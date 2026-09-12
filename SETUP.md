@@ -7,9 +7,15 @@ Alles in deze map is een statische website (geen build-stap). De database en de 
 1. Ga naar https://supabase.com/dashboard → **New project** (naam: `leerpret`, regio: **West EU (Ireland)** of **Central EU (Frankfurt)** – dan staan de gegevens in Europa). Gebruik een apart project, niet dat van Shopzo.
 2. Open **SQL Editor → New query**, plak de inhoud van `supabase/schema.sql` en klik **Run**.
 3. Doe hetzelfde met `supabase/seed.sql` (maakt school De Kleine Wereld, klas 3A met namenlijst en de Ruimte Quiz aan).
-4. Maak de logins: **Authentication → Users → Add user → Create new user**. Vink **Auto Confirm User** aan. Bijvoorbeeld:
-   - `arnold.verhoeven@agv-it.be` (jij, beheerder)
-   - `juf.marielle@dekleinewereld.be` (of het echte adres van de juf) + een wachtwoord dat je haar doorgeeft
+4. Maak de logins: **Authentication → Users → Add user → Create new user**. Vink **Auto Confirm User** aan.
+   Leerkrachten loggen in met een **gebruikersnaam** (`voornaam.achternaam`), geen e-mailadres. Supabase wil intern toch een e-mail, dus maak het account aan als `voornaam.achternaam@login.leerpret.be` – de site plakt dat domein er zelf achter als iemand alleen `voornaam.achternaam` typt. Bijvoorbeeld:
+   - `arnold.verhoeven@agv-it.be` (jij; een echt e-mailadres werkt ook gewoon als login)
+   - `marielle.peeters@login.leerpret.be` + een wachtwoord dat je de juf doorgeeft → zij logt in met `marielle.peeters`
+   Het domein staat in `js/config.js` (`LOGIN_DOMAIN`). Er wordt nooit mail naartoe gestuurd; het hoeft niet te bestaan. Wachtwoord vergeten? Er is geen mailbox, dus jij zet een nieuw wachtwoord in de SQL Editor en geeft het door:
+   ```sql
+   update auth.users set encrypted_password = crypt('NieuwWachtwoord123', gen_salt('bf'))
+    where email = 'marielle.peeters@login.leerpret.be';
+   ```
 5. Maak jezelf beheerder (één keer, SQL Editor):
    ```sql
    update public.profiles set role = 'admin',
@@ -43,7 +49,7 @@ Voor e-mail op `info@leerpret.be`: dat blijft via Easyhost (MX-records niet aanr
 
 - `https://leerpret.be` → homepage, favicon in het tabblad.
 - `https://leerpret.be/quiz?demo=1` → demo zonder login (met neutrale namen, niet de echte klas).
-- `https://leerpret.be/login` → inloggen als de juf → dashboard → klas 3A → **Start** bij Ruimte Quiz.
+- `https://leerpret.be/login` → inloggen als de juf (gebruikersnaam `voornaam.achternaam`) → dashboard → klas 3A → **Start** bij Ruimte Quiz.
 - Deelvoorvertoning: plak `https://leerpret.be` in https://www.opengraph.xyz of in een WhatsApp-chat. Facebook kan een oude versie cachen: https://developers.facebook.com/tools/debug/ → *Scrape again*.
 
 ## 5. Beheerdersscherm: quizzen, scholen en leerkrachten
@@ -58,7 +64,7 @@ Log in als beheerder en ga naar **leerpret.be/admin** (ook via de knop *Beheer* 
 
 Na het inlezen zie je alle vragen in een formulier: tekst aanpassen, juiste antwoord aan- of uitvinken (groen vinkje), uitleg aanvullen, antwoorden of vragen toevoegen/verwijderen/verschuiven, en per antwoord eventueel een visueel planeetje kiezen. *✔ Controleren* wijst op ontbrekende juiste antwoorden of uitleg. Klik daarna *Bewaren*; met *Uitproberen* opent de quiz meteen op een nieuw tabblad. *Gepubliceerd* uitvinken verbergt een quiz voor leerkrachten zonder ze te verwijderen.
 
-**Nieuwe school.** Tab *Scholen & leerkrachten* → naam typen → *School toevoegen*. Daarna in Supabase de login(s) aanmaken (*Authentication → Users → Add user*, *Auto Confirm* aan); ze verschijnen automatisch in de tabel, waar je naam, school en rol instelt. De juf maakt vervolgens zelf haar klassen en namenlijsten aan in het dashboard.
+**Nieuwe school.** Tab *Scholen & leerkrachten* → naam typen → *School toevoegen*. Daarna in Supabase de login(s) aanmaken (*Authentication → Users → Add user*, e-mail `voornaam.achternaam@login.leerpret.be`, *Auto Confirm* aan); ze verschijnen automatisch in de tabel, waar je naam, school en rol instelt. De juf maakt vervolgens zelf haar klassen en namenlijsten aan in het dashboard.
 
 Het interne vraagformaat (voor wie JSON wil aanleveren):
 ```json
@@ -72,7 +78,7 @@ Het interne vraagformaat (voor wie JSON wil aanleveren):
 
 ```
 index.html          homepage (thema's, leerjaarfilter, OG-tags)
-login.html          inloggen (e-mail + wachtwoord)
+login.html          inloggen (gebruikersnaam voornaam.achternaam + wachtwoord)
 dashboard.html      klassen, namenlijsten, quizzen starten
 admin.html          beheer: quizzen (import uit .docx/tekst/JSON), scholen, leerkrachten
 quiz.html           de quiz zelf (?demo=1 of ?quiz=<id>&class=<id>)

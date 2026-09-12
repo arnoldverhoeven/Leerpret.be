@@ -36,12 +36,12 @@
   <div class="login">
     <div class="card">
       <h1>Welkom terug! 👋</h1>
-      <p class="sub">Log in met het e-mailadres en wachtwoord van je klas of school.</p>
+      <p class="sub">Log in met je gebruikersnaam (voornaam.achternaam) en wachtwoord.</p>
       <div id="msg"></div>
       <form id="form" autocomplete="on">
         <div class="field">
-          <label for="email">E-mailadres</label>
-          <input id="email" type="email" required autocomplete="username" placeholder="juf@school.be">
+          <label for="email">Gebruikersnaam</label>
+          <input id="email" type="text" required autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="voornaam.achternaam">
         </div>
         <div class="field">
           <label for="pw">Wachtwoord</label>
@@ -76,8 +76,8 @@ document.getElementById('toggle').addEventListener('click',()=>{const i=document
 form.addEventListener('submit',async e=>{
   e.preventDefault(); if(!LP.configured) return;
   btn.disabled=true;btn.textContent='Even geduld…';msg.innerHTML='';
-  const {error}=await LP.sb.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('pw').value});
-  if(error){show('Dat klopt niet helemaal. Controleer je e-mailadres en wachtwoord en probeer opnieuw.','err');btn.disabled=false;btn.textContent='Inloggen';return;}
+  const {error}=await LP.sb.auth.signInWithPassword({email:LP.toEmail(document.getElementById('email').value),password:document.getElementById('pw').value});
+  if(error){show('Dat klopt niet helemaal. Controleer je gebruikersnaam en wachtwoord en probeer opnieuw.','err');btn.disabled=false;btn.textContent='Inloggen';return;}
   location.href=q.get('next')||'/dashboard.html';
 });
 </script>

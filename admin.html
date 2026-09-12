@@ -138,8 +138,8 @@
       </section>
       <section class="card">
         <h2 style="font-size:1.4rem">Leerkrachten &amp; logins</h2>
-        <p class="muted">Een login aanmaken gebeurt in Supabase (<b>Authentication → Users → Add user</b>, met <i>Auto Confirm</i>). Zodra het account bestaat, verschijnt het hier en koppel je het aan een school.</p>
-        <table id="users"><thead><tr><th>Naam</th><th>E-mail</th><th>School</th><th>Rol</th><th></th></tr></thead><tbody></tbody></table>
+        <p class="muted">Een login aanmaken gebeurt in Supabase (<b>Authentication → Users → Add user</b>, <i>Auto Confirm</i> aan). Gebruik als e-mail <code>voornaam.achternaam@login.leerpret.be</code>; de juf logt dan in met enkel <code>voornaam.achternaam</code>. Zodra het account bestaat, verschijnt het hier en koppel je het aan een school.</p>
+        <table id="users"><thead><tr><th>Naam</th><th>Gebruikersnaam</th><th>School</th><th>Rol</th><th></th></tr></thead><tbody></tbody></table>
       </section>
     </div>
   </div>
@@ -164,7 +164,7 @@ async function init(){
   const user=await LP.requireAuth(); if(!user) return;
   profile=await LP.myProfile();
   if(!profile||profile.role!=='admin'){document.querySelector('main').innerHTML='<div class="card"><h2>Geen toegang</h2><p>Dit scherm is enkel voor beheerders. <a href="/dashboard.html">Naar mijn klassen</a></p></div>';return;}
-  $('who').textContent=profile.full_name||user.email;
+  $('who').textContent=profile.full_name||LP.toUsername(user.email);
   await Promise.all([loadSchools(),loadQuizzes(),loadUsers()]);
   renderSchools(); renderQuizList(); renderUsers();
 }
@@ -280,7 +280,7 @@ $('addSchool').addEventListener('click',async()=>{
 });
 function renderUsers(){
   $('users').querySelector('tbody').innerHTML=users.map(u=>`<tr data-id="${u.id}">
-    <td><input class="fn" value="${esc(u.full_name||'')}" placeholder="Naam"></td><td>${esc(u.email||'–')}</td>
+    <td><input class="fn" value="${esc(u.full_name||'')}" placeholder="Naam"></td><td><code>${esc(LP.toUsername(u.email)||'–')}</code></td>
     <td><select class="sc"><option value="">– geen –</option>${schools.map(s=>`<option value="${s.id}" ${u.school_id===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></td>
     <td><select class="ro"><option value="teacher" ${u.role==='teacher'?'selected':''}>Leerkracht</option><option value="admin" ${u.role==='admin'?'selected':''}>Beheerder</option></select></td>
     <td><button class="btn btn-navy btn-sm sv">Bewaren</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">Nog geen accounts. Maak ze aan in Supabase → Authentication → Users.</td></tr>';

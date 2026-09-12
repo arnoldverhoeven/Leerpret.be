@@ -83,7 +83,7 @@ $('logout').addEventListener('click',async e=>{e.preventDefault();await LP.sb.au
 async function init(){
   const user=await LP.requireAuth(); if(!user) return;
   profile=await LP.myProfile();
-  const name=(profile&&profile.full_name)||user.email;
+  const name=(profile&&profile.full_name)||LP.toUsername(user.email);
   $('hello').textContent=`Dag ${name}! 👋`;
   if(profile&&profile.role==='admin') $('adminLink').hidden=false;
   if(!profile||!profile.school_id){ $('school').textContent='Je account is nog niet aan een school gekoppeld. Mail naar info@leerpret.be.'; return; }
