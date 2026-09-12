@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mijn klassen – Leerpret</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#1e2a78">
+<link rel="stylesheet" href="/css/leerpret.css">
+<style>
+  main{padding:40px 0 60px}
+  .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:flex-end;gap:16px;margin-bottom:28px}
+  .top h1{font-size:2.2rem;margin:0}
+  .top .school{color:var(--muted);font-weight:700}
+  .grid{display:grid;grid-template-columns:1.1fr .9fr;gap:24px;align-items:start}
+  @media (max-width:900px){.grid{grid-template-columns:1fr}}
+  .klas{border:2px solid var(--line);border-radius:18px;padding:18px 20px;margin-bottom:14px;background:#fff}
+  .klas.active{border-color:var(--orange);box-shadow:0 0 0 4px #ffe9d9}
+  .klas header{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .klas h3{margin:0;font-size:1.35rem}
+  .klas .count{color:var(--muted);font-weight:700;font-size:.95rem}
+  .klas textarea{width:100%;min-height:200px;resize:vertical;font-family:var(--body);font-size:1rem;line-height:1.5}
+  .klas .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+  .quiz{display:flex;gap:14px;align-items:center;padding:14px 16px;border:2px solid var(--line);border-radius:16px;margin-bottom:10px;background:#fff}
+  .quiz .ico{width:52px;height:52px;border-radius:14px;background:#eef1ff;display:flex;align-items:center;justify-content:center;font-size:1.7rem;flex:none}
+  .quiz .t{flex:1}
+  .quiz h4{margin:0;font-size:1.15rem}
+  .quiz .m{color:var(--muted);font-size:.9rem;font-weight:700}
+  .empty{color:var(--muted);padding:20px;text-align:center;border:2px dashed var(--line);border-radius:16px}
+  .newklas{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;margin-top:10px}
+  .newklas .field{margin:0;flex:1;min-width:140px}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/icon.svg" alt="" width="44" height="44"><span class="word">Leer<b>pret</b></span></a>
+    <nav class="nav"><a href="/dashboard.html">Mijn klassen</a><a href="/admin.html" id="adminLink" hidden>Beheer</a><a href="/#themas">Thema's</a><a class="cta" href="#" id="logout">Uitloggen</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="top">
+    <div><h1 id="hello">Dag!</h1><div class="school" id="school"></div></div>
+    <a class="btn btn-light btn-sm" href="/quiz.html?demo=1" target="_blank">Demo-quiz bekijken</a>
+  </div>
+  <div id="msg"></div>
+  <div class="grid">
+    <section class="card">
+      <h2 style="font-size:1.5rem">Mijn klassen</h2>
+      <p class="muted">Klik op een klas om ze te kiezen. De namenlijst: één naam per lijn. Vergeet niet op <b>Bewaren</b> te klikken.</p>
+      <div id="classes"></div>
+      <div class="newklas">
+        <div class="field"><label for="nk">Nieuwe klas</label><input id="nk" placeholder="bv. 3A"></div>
+        <div class="field" style="flex:0 0 120px"><label for="ng">Leerjaar</label><select id="ng"><option>1</option><option>2</option><option selected>3</option><option>4</option><option>5</option><option>6</option></select></div>
+        <button class="btn btn-navy btn-sm" id="addClass" type="button">+ Toevoegen</button>
+      </div>
+    </section>
+    <section class="card">
+      <h2 style="font-size:1.5rem">Quizzen</h2>
+      <p class="muted" id="quizhint">Kies eerst een klas links, kies dan een quiz en klik op <b>Start</b>. De quiz opent op een nieuw tabblad – zet dat op volledig scherm (F11).</p>
+      <div id="quizzes"></div>
+    </section>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="wrap"><small>© <span id="year"></span> Leerpret</small><div><a href="/privacy.html">Privacy</a><a href="/">Home</a></div></div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id), esc=LP.esc;
+let profile=null, classes=[], quizzes=[], activeClass=null;
+function note(t,cls){$('msg').innerHTML=t?`<div class="notice ${cls}">${t}</div>`:'';if(t)setTimeout(()=>{$('msg').innerHTML=''},4000);}
+
+$('logout').addEventListener('click',async e=>{e.preventDefault();await LP.sb.auth.signOut();location.href='/';});
+
+async function init(){
+  const user=await LP.requireAuth(); if(!user) return;
+  profile=await LP.myProfile();
+  const name=(profile&&profile.full_name)||user.email;
+  $('hello').textContent=`Dag ${name}! 👋`;
+  if(profile&&profile.role==='admin') $('adminLink').hidden=false;
+  if(!profile||!profile.school_id){ $('school').textContent='Je account is nog niet aan een school gekoppeld. Mail naar info@leerpret.be.'; return; }
+  $('school').textContent=profile.schools?profile.schools.name:'';
+  await Promise.all([loadClasses(),loadQuizzes()]);
+  try{ const last=localStorage.getItem('lp_class'); if(last&&classes.find(c=>c.id===last)) activeClass=last; }catch(e){}
+  if(!activeClass&&classes.length) activeClass=classes[0].id;
+  renderClasses(); renderQuizzes();
+}
+async function loadClasses(){
+  const {data,error}=await LP.sb.from('classes').select('id,name,grade,pupils').eq('school_id',profile.school_id).order('grade').order('name');
+  if(error){note('Klassen konden niet geladen worden: '+esc(error.message),'err');return;}
+  classes=data||[];
+}
+async function loadQuizzes(){
+  const {data,error}=await LP.sb.from('quizzes').select('id,title,theme,emoji,grade_min,grade_max,school_id,questions').eq('published',true).order('title');
+  if(error){note('Quizzen konden niet geladen worden: '+esc(error.message),'err');return;}
+  quizzes=data||[];
+}
+function renderClasses(){
+  const box=$('classes');
+  if(!classes.length){box.innerHTML='<div class="empty">Nog geen klas. Maak er hieronder één aan.</div>';return;}
+  box.innerHTML=classes.map(c=>`
+    <div class="klas ${c.id===activeClass?'active':''}" data-id="${c.id}">
+      <header><h3>${esc(c.name)} <span class="tag">${c.grade}${c.grade===1?'ste':'de'} leerjaar</span></h3><span class="count">${(c.pupils||[]).length} namen</span></header>
+      <div class="lijst" ${c.id===activeClass?'':'hidden'}>
+        <textarea data-id="${c.id}" spellcheck="false">${esc((c.pupils||[]).join('\n'))}</textarea>
+        <div class="actions"><button class="btn btn-primary btn-sm save" data-id="${c.id}">Bewaren</button><button class="btn btn-light btn-sm del" data-id="${c.id}">Klas verwijderen</button></div>
+      </div>
+    </div>`).join('');
+}
+function renderQuizzes(){
+  const box=$('quizzes'); const c=classes.find(x=>x.id===activeClass);
+  if(!quizzes.length){box.innerHTML='<div class="empty">Nog geen quizzen beschikbaar.</div>';return;}
+  const sorted=[...quizzes].sort((a,b)=>{const fa=c&&c.grade>=a.grade_min&&c.grade<=a.grade_max?0:1;const fb=c&&c.grade>=b.grade_min&&c.grade<=b.grade_max?0:1;return fa-fb||a.title.localeCompare(b.title);});
+  box.innerHTML=sorted.map(q=>{
+    const fit=c&&c.grade>=q.grade_min&&c.grade<=q.grade_max;
+    const n=Array.isArray(q.questions)?q.questions.length:0;
+    return `<div class="quiz"><div class="ico">${esc(q.emoji||'🎯')}</div><div class="t"><h4>${esc(q.title)}</h4><div class="m">${esc(q.theme||'')} · ${n} vragen · ${q.grade_min}–${q.grade_max}de leerjaar ${q.school_id?'· <span class="tag orange">eigen quiz</span>':''} ${fit?'<span class="tag green">past bij deze klas</span>':''}</div></div>
+      <a class="btn btn-primary btn-sm" ${c?`href="/quiz.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="#" aria-disabled="true" style="opacity:.5"'}>▶ Start</a></div>`;
+  }).join('');
+}
+$('classes').addEventListener('click',async e=>{
+  const save=e.target.closest('.save'), del=e.target.closest('.del'), klas=e.target.closest('.klas');
+  if(save){
+    const id=save.dataset.id; const pupils=document.querySelector(`textarea[data-id="${id}"]`).value.split('\n').map(s=>s.trim()).filter(Boolean);
+    save.disabled=true; const {error}=await LP.sb.from('classes').update({pupils}).eq('id',id); save.disabled=false;
+    if(error){note('Bewaren mislukt: '+esc(error.message),'err');return;}
+    classes.find(c=>c.id===id).pupils=pupils; note('Namenlijst bewaard ✔','ok'); renderClasses(); return;
+  }
+  if(del){
+    const id=del.dataset.id; const c=classes.find(x=>x.id===id);
+    if(!confirm(`Klas ${c.name} verwijderen? De namenlijst gaat verloren.`)) return;
+    const {error}=await LP.sb.from('classes').delete().eq('id',id);
+    if(error){note('Verwijderen mislukt: '+esc(error.message),'err');return;}
+    classes=classes.filter(x=>x.id!==id); if(activeClass===id) activeClass=classes[0]?classes[0].id:null; renderClasses(); renderQuizzes(); return;
+  }
+  if(klas&&!e.target.closest('textarea')){ activeClass=klas.dataset.id; try{localStorage.setItem('lp_class',activeClass)}catch(x){} renderClasses(); renderQuizzes(); }
+});
+$('addClass').addEventListener('click',async()=>{
+  const name=$('nk').value.trim(); if(!name){$('nk').focus();return;}
+  const {data,error}=await LP.sb.from('classes').insert({school_id:profile.school_id,name,grade:+$('ng').value,pupils:[]}).select().single();
+  if(error){note('Toevoegen mislukt: '+esc(error.message),'err');return;}
+  classes.push(data); activeClass=data.id; $('nk').value=''; renderClasses(); renderQuizzes();
+});
+init();
+</script>
+</body>
+</html>

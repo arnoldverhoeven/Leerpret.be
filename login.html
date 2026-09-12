@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inloggen – Leerpret</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+<meta name="theme-color" content="#1e2a78">
+<link rel="stylesheet" href="/css/leerpret.css">
+<style>
+  body{min-height:100vh;display:flex;flex-direction:column;background:radial-gradient(ellipse at 15% 20%,#3a4bb8 0%,transparent 50%),radial-gradient(ellipse at 85% 85%,#0c3b6e 0%,transparent 50%),linear-gradient(180deg,#1e2a78,#151f5e)}
+  main{flex:1;display:flex;align-items:center;justify-content:center;padding:40px 20px}
+  .login{width:100%;max-width:440px}
+  .login .card{padding:36px 32px}
+  .login h1{font-size:1.9rem;margin-bottom:.2em}
+  .login .sub{color:var(--muted);margin-bottom:1.4em}
+  .login .btn{width:100%;justify-content:center;font-size:1.15rem}
+  .pw{position:relative}
+  .pw button{position:absolute;right:10px;top:50%;transform:translateY(-50%);background:none;border:0;cursor:pointer;color:var(--muted);font-weight:700;font-family:var(--head)}
+  .help{margin-top:1.4em;text-align:center;color:var(--muted);font-size:.95rem}
+  .site-footer{margin-top:0}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/icon.svg" alt="" width="44" height="44"><span class="word">Leer<b>pret</b></span></a>
+    <nav class="nav"><a href="/#themas">Thema's</a><a href="/#hoe">Hoe werkt het</a><a href="/#scholen">Voor scholen</a><a class="cta" href="/login.html">Inloggen</a></nav>
+  </div>
+</header>
+
+<main>
+  <div class="login">
+    <div class="card">
+      <h1>Welkom terug! 👋</h1>
+      <p class="sub">Log in met het e-mailadres en wachtwoord van je klas of school.</p>
+      <div id="msg"></div>
+      <form id="form" autocomplete="on">
+        <div class="field">
+          <label for="email">E-mailadres</label>
+          <input id="email" type="email" required autocomplete="username" placeholder="juf@school.be">
+        </div>
+        <div class="field">
+          <label for="pw">Wachtwoord</label>
+          <div class="pw">
+            <input id="pw" type="password" required autocomplete="current-password" placeholder="••••••••" style="width:100%;padding-right:70px">
+            <button type="button" id="toggle">Toon</button>
+          </div>
+        </div>
+        <button class="btn btn-primary" id="submit" type="submit">Inloggen</button>
+      </form>
+      <p class="help">Wachtwoord vergeten of nog geen account? Mail naar <a href="mailto:info@leerpret.be">info@leerpret.be</a>.</p>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="wrap"><small>© <span id="year"></span> Leerpret</small><div><a href="/privacy.html">Privacy</a><a href="/">Home</a></div></div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+const msg=document.getElementById('msg'),form=document.getElementById('form'),btn=document.getElementById('submit');
+const q=new URLSearchParams(location.search);
+function show(t,cls){msg.innerHTML=`<div class="notice ${cls}">${t}</div>`;}
+if(q.get('err')==='config'||!LP.configured){show('Leerpret is nog niet verbonden met de database. Vul <code>js/config.js</code> in (zie SETUP.md).','err');}
+document.getElementById('toggle').addEventListener('click',()=>{const i=document.getElementById('pw');i.type=i.type==='password'?'text':'password';document.getElementById('toggle').textContent=i.type==='password'?'Toon':'Verberg';});
+
+// al ingelogd? meteen door
+(async()=>{ if(LP.configured && await LP.currentUser()) location.href=q.get('next')||'/dashboard.html'; })();
+
+form.addEventListener('submit',async e=>{
+  e.preventDefault(); if(!LP.configured) return;
+  btn.disabled=true;btn.textContent='Even geduld…';msg.innerHTML='';
+  const {error}=await LP.sb.auth.signInWithPassword({email:document.getElementById('email').value.trim(),password:document.getElementById('pw').value});
+  if(error){show('Dat klopt niet helemaal. Controleer je e-mailadres en wachtwoord en probeer opnieuw.','err');btn.disabled=false;btn.textContent='Inloggen';return;}
+  location.href=q.get('next')||'/dashboard.html';
+});
+</script>
+</body>
+</html>

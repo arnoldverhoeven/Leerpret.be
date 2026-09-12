@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beheer – Leerpret</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#1e2a78">
+<link rel="stylesheet" href="/css/leerpret.css">
+<style>
+  main{padding:34px 0 60px}
+  .top{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:16px;margin-bottom:22px}
+  .top h1{font-size:2rem;margin:0}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:22px}
+  .tabs button{font-family:var(--head);font-weight:800;font-size:1.05rem;padding:.55em 1.2em;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--navy);cursor:pointer}
+  .tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+  .pane{display:none}.pane.active{display:block}
+  .grid{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+  @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+  .list .row{display:flex;gap:12px;align-items:center;padding:12px 14px;border:2px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer;background:#fff}
+  .list .row:hover{border-color:var(--sky)}
+  .list .row.active{border-color:var(--orange);box-shadow:0 0 0 3px #ffe9d9}
+  .list .ico{width:40px;height:40px;border-radius:10px;background:#eef1ff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:none}
+  .list h4{margin:0;font-size:1.05rem}.list .m{color:var(--muted);font-size:.85rem;font-weight:700}
+  .meta{display:grid;grid-template-columns:2fr 1fr 80px 1fr 1fr 1fr;gap:12px}
+  @media (max-width:900px){.meta{grid-template-columns:1fr 1fr}}
+  .meta .field{margin:0}
+  .imp{border:2px dashed var(--sky);background:#f0fbff;border-radius:16px;padding:18px;margin:18px 0}
+  .imp h3{margin:0 0 6px;font-size:1.2rem}
+  .imp .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .imp textarea{width:100%;min-height:120px;font-family:ui-monospace,Consolas,monospace;font-size:.95rem}
+  .imp .drop{flex:1;min-width:220px;border:2px solid var(--line);border-radius:12px;padding:12px;background:#fff;text-align:center;color:var(--muted);font-weight:700}
+  .imp .drop.over{border-color:var(--orange);background:#fff7ee}
+  .imp input[type=file]{display:none}
+  .warn{background:#fff3cd;color:#7a5200;border-radius:12px;padding:10px 14px;font-weight:700;font-size:.95rem;white-space:pre-line;margin-top:10px}
+  /* vragen-editor */
+  .qs{margin-top:8px}
+  .qcard{border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;background:#fff}
+  .qcard .qh{display:flex;gap:10px;align-items:flex-start}
+  .qcard .qn{font-family:var(--head);font-weight:800;color:var(--orange);font-size:1.3rem;min-width:36px;padding-top:8px}
+  .qcard .qh input{flex:1;font-family:var(--head);font-weight:800;font-size:1.1rem}
+  .qcard .tools{display:flex;gap:6px;flex-wrap:wrap}
+  .ans{display:grid;grid-template-columns:36px 1fr 2fr 130px 32px;gap:8px;align-items:center;margin-top:8px}
+  @media (max-width:900px){.ans{grid-template-columns:36px 1fr 32px}.ans .e,.ans select{grid-column:2/-1}}
+  .ans .L{font-family:var(--head);font-weight:800;text-align:center}
+  .ans input,.ans select{font:inherit;font-size:.95rem;padding:.5em .7em;border:2px solid var(--line);border-radius:10px;width:100%}
+  .ans.ok input.t{border-color:var(--green);background:#f0fff6}
+  .ans .ok{display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;border:2px solid var(--line);background:#fff;cursor:pointer;font-weight:900;color:#bbb}
+  .ans.ok .ok{background:var(--green);color:#fff;border-color:var(--green)}
+  .ans .del{background:none;border:0;color:#c33;font-size:1.2rem;cursor:pointer}
+  .ic{background:none;border:2px solid var(--line);border-radius:10px;padding:4px 10px;cursor:pointer;font-family:var(--head);font-weight:700;color:var(--navy);font-size:.9rem}
+  .ic:hover{border-color:var(--sky)}
+  .multi{display:flex;gap:8px;align-items:center;margin-top:8px;font-size:.9rem;color:var(--muted);font-weight:700}
+  .multi select{font:inherit;padding:.3em .5em;border:2px solid var(--line);border-radius:8px}
+  .save-bar{position:sticky;bottom:0;background:#fff;border-top:2px solid var(--line);padding:12px 0;display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:14px;border-radius:0 0 var(--radius) var(--radius)}
+  table{width:100%;border-collapse:collapse}
+  th,td{text-align:left;padding:10px 8px;border-bottom:1px solid var(--line);vertical-align:middle;font-size:.95rem}
+  th{font-family:var(--head);color:var(--navy)}
+  td select,td input{font:inherit;font-size:.95rem;padding:.4em .6em;border:2px solid var(--line);border-radius:10px}
+  code{background:#eef1ff;padding:.1em .4em;border-radius:6px}
+</style>
+</head>
+<body>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="/"><img src="/assets/icon.svg" alt="" width="44" height="44"><span class="word">Leer<b>pret</b></span></a>
+    <nav class="nav"><a href="/dashboard.html">Mijn klassen</a><a href="/admin.html">Beheer</a><a class="cta" href="#" id="logout">Uitloggen</a></nav>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="top"><h1>Beheer 🛠️</h1><div id="who" class="muted"></div></div>
+  <div id="msg"></div>
+  <div class="tabs"><button class="active" data-pane="quizzes">Quizzen</button><button data-pane="schools">Scholen &amp; leerkrachten</button></div>
+
+  <!-- ================= QUIZZEN ================= -->
+  <div class="pane active" id="pane-quizzes">
+    <div class="grid">
+      <section class="card">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:10px">
+          <h2 style="font-size:1.4rem;margin:0">Alle quizzen</h2>
+          <button class="btn btn-primary btn-sm" id="newQuiz">+ Nieuwe quiz</button>
+        </div>
+        <div class="list" id="quizList"></div>
+      </section>
+
+      <section class="card" id="editor" hidden>
+        <h2 style="font-size:1.4rem" id="edTitle">Nieuwe quiz</h2>
+        <div class="meta">
+          <div class="field"><label>Titel</label><input id="f_title" placeholder="bv. Dieren Quiz"></div>
+          <div class="field"><label>Thema</label><input id="f_theme" placeholder="bv. Dieren"></div>
+          <div class="field"><label>Emoji</label><input id="f_emoji" placeholder="🐾"></div>
+          <div class="field"><label>Van leerjaar</label><select id="f_gmin"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
+          <div class="field"><label>Tot leerjaar</label><select id="f_gmax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select></div>
+          <div class="field"><label>Zichtbaar voor</label><select id="f_school"><option value="">Alle scholen</option></select></div>
+        </div>
+
+        <div class="imp">
+          <h3>📥 Vragen importeren</h3>
+          <p class="muted" style="margin:0 0 10px">Sleep een <b>Word-bestand (.docx)</b>, tekstbestand of JSON hierheen, of plak tekst. Formaat: vraag op een lijn die begint met <code>1.</code>, antwoorden met <code>A.</code> <code>B.</code>…, een <code>*</code> voor het juiste antwoord, en de uitleg op de lijn eronder. <a href="/assets/sjabloon-quiz.docx" download>Download het Word-sjabloon</a> · <a href="/assets/sjabloon-quiz.txt" download>tekst-sjabloon</a></p>
+          <div class="row">
+            <label class="drop" id="drop">📄 Klik of sleep een bestand hierheen (.docx, .txt, .json)<input type="file" id="file" accept=".docx,.txt,.md,.json"></label>
+          </div>
+          <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Of plak tekst / JSON</summary>
+            <textarea id="paste" placeholder="1. Welk dier zegt miauw?&#10;A. Hond&#10;   Nee, een hond blaft.&#10;*B. Kat&#10;   Juist! Een kat miauwt."></textarea>
+            <div class="row" style="margin-top:8px"><button class="btn btn-navy btn-sm" id="parsePaste">Tekst omzetten</button><label style="font-weight:700;color:var(--muted)"><input type="checkbox" id="append"> Toevoegen aan bestaande vragen (i.p.v. vervangen)</label></div>
+          </details>
+          <div id="warn" class="warn" hidden></div>
+        </div>
+
+        <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
+          <h3 style="margin:0;font-size:1.2rem">Vragen <span class="tag" id="qcount">0</span></h3>
+          <div class="tools"><button class="ic" id="addQ">+ Vraag toevoegen</button><button class="ic" id="checkQ">✔ Controleren</button><button class="ic" id="exportJson">⬇ JSON</button></div>
+        </div>
+        <div class="qs" id="qs"></div>
+
+        <div class="save-bar">
+          <button class="btn btn-primary" id="save">💾 Bewaren</button>
+          <label style="font-weight:700"><input type="checkbox" id="f_pub" checked> Gepubliceerd (zichtbaar voor leerkrachten)</label>
+          <span style="flex:1"></span>
+          <a class="btn btn-light btn-sm" id="preview" href="#" target="_blank" hidden>▶ Uitproberen</a>
+          <button class="btn btn-light btn-sm" id="delQuiz" hidden style="color:#c33">Verwijderen</button>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- ================= SCHOLEN ================= -->
+  <div class="pane" id="pane-schools">
+    <div class="grid">
+      <section class="card">
+        <h2 style="font-size:1.4rem">Scholen</h2>
+        <div id="schoolList" class="list"></div>
+        <div class="field" style="margin-top:12px"><label>Nieuwe school</label><input id="s_name" placeholder="bv. Basisschool De Regenboog"></div>
+        <button class="btn btn-navy btn-sm" id="addSchool">+ School toevoegen</button>
+      </section>
+      <section class="card">
+        <h2 style="font-size:1.4rem">Leerkrachten &amp; logins</h2>
+        <p class="muted">Een login aanmaken gebeurt in Supabase (<b>Authentication → Users → Add user</b>, met <i>Auto Confirm</i>). Zodra het account bestaat, verschijnt het hier en koppel je het aan een school.</p>
+        <table id="users"><thead><tr><th>Naam</th><th>E-mail</th><th>School</th><th>Rol</th><th></th></tr></thead><tbody></tbody></table>
+      </section>
+    </div>
+  </div>
+</main>
+
+<footer class="site-footer"><div class="wrap"><small>© <span id="year"></span> Leerpret</small><div><a href="/dashboard.html">Mijn klassen</a><a href="/">Home</a></div></div></footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script src="/js/quiz-import.js"></script>
+<script>
+document.getElementById('year').textContent=new Date().getFullYear();
+const $=id=>document.getElementById(id), esc=LP.esc, L='ABCD';
+const PLANETS=[['','– geen –'],['saturn ring','Saturnus (ringen)'],['jupiter','Jupiter'],['mars','Mars'],['earth','Aarde'],['uranus ring thin','Uranus (dunne ring)'],['neptune','Neptunus'],['venus','Venus'],['mercury','Mercurius']];
+let profile=null, schools=[], quizzes=[], users=[], cur=null; // cur = quiz in bewerking {id?, ...}
+function note(t,cls){$('msg').innerHTML=t?`<div class="notice ${cls}">${t}</div>`:'';if(t&&cls!=='err')setTimeout(()=>{$('msg').innerHTML=''},4000);}
+$('logout').addEventListener('click',async e=>{e.preventDefault();await LP.sb.auth.signOut();location.href='/';});
+document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+b.dataset.pane));}));
+
+async function init(){
+  const user=await LP.requireAuth(); if(!user) return;
+  profile=await LP.myProfile();
+  if(!profile||profile.role!=='admin'){document.querySelector('main').innerHTML='<div class="card"><h2>Geen toegang</h2><p>Dit scherm is enkel voor beheerders. <a href="/dashboard.html">Naar mijn klassen</a></p></div>';return;}
+  $('who').textContent=profile.full_name||user.email;
+  await Promise.all([loadSchools(),loadQuizzes(),loadUsers()]);
+  renderSchools(); renderQuizList(); renderUsers();
+}
+async function loadSchools(){const {data,error}=await LP.sb.from('schools').select('id,name,slug').order('name');if(error)note(esc(error.message),'err');schools=data||[];$('f_school').innerHTML='<option value="">Alle scholen</option>'+schools.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');}
+async function loadQuizzes(){const {data,error}=await LP.sb.from('quizzes').select('*').order('title');if(error)note(esc(error.message),'err');quizzes=data||[];}
+async function loadUsers(){const {data,error}=await LP.sb.from('profiles').select('id,full_name,email,role,school_id').order('email');if(error)note(esc(error.message),'err');users=data||[];}
+
+/* ---------- lijst ---------- */
+function renderQuizList(){
+  $('quizList').innerHTML=quizzes.length?quizzes.map(q=>`<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'}</h4><div class="m">${esc(q.theme||'')} · ${(q.questions||[]).length} vragen · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`).join(''):'<div class="muted">Nog geen quizzen.</div>';
+}
+$('quizList').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));});
+$('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:null,published:true,questions:[]}));
+
+/* ---------- editor ---------- */
+function openQuiz(q){
+  cur=JSON.parse(JSON.stringify(q)); if(!Array.isArray(cur.questions))cur.questions=[];
+  $('editor').hidden=false; $('edTitle').textContent=cur.id?'Quiz bewerken':'Nieuwe quiz';
+  $('f_title').value=cur.title||'';$('f_theme').value=cur.theme||'';$('f_emoji').value=cur.emoji||'🎯';
+  $('f_gmin').value=cur.grade_min||1;$('f_gmax').value=cur.grade_max||6;$('f_school').value=cur.school_id||'';$('f_pub').checked=cur.published!==false;
+  $('delQuiz').hidden=!cur.id; $('preview').hidden=!cur.id; $('warn').hidden=true;
+  renderQuestions(); renderQuizList(); $('editor').scrollIntoView({behavior:'smooth',block:'start'});
+}
+function renderQuestions(){
+  $('qcount').textContent=cur.questions.length;
+  $('qs').innerHTML=cur.questions.map((q,i)=>`<div class="qcard" data-i="${i}">
+    <div class="qh"><div class="qn">${i+1}.</div><input class="qt" value="${esc(q.q)}" placeholder="Vraag…">
+      <div class="tools"><button class="ic mv" data-d="-1" title="Omhoog">↑</button><button class="ic mv" data-d="1" title="Omlaag">↓</button><button class="ic rm" title="Vraag verwijderen">🗑</button></div></div>
+    ${(q.a||[]).map((a,j)=>`<div class="ans ${a.ok?'ok':''}" data-j="${j}"><span class="ok" title="Juist antwoord">✔</span><input class="t" value="${esc(a.t)}" placeholder="Antwoord ${L[j]}"><input class="e" value="${esc(a.e||'')}" placeholder="Uitleg (waarom juist/fout)"><select class="p" title="Visueel planeetje (optioneel)">${PLANETS.map(p=>`<option value="${p[0]}" ${(a.planet||'')===p[0]?'selected':''}>${p[1]}</option>`).join('')}</select><button class="del" title="Antwoord verwijderen">×</button></div>`).join('')}
+    <div class="multi">${(q.a||[]).length<4?'<button class="ic addA">+ Antwoord</button>':''}<span>Aantal juiste antwoorden dat gekozen moet worden:</span><select class="mu"><option value="">1 (gewoon)</option><option value="2" ${q.multi==2?'selected':''}>2</option><option value="3" ${q.multi==3?'selected':''}>3</option></select></div>
+  </div>`).join('')||'<div class="muted" style="padding:14px">Nog geen vragen. Importeer hierboven of klik op “+ Vraag toevoegen”.</div>';
+}
+// wijzigingen in de editor → cur bijwerken
+$('qs').addEventListener('input',e=>{
+  const qc=e.target.closest('.qcard');if(!qc)return;const q=cur.questions[+qc.dataset.i];
+  if(e.target.classList.contains('qt'))q.q=e.target.value;
+  const ar=e.target.closest('.ans');if(ar){const a=q.a[+ar.dataset.j];if(e.target.classList.contains('t'))a.t=e.target.value;if(e.target.classList.contains('e'))a.e=e.target.value;if(e.target.classList.contains('p')){if(e.target.value)a.planet=e.target.value;else delete a.planet;}}
+  if(e.target.classList.contains('mu')){if(e.target.value)q.multi=+e.target.value;else delete q.multi;}
+});
+$('qs').addEventListener('click',e=>{
+  const qc=e.target.closest('.qcard');if(!qc)return;const i=+qc.dataset.i,q=cur.questions[i];
+  if(e.target.classList.contains('ok')){const j=+e.target.closest('.ans').dataset.j;q.a[j].ok=!q.a[j].ok;renderQuestions();}
+  else if(e.target.classList.contains('del')){q.a.splice(+e.target.closest('.ans').dataset.j,1);renderQuestions();}
+  else if(e.target.classList.contains('addA')){q.a.push({t:'',ok:false,e:''});renderQuestions();}
+  else if(e.target.classList.contains('rm')){if(confirm('Vraag verwijderen?')){cur.questions.splice(i,1);renderQuestions();}}
+  else if(e.target.classList.contains('mv')){const d=+e.target.dataset.d,k=i+d;if(k<0||k>=cur.questions.length)return;[cur.questions[i],cur.questions[k]]=[cur.questions[k],cur.questions[i]];renderQuestions();}
+});
+$('addQ').addEventListener('click',()=>{cur.questions.push({q:'',a:[{t:'',ok:true,e:''},{t:'',ok:false,e:''},{t:'',ok:false,e:''}]});renderQuestions();window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
+$('checkQ').addEventListener('click',()=>showWarnings(QuizImport.validate({questions:cur.questions}),true));
+$('exportJson').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(cur.questions,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(cur.title||'quiz').replace(/\W+/g,'-').toLowerCase()+'.json';a.click();});
+function showWarnings(w,alsoOk){const box=$('warn');const real=w.filter(x=>!/geen uitleg/.test(x));if(!w.length){box.hidden=!alsoOk;box.textContent='✔ Alles in orde!';return;}box.hidden=false;box.textContent=w.join('\n');return real.length;}
+
+/* ---------- import ---------- */
+function applyImport(quiz,source){
+  const w=QuizImport.validate(quiz);
+  if(!quiz.questions.length){showWarnings(['Geen vragen herkend in '+source+'. Controleer of elke vraag begint met "1." en elk antwoord met "A." (of gebruik de automatische nummering van Word).']);return;}
+  if($('append').checked)cur.questions=cur.questions.concat(quiz.questions);else cur.questions=quiz.questions;
+  if(quiz.title&&!$('f_title').value){$('f_title').value=quiz.title;cur.title=quiz.title;}
+  if(quiz.theme&&!$('f_theme').value){$('f_theme').value=quiz.theme;}
+  if(quiz.emoji){$('f_emoji').value=quiz.emoji;}
+  if(quiz.title&&quiz.grade_min){$('f_gmin').value=quiz.grade_min;$('f_gmax').value=quiz.grade_max;}
+  renderQuestions(); showWarnings(w,true); note(`${quiz.questions.length} vragen ingelezen uit ${source}. Kijk ze na en klik op Bewaren.`,'ok');
+}
+async function importFile(file){
+  try{
+    const name=file.name.toLowerCase();
+    if(name.endsWith('.docx')){const paras=await QuizImport.docxToParagraphs(await file.arrayBuffer());applyImport(QuizImport.parseParagraphs(paras),file.name);}
+    else if(name.endsWith('.json')){applyImport(QuizImport.parseJson(await file.text()),file.name);}
+    else{applyImport(QuizImport.parseParagraphs(QuizImport.textToParagraphs(await file.text())),file.name);}
+  }catch(err){showWarnings(['Import mislukt: '+err.message]);}
+}
+$('file').addEventListener('change',e=>{if(e.target.files[0])importFile(e.target.files[0]);e.target.value='';});
+const drop=$('drop');['dragenter','dragover'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over');}));
+['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over');}));
+drop.addEventListener('drop',e=>{const f=e.dataTransfer.files[0];if(f)importFile(f);});
+$('parsePaste').addEventListener('click',()=>{const t=$('paste').value.trim();if(!t)return;try{const q=t.startsWith('[')||t.startsWith('{')?QuizImport.parseJson(t):QuizImport.parseParagraphs(QuizImport.textToParagraphs(t));applyImport(q,'geplakte tekst');}catch(err){showWarnings(['Import mislukt: '+err.message]);}});
+
+/* ---------- bewaren ---------- */
+$('save').addEventListener('click',async()=>{
+  const title=$('f_title').value.trim(); if(!title){note('Geef de quiz een titel.','err');$('f_title').focus();return;}
+  const w=QuizImport.validate({questions:cur.questions}); const blocking=w.filter(x=>!/geen uitleg/.test(x));
+  if(blocking.length){showWarnings(w);if(!confirm('Er zijn nog problemen met de vragen (zie geel kader). Toch bewaren?'))return;}
+  const rec={title,theme:$('f_theme').value.trim()||null,emoji:$('f_emoji').value.trim()||'🎯',grade_min:+$('f_gmin').value,grade_max:+$('f_gmax').value,school_id:$('f_school').value||null,published:$('f_pub').checked,
+    questions:cur.questions.map(q=>{const o={q:q.q.trim(),a:q.a.map(a=>{const x={t:a.t.trim(),ok:!!a.ok,e:(a.e||'').trim()};if(a.planet)x.planet=a.planet;return x;})};if(q.multi)o.multi=q.multi;return o;})};
+  if(rec.grade_min>rec.grade_max)[rec.grade_min,rec.grade_max]=[rec.grade_max,rec.grade_min];
+  $('save').disabled=true;
+  const res=cur.id?await LP.sb.from('quizzes').update(rec).eq('id',cur.id).select().single():await LP.sb.from('quizzes').insert(rec).select().single();
+  $('save').disabled=false;
+  if(res.error){note('Bewaren mislukt: '+esc(res.error.message),'err');return;}
+  cur.id=res.data.id; await loadQuizzes(); renderQuizList(); $('delQuiz').hidden=false; $('preview').hidden=false; $('edTitle').textContent='Quiz bewerken';
+  note('Quiz bewaard ✔','ok');
+});
+$('preview').addEventListener('click',async e=>{
+  e.preventDefault(); if(!cur.id)return;
+  // eerste klas van de eerste school als proefklas
+  const {data}=await LP.sb.from('classes').select('id').limit(1);
+  if(!data||!data.length){note('Maak eerst een klas aan (dashboard) om uit te proberen.','err');return;}
+  window.open(`/quiz.html?quiz=${cur.id}&class=${data[0].id}`,'_blank');
+});
+$('delQuiz').addEventListener('click',async()=>{
+  if(!cur.id||!confirm(`Quiz "${cur.title||$('f_title').value}" definitief verwijderen?`))return;
+  const {error}=await LP.sb.from('quizzes').delete().eq('id',cur.id); if(error){note(esc(error.message),'err');return;}
+  cur=null;$('editor').hidden=true;await loadQuizzes();renderQuizList();note('Quiz verwijderd.','ok');
+});
+
+/* ---------- scholen & gebruikers ---------- */
+function renderSchools(){$('schoolList').innerHTML=schools.map(s=>`<div class="row" style="cursor:default"><div class="ico">🏫</div><div><h4>${esc(s.name)}</h4><div class="m">${users.filter(u=>u.school_id===s.id).length} leerkracht(en) · slug ${esc(s.slug)}</div></div></div>`).join('')||'<div class="muted">Nog geen scholen.</div>';}
+$('addSchool').addEventListener('click',async()=>{
+  const name=$('s_name').value.trim();if(!name)return;
+  const slug=name.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  const {error}=await LP.sb.from('schools').insert({name,slug});if(error){note(esc(error.message),'err');return;}
+  $('s_name').value='';await loadSchools();renderSchools();renderUsers();note('School toegevoegd ✔','ok');
+});
+function renderUsers(){
+  $('users').querySelector('tbody').innerHTML=users.map(u=>`<tr data-id="${u.id}">
+    <td><input class="fn" value="${esc(u.full_name||'')}" placeholder="Naam"></td><td>${esc(u.email||'–')}</td>
+    <td><select class="sc"><option value="">– geen –</option>${schools.map(s=>`<option value="${s.id}" ${u.school_id===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></td>
+    <td><select class="ro"><option value="teacher" ${u.role==='teacher'?'selected':''}>Leerkracht</option><option value="admin" ${u.role==='admin'?'selected':''}>Beheerder</option></select></td>
+    <td><button class="btn btn-navy btn-sm sv">Bewaren</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">Nog geen accounts. Maak ze aan in Supabase → Authentication → Users.</td></tr>';
+}
+$('users').addEventListener('click',async e=>{
+  const b=e.target.closest('.sv');if(!b)return;const tr=b.closest('tr');
+  const rec={full_name:tr.querySelector('.fn').value.trim()||null,school_id:tr.querySelector('.sc').value||null,role:tr.querySelector('.ro').value};
+  if(tr.dataset.id===profile.id&&rec.role!=='admin'&&!confirm('Je maakt jezelf geen beheerder meer. Zeker?'))return;
+  b.disabled=true;const {error}=await LP.sb.from('profiles').update(rec).eq('id',tr.dataset.id);b.disabled=false;
+  if(error){note(esc(error.message),'err');return;}
+  Object.assign(users.find(u=>u.id===tr.dataset.id),rec);renderSchools();note('Bewaard ✔','ok');
+});
+init();
+</script>
+</body>
+</html>

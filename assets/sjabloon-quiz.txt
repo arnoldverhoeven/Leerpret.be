@@ -1,0 +1,30 @@
+Titel: Dieren Quiz
+Thema: Dieren
+Emoji: 🐾
+Leerjaar: 1-3
+
+1. Welk dier zegt "miauw"?
+A. Hond
+   Nee, een hond blaft: waf waf!
+*B. Kat
+   Juist! Een kat miauwt.
+C. Koe
+   Nee, een koe loeit: boe!
+
+2. Welke 2 dieren leggen eieren? (kies 2)
+*A. Kip
+   Juist! Een kip legt bijna elke dag een ei.
+B. Hond
+   Nee, een hond krijgt puppy's.
+*C. Schildpad
+   Juist! Een schildpad begraaft haar eieren in het zand.
+D. Koe
+   Nee, een koe krijgt een kalfje.
+
+3. Hoeveel poten heeft een spin?
+A. 6
+   Nee, dat is een insect. Een spin heeft er meer!
+*B. 8
+   Juist! Een spin heeft 8 poten.
+C. 10
+   Nee, dat zijn er te veel.

@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quiz – Leerpret</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#050b2e">
+<style>
+@font-face{font-family:'Baloo 2';font-weight:700;font-display:swap;src:url('/assets/fonts/baloo2-700.woff') format('woff')}
+@font-face{font-family:'Baloo 2';font-weight:800;font-display:swap;src:url('/assets/fonts/baloo2-800.woff') format('woff')}
+</style>
+<style>
+  :root{
+    --bg1:#050b2e; --bg2:#1a0f4d; --bg3:#2b1463;
+    --yellow:#ffd93d; --orange:#ff8c42; --pink:#ff5fa2; --green:#3ddc84; --blue:#4cc9f0; --purple:#b388ff;
+    --card:rgba(255,255,255,0.10); --card2:rgba(255,255,255,0.18);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;overflow:hidden}
+  body{
+    font-family:'Baloo 2','Nunito','Trebuchet MS','Verdana',sans-serif;
+    color:#fff;
+    background:radial-gradient(ellipse at 20% 10%,#3a1f7a 0%,transparent 55%),
+               radial-gradient(ellipse at 80% 90%,#0c3b6e 0%,transparent 55%),
+               linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg3));
+    user-select:none;-webkit-user-select:none;
+  }
+
+  /* ---------- Sterren ---------- */
+  #stars,#stars2,#stars3{position:fixed;inset:0;pointer-events:none;z-index:0}
+  .star{position:absolute;border-radius:50%;background:#fff;animation:twinkle var(--d) ease-in-out infinite alternate}
+  @keyframes twinkle{from{opacity:.25;transform:scale(.8)}to{opacity:1;transform:scale(1.2)}}
+  .shooting{position:absolute;width:140px;height:2px;background:linear-gradient(90deg,#fff,transparent);border-radius:2px;
+    transform:rotate(-30deg);animation:shoot 2.2s linear forwards;opacity:0}
+  @keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(-30deg)}10%{opacity:1}100%{opacity:0;transform:translate(-700px,400px) rotate(-30deg)}}
+
+  /* decoratieve planeten op startscherm */
+  .deco{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:drop-shadow(0 0 30px rgba(255,255,255,.15))}
+  .deco.p1{width:22vmin;height:22vmin;right:8vw;top:12vh;background:radial-gradient(circle at 35% 35%,#ffb86b,#e0682d 60%,#8e3a16);animation:floaty 9s ease-in-out infinite}
+  .deco.p1::after{content:"";position:absolute;left:-35%;top:40%;width:170%;height:22%;border-radius:50%;border:2.2vmin solid rgba(255,220,170,.75);border-top-color:transparent;transform:rotate(-15deg)}
+  .deco.p2{width:12vmin;height:12vmin;left:7vw;bottom:14vh;background:radial-gradient(circle at 35% 35%,#7fe3ff,#2b8fd6 60%,#123c73);animation:floaty 11s ease-in-out infinite reverse}
+  .deco.p3{width:8vmin;height:8vmin;left:18vw;top:14vh;background:radial-gradient(circle at 35% 35%,#ff9e8a,#d2412b 60%,#6e1a10);animation:floaty 7s ease-in-out infinite}
+  .deco.moon{width:6vmin;height:6vmin;right:22vw;bottom:10vh;background:radial-gradient(circle at 35% 35%,#fff,#cfd6e6 60%,#8a93a8);animation:floaty 13s ease-in-out infinite reverse}
+  @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3vh)}}
+
+  /* ---------- Schermen ---------- */
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:4vh 5vw;z-index:2;text-align:center}
+  .screen.active{display:flex;animation:fadeIn .5s ease}
+  @keyframes fadeIn{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+
+  h1.title{font-size:clamp(3rem,9vmin,8rem);font-weight:800;line-height:1.05;
+    background:linear-gradient(90deg,var(--yellow),var(--orange),var(--pink),var(--blue));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    filter:drop-shadow(0 6px 0 rgba(0,0,0,.25));animation:wobble 4s ease-in-out infinite}
+  @keyframes wobble{0%,100%{transform:rotate(-1.5deg)}50%{transform:rotate(1.5deg)}}
+  .subtitle{font-size:clamp(1.3rem,3.6vmin,2.6rem);margin-top:1.5vh;color:#dfe6ff;font-weight:700}
+  .rocket{font-size:clamp(4rem,12vmin,10rem);margin-bottom:1vh;display:inline-block;animation:rocketIdle 2.5s ease-in-out infinite}
+  @keyframes rocketIdle{0%,100%{transform:translateY(0) rotate(-8deg)}50%{transform:translateY(-14px) rotate(-8deg)}}
+
+  .bigbtn{
+    margin-top:6vh;border:none;cursor:pointer;color:#2a1600;
+    font-family:inherit;font-weight:800;font-size:clamp(1.6rem,4.5vmin,3.4rem);
+    padding:2.2vh 6vw;border-radius:999px;
+    background:linear-gradient(180deg,#ffe066,#ffb703);
+    box-shadow:0 10px 0 #c77d00,0 20px 40px rgba(0,0,0,.4);
+    transition:transform .1s,box-shadow .1s;animation:pulse 1.8s ease-in-out infinite
+  }
+  .bigbtn:hover{transform:translateY(-3px) scale(1.03)}
+  .bigbtn:active{transform:translateY(6px);box-shadow:0 4px 0 #c77d00,0 10px 20px rgba(0,0,0,.4)}
+  @keyframes pulse{0%,100%{filter:brightness(1)}50%{filter:brightness(1.15)}}
+  .bigbtn.secondary{background:linear-gradient(180deg,#8be9fd,#4cc9f0);box-shadow:0 10px 0 #1f7fa8,0 20px 40px rgba(0,0,0,.4);color:#04203a;animation:none;font-size:clamp(1.3rem,3.5vmin,2.6rem);padding:1.6vh 4vw}
+  .bigbtn.secondary:active{box-shadow:0 4px 0 #1f7fa8}
+  .bigbtn.green{background:linear-gradient(180deg,#7dffb6,#3ddc84);box-shadow:0 10px 0 #1f8c50,0 20px 40px rgba(0,0,0,.4);color:#04301a;animation:none}
+  .bigbtn.green:active{box-shadow:0 4px 0 #1f8c50}
+
+  /* ---------- Naamscherm ---------- */
+  .label{font-size:clamp(1.4rem,4vmin,3rem);color:#bfc9ff;font-weight:700;letter-spacing:.02em}
+  .namebox{
+    margin-top:3vh;min-width:60vw;padding:4vh 5vw;border-radius:3vmin;
+    background:var(--card);border:3px solid rgba(255,255,255,.25);backdrop-filter:blur(6px);
+    font-size:clamp(3rem,11vmin,10rem);font-weight:800;line-height:1.1;
+    text-shadow:0 6px 0 rgba(0,0,0,.35)
+  }
+  .namebox.spinning{color:#c9d3ff}
+  .namebox.chosen{color:var(--yellow);border-color:var(--yellow);animation:popName .6s cubic-bezier(.2,1.6,.4,1) both;box-shadow:0 0 60px rgba(255,217,61,.45)}
+  @keyframes popName{0%{transform:scale(.6)}100%{transform:scale(1)}}
+  .namehint{margin-top:3vh;font-size:clamp(1.3rem,3.5vmin,2.6rem);color:#fff;opacity:0;transition:opacity .4s}
+  .namehint.show{opacity:1}
+
+  /* ---------- Vraagscherm ---------- */
+  #quiz{justify-content:flex-start;padding-top:2vh;overflow-y:auto}
+  .topbar{width:100%;display:flex;justify-content:space-between;align-items:center;font-size:clamp(1.1rem,2.8vmin,2rem);color:#bfc9ff;font-weight:700}
+  .topbar .who{color:var(--yellow)}
+  .topbar .who b{font-size:1.15em}
+  .progress{height:1.2vh;width:100%;background:rgba(255,255,255,.15);border-radius:99px;margin-top:1.2vh;overflow:hidden}
+  .progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green));border-radius:99px;transition:width .6s ease}
+
+  .qwrap{width:100%;max-width:1500px;margin-top:2vh;display:flex;flex-direction:column;align-items:center;flex:1}
+  .qnum{font-size:clamp(1.4rem,3.8vmin,3rem);font-weight:800;color:var(--orange)}
+  .question{
+    font-size:clamp(1.8rem,4.6vmin,3.8rem);font-weight:800;line-height:1.2;margin-top:1vh;
+    text-shadow:0 4px 0 rgba(0,0,0,.3);animation:slideDown .5s ease both
+  }
+  @keyframes slideDown{from{opacity:0;transform:translateY(-30px)}to{opacity:1;transform:none}}
+  .multihint{margin-top:1vh;font-size:clamp(1.1rem,3vmin,2.2rem);color:var(--blue);font-weight:700}
+
+  /* timer */
+  .timer{margin:3vh auto 0;width:clamp(120px,22vmin,220px);height:clamp(120px,22vmin,220px);position:relative;display:flex;align-items:center;justify-content:center}
+  .timer svg{position:absolute;inset:0;transform:rotate(-90deg)}
+  .timer circle{fill:none;stroke-width:12}
+  .timer .track{stroke:rgba(255,255,255,.15)}
+  .timer .arc{stroke:var(--blue);stroke-linecap:round;transition:stroke-dashoffset 1s linear,stroke .3s}
+  .timer .num{font-size:clamp(2.5rem,8vmin,6rem);font-weight:800}
+  .timer.hide{display:none}
+  .timerhint{margin-top:1.5vh;font-size:clamp(1.1rem,2.8vmin,2rem);color:#bfc9ff}
+  .skip{margin-top:1.5vh;background:none;border:2px solid rgba(255,255,255,.35);color:#dfe6ff;border-radius:99px;font-family:inherit;font-weight:700;padding:.6vh 2vw;font-size:clamp(.9rem,2.2vmin,1.5rem);cursor:pointer;opacity:.7}
+  .skip:hover{opacity:1;background:rgba(255,255,255,.1)}
+
+  /* antwoorden */
+  .answers{display:grid;grid-template-columns:1fr 1fr;gap:1.8vmin;width:100%;margin-top:2vh}
+  .answers.three{grid-template-columns:1fr 1fr 1fr}
+  @media (max-width:800px){.answers,.answers.three{grid-template-columns:1fr}}
+  .ans{
+    position:relative;text-align:left;border:3px solid rgba(255,255,255,.25);background:var(--card);
+    border-radius:2.5vmin;padding:1.6vmin 2.2vmin;cursor:pointer;color:#fff;font-family:inherit;
+    display:flex;flex-direction:column;gap:1vmin;
+    transition:transform .15s,background .2s,border-color .2s;
+    animation:popIn .45s cubic-bezier(.2,1.4,.4,1) both;animation-delay:var(--delay,0s)
+  }
+  @keyframes popIn{from{opacity:0;transform:scale(.7) translateY(30px)}to{opacity:1;transform:none}}
+  .ans:hover:not(.revealed):not(.locked){transform:translateY(-4px) scale(1.02);background:var(--card2);border-color:rgba(255,255,255,.6)}
+  .ans .head{display:flex;align-items:center;gap:2vmin}
+  .ans .letter{
+    flex:none;width:clamp(44px,7vmin,80px);height:clamp(44px,7vmin,80px);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:clamp(1.3rem,3.8vmin,2.8rem);
+    background:linear-gradient(180deg,var(--purple),#7c4dff);color:#fff;box-shadow:0 4px 0 rgba(0,0,0,.3)
+  }
+  .ans .text{font-size:clamp(1.3rem,3.4vmin,2.6rem);font-weight:800;line-height:1.15}
+  .ans .planet{flex:none}
+  .ans .explain{
+    display:none;font-size:clamp(1rem,2.3vmin,1.8rem);font-weight:600;line-height:1.3;
+    padding:1.4vmin 1.8vmin;border-radius:1.6vmin;background:rgba(0,0,0,.28);color:#fff
+  }
+  .ans.revealed .explain{display:block;animation:fadeIn .35s ease}
+  .ans.selected{border-color:var(--blue);background:rgba(76,201,240,.22);box-shadow:0 0 0 4px rgba(76,201,240,.35)}
+  .ans.correct{border-color:var(--green);background:rgba(61,220,132,.22);box-shadow:0 0 40px rgba(61,220,132,.45)}
+  .ans.correct .letter{background:linear-gradient(180deg,#7dffb6,#22b866)}
+  .ans.wrong{border-color:var(--pink);background:rgba(255,95,162,.18);opacity:.9}
+  .ans.wrong .letter{background:linear-gradient(180deg,#ff8ac0,#d63d7c)}
+  .ans.wrong .explain{background:rgba(120,20,60,.45)}
+  .ans.correct .explain{background:rgba(10,90,50,.5)}
+  .ans.locked{cursor:default}
+  .ans.shake{animation:shake .5s cubic-bezier(.36,.07,.19,.97) both}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+  .ans.bounce{animation:bounce .7s cubic-bezier(.2,1.4,.4,1) both}
+  @keyframes bounce{0%{transform:scale(1)}40%{transform:scale(1.08) rotate(-1.5deg)}70%{transform:scale(.98) rotate(1deg)}100%{transform:scale(1)}}
+
+  /* CSS-planeetjes voor de visuele vraag */
+  .pl{position:relative;width:clamp(56px,10vmin,110px);height:clamp(56px,10vmin,110px);border-radius:50%;flex:none;box-shadow:inset -10px -8px 20px rgba(0,0,0,.45)}
+  .pl.ring::after{content:"";position:absolute;left:-30%;top:40%;width:160%;height:22%;border-radius:50%;border:.9vmin solid rgba(255,235,200,.85);border-top-color:transparent;transform:rotate(-18deg)}
+  .pl.ring.thin::after{border-width:.4vmin;border-color:rgba(200,240,255,.85);transform:rotate(75deg);left:-25%;width:150%;height:18%;top:42%}
+  .pl.saturn{background:radial-gradient(circle at 35% 35%,#ffe0a8,#e2a35a 55%,#8a5a22)}
+  .pl.mars{background:radial-gradient(circle at 35% 35%,#ff9e8a,#d2412b 60%,#6e1a10)}
+  .pl.earth{background:radial-gradient(circle at 30% 30%,#9be7ff,#2b8fd6 45%,#1a6b3a 60%,#0f3d6b)}
+  .pl.uranus{background:radial-gradient(circle at 35% 35%,#d9fbff,#6fd6e8 55%,#2a8ea6)}
+  .pl.jupiter{background:repeating-linear-gradient(175deg,#f3d5b0 0 12%,#c98a55 12% 22%,#e9c9a6 22% 34%,#b06a3c 34% 42%)}
+  .pl.neptune{background:radial-gradient(circle at 35% 35%,#8fb4ff,#2f5fe0 60%,#122b7a)}
+  .pl.venus{background:radial-gradient(circle at 35% 35%,#fff3cf,#e6b96a 60%,#9a6b2a)}
+  .pl.mercury{background:radial-gradient(circle at 35% 35%,#e6e6e6,#9a9a9a 60%,#4a4a4a)}
+
+  .bottom{margin-top:auto;padding-top:2vh;padding-bottom:1vh;display:flex;gap:2vw;justify-content:center;align-items:center;min-height:12vh}
+  .feedback{font-size:clamp(1.6rem,5vmin,4rem);font-weight:800;color:var(--yellow);text-shadow:0 4px 0 rgba(0,0,0,.35);animation:popIn .5s cubic-bezier(.2,1.4,.4,1) both}
+
+  /* ---------- Eindscherm ---------- */
+  .trophy{font-size:clamp(5rem,16vmin,14rem);animation:rocketIdle 2s ease-in-out infinite}
+
+  /* ---------- Confetti / raket ---------- */
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+  .flyrocket{position:fixed;left:50%;bottom:-20vh;font-size:clamp(5rem,14vmin,12rem);z-index:60;pointer-events:none;animation:flyUp 1.8s cubic-bezier(.4,0,.6,1) forwards}
+  @keyframes flyUp{0%{transform:translate(-50%,0) rotate(-45deg)}100%{transform:translate(-50%,-140vh) rotate(-45deg)}}
+  .burst{position:fixed;font-size:clamp(2rem,6vmin,5rem);z-index:60;pointer-events:none;animation:burst 1.2s ease-out forwards}
+  @keyframes burst{0%{opacity:1;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.4) rotate(360deg)}}
+
+  .backlink{position:fixed;top:1.5vh;left:1.5vw;z-index:100;color:#c9d3ff;text-decoration:none;font-weight:700;font-size:clamp(.9rem,2vmin,1.3rem);opacity:.75}
+  .backlink:hover{opacity:1}
+  .mute{position:fixed;bottom:1.5vh;left:1.5vw;z-index:100;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.3);color:#fff;border-radius:99px;padding:.5vh 1.2vw;font-family:inherit;font-weight:700;cursor:pointer;font-size:clamp(.9rem,2vmin,1.3rem)}
+</style>
+</head>
+<body>
+
+<div id="stars"></div><div id="stars2"></div><div id="stars3"></div>
+<canvas id="confetti"></canvas>
+<button class="mute" id="muteBtn" title="Geluid aan/uit">🔊 Geluid</button>
+
+<!-- START -->
+<section class="screen active" id="start">
+  <div class="deco p1"></div><div class="deco p2"></div><div class="deco p3"></div><div class="deco moon"></div>
+  <div class="rocket" id="startEmoji">🚀</div>
+  <h1 class="title" id="startTitle">Leerpret</h1>
+  <div class="subtitle" id="startSub">Even laden…</div>
+  <button class="bigbtn" id="startBtn" style="display:none">🚀 Start de test</button>
+  <div id="startErr" class="subtitle" style="display:none;color:#ff8ac0"></div>
+  <a href="/dashboard.html" class="backlink">← Terug naar Leerpret</a>
+</section>
+
+<!-- NAAM -->
+<section class="screen" id="pick">
+  <div class="label">Wie mag deze vraag beantwoorden?</div>
+  <div class="namebox spinning" id="namebox">…</div>
+  <div class="namehint" id="namehint">Maak je klaar! De vraag komt zo… 🌟</div>
+</section>
+
+<!-- QUIZ -->
+<section class="screen" id="quiz">
+  <div class="topbar">
+    <div>Vraag <span id="qcount"></span> van <span id="qtotal"></span></div>
+    <div class="who">Aan de beurt: <b id="whoName"></b></div>
+  </div>
+  <div class="progress"><div id="progbar"></div></div>
+
+  <div class="qwrap">
+    <div class="qnum" id="qnum"></div>
+    <div class="question" id="qtext"></div>
+    <div class="multihint" id="multihint"></div>
+
+    <div class="timer" id="timer">
+      <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="arc" id="arc" cx="60" cy="60" r="52"/></svg>
+      <div class="num" id="tnum">10</div>
+    </div>
+    <div class="timerhint" id="timerhint">Lees de vraag goed… de antwoorden komen zo!</div>
+    <button class="skip" id="skipBtn">Antwoorden nu tonen ⏩</button>
+
+    <div class="answers" id="answers"></div>
+
+    <div class="bottom" id="bottom"></div>
+  </div>
+</section>
+
+<!-- EINDE -->
+<section class="screen" id="end">
+  <div class="trophy">🏆</div>
+  <h1 class="title" id="endTitle">Fantastisch!</h1>
+  <div class="subtitle">Jullie zijn echte ruimtehelden! 🚀🪐⭐</div>
+  <button class="bigbtn" id="againBtn">🔁 Nog een keer</button>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+/* =========================================================
+   DATA
+   ========================================================= */
+let NAMES = [];
+let QUESTIONS = [];
+const DEMO_NAMES = ["Noor","Liam","Emma","Adam","Lina","Milan","Sara","Finn","Yara","Louis","Nour","Jules","Amira","Arthur","Mila","Ayoub"];
+
+/* Laadt quiz + klas: ?demo=1  of  ?quiz=<id>&class=<id> (Supabase) */
+async function loadData(){
+  const q=new URLSearchParams(location.search);
+  const T=document.getElementById('startTitle'),S=document.getElementById('startSub'),E=document.getElementById('startEmoji');
+  try{
+    if(q.get('demo')){
+      const r=await fetch('/js/demo-ruimte.json'); QUESTIONS=await r.json(); NAMES=DEMO_NAMES;
+      T.textContent='Ruimte Quiz'; S.textContent='Demo · Planeten & vliegende dingen'; E.textContent='🪐';
+    }else{
+      if(!window.LP||!LP.configured) throw new Error('Leerpret is nog niet verbonden met de database (js/config.js).');
+      const user=await LP.requireAuth(); if(!user) return;
+      const [{data:quiz,error:e1},{data:klas,error:e2}]=await Promise.all([
+        LP.sb.from('quizzes').select('title,theme,emoji,questions').eq('id',q.get('quiz')).single(),
+        LP.sb.from('classes').select('name,pupils,schools(name)').eq('id',q.get('class')).single()]);
+      if(e1||!quiz) throw new Error('Quiz niet gevonden.'); if(e2||!klas) throw new Error('Klas niet gevonden.');
+      QUESTIONS=quiz.questions||[]; NAMES=(klas.pupils||[]).slice();
+      T.textContent=quiz.title; E.textContent=quiz.emoji||'🚀';
+      S.textContent=[klas.schools&&klas.schools.name,'Klas '+klas.name,quiz.theme].filter(Boolean).join(' · ');
+      document.getElementById('endTitle').textContent='Fantastisch, '+klas.name+'!';
+      if(!NAMES.length) throw new Error('Deze klas heeft nog geen namenlijst. Vul ze in op het dashboard.');
+    }
+    if(!QUESTIONS.length) throw new Error('Deze quiz heeft nog geen vragen.');
+    document.title=T.textContent+' – Leerpret';
+    document.getElementById('startBtn').style.display='';
+  }catch(err){ S.textContent='Oeps…'; const x=document.getElementById('startErr'); x.style.display=''; x.textContent=err.message; }
+}
+loadData();
+
+/* =========================================================
+   STERREN
+   ========================================================= */
+function makeStars(id, n, size){
+  const c=document.getElementById(id);
+  for(let i=0;i<n;i++){
+    const s=document.createElement('div');s.className='star';
+    const sz=Math.random()*size+1;
+    s.style.cssText=`left:${Math.random()*100}%;top:${Math.random()*100}%;width:${sz}px;height:${sz}px;--d:${(Math.random()*3+1.5).toFixed(2)}s;animation-delay:${(Math.random()*3).toFixed(2)}s`;
+    c.appendChild(s);
+  }
+}
+makeStars('stars',120,2);makeStars('stars2',60,3);makeStars('stars3',20,4);
+setInterval(()=>{
+  const s=document.createElement('div');s.className='shooting';
+  s.style.left=(50+Math.random()*50)+'%';s.style.top=(Math.random()*40)+'%';
+  document.getElementById('stars').appendChild(s);setTimeout(()=>s.remove(),2500);
+},4000);
+
+/* =========================================================
+   GELUID (Web Audio, geen bestanden nodig)
+   ========================================================= */
+let audioCtx=null, muted=false;
+function ctx(){ if(!audioCtx){ audioCtx=new (window.AudioContext||window.webkitAudioContext)(); } if(audioCtx.state==='suspended') audioCtx.resume(); return audioCtx; }
+function tone(freq, start, dur, type='sine', vol=0.25){
+  if(muted) return;
+  const ac=ctx(), o=ac.createOscillator(), g=ac.createGain();
+  o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime+start);
+  g.gain.setValueAtTime(0.0001,ac.currentTime+start);
+  g.gain.exponentialRampToValueAtTime(vol,ac.currentTime+start+0.02);
+  g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+start+dur);
+  o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+start);o.stop(ac.currentTime+start+dur+0.05);
+}
+function soundCorrect(){ // vrolijk arpeggio
+  [523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*0.09,0.35,'triangle',0.28));
+  tone(1318.5,0.4,0.5,'sine',0.18);
+}
+function soundFanfare(){
+  [523.25,523.25,523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*0.15,0.3,'square',0.12));
+  [659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,1.0+i*0.12,0.6,'triangle',0.22));
+}
+document.getElementById('muteBtn').addEventListener('click',e=>{
+  muted=!muted;e.target.textContent=muted?'🔇 Stil':'🔊 Geluid';
+});
+
+/* =========================================================
+   CONFETTI + RAKET
+   ========================================================= */
+const canvas=document.getElementById('confetti'),cx=canvas.getContext('2d');
+let pieces=[],confettiRunning=false;
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}
+addEventListener('resize',resize);resize();
+const COLORS=['#ffd93d','#ff8c42','#ff5fa2','#3ddc84','#4cc9f0','#b388ff','#ffffff'];
+function confetti(n=220){
+  for(let i=0;i<n;i++){
+    pieces.push({x:canvas.width/2+(Math.random()-0.5)*canvas.width*0.5,y:canvas.height*0.55,
+      vx:(Math.random()-0.5)*18,vy:-Math.random()*18-6,g:0.35+Math.random()*0.2,
+      s:6+Math.random()*10,c:COLORS[i%COLORS.length],r:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.3,life:1});
+  }
+  if(!confettiRunning){confettiRunning=true;requestAnimationFrame(tick);}
+}
+function tick(){
+  cx.clearRect(0,0,canvas.width,canvas.height);
+  pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=0.99;p.r+=p.vr;if(p.y>canvas.height*0.85)p.life-=0.04;
+    cx.save();cx.globalAlpha=Math.max(p.life,0);cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6);cx.restore();});
+  pieces=pieces.filter(p=>p.life>0&&p.y<canvas.height+50);
+  if(pieces.length){requestAnimationFrame(tick);}else{confettiRunning=false;cx.clearRect(0,0,canvas.width,canvas.height);}
+}
+function rocketFly(){
+  const r=document.createElement('div');r.className='flyrocket';r.textContent='🚀';document.body.appendChild(r);
+  setTimeout(()=>r.remove(),2000);
+}
+function starBurst(x,y){
+  const em=['⭐','🌟','✨','💫','🪐'];
+  for(let i=0;i<10;i++){
+    const b=document.createElement('div');b.className='burst';b.textContent=em[i%em.length];
+    const ang=(i/10)*Math.PI*2,d=120+Math.random()*160;
+    b.style.cssText=`left:${x}px;top:${y}px;--dx:${Math.cos(ang)*d}px;--dy:${Math.sin(ang)*d}px`;
+    document.body.appendChild(b);setTimeout(()=>b.remove(),1300);
+  }
+}
+
+/* =========================================================
+   QUIZ LOGICA
+   ========================================================= */
+const $=id=>document.getElementById(id);
+const screens=['start','pick','quiz','end'];
+function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));}
+
+let order=[],qi=0,namePool=[],currentName='',timerId=null,solved=false;
+
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+
+function startQuiz(){
+  ctx(); // audio ontgrendelen bij eerste klik
+  order=QUESTIONS.map((_,i)=>i); // vaste volgorde; wil je willekeurig: shuffle(order)
+  qi=0;namePool=shuffle([...NAMES]);
+  $('qtotal').textContent=QUESTIONS.length;
+  nextTurn();
+}
+
+function pickName(){
+  if(!namePool.length) namePool=shuffle([...NAMES]);
+  return namePool.pop();
+}
+
+function nextTurn(){
+  if(qi>=order.length){ finish(); return; }
+  show('pick');
+  const box=$('namebox'),hint=$('namehint');
+  hint.classList.remove('show');box.className='namebox spinning';
+  currentName=pickName();
+  // roulette: namen flitsen voorbij, dan stoppen op de gekozen naam
+  let t=0,delay=60;
+  (function spin(){
+    box.textContent=NAMES[Math.floor(Math.random()*NAMES.length)];
+    t+=delay;delay*=1.08;
+    if(t<2200){ setTimeout(spin,delay); }
+    else{
+      box.textContent=currentName;box.className='namebox chosen';hint.classList.add('show');
+      setTimeout(showQuestion,3200);
+    }
+  })();
+}
+
+function showQuestion(){
+  const q=QUESTIONS[order[qi]];
+  solved=false;
+  show('quiz');
+  $('qcount').textContent=qi+1;$('whoName').textContent=currentName;
+  $('progbar').style.width=((qi)/QUESTIONS.length*100)+'%';
+  $('qnum').textContent=(qi+1)+'.';
+  $('qtext').textContent=q.q;
+  $('multihint').textContent=q.multi?`Let op: kies ${q.multi} antwoorden en klik dan op "Controleer!"`:'';
+  $('answers').innerHTML='';$('bottom').innerHTML='';
+  $('answers').className='answers'+(q.a.length===3?' three':'');
+  // timer
+  const timer=$('timer');timer.classList.remove('hide');$('timerhint').style.display='';$('skipBtn').style.display='';
+  const arc=$('arc'),circ=2*Math.PI*52;arc.style.strokeDasharray=circ;arc.style.strokeDashoffset=0;arc.style.stroke='var(--blue)';
+  let left=10;$('tnum').textContent=left;
+  clearInterval(timerId);
+  timerId=setInterval(()=>{
+    left--;$('tnum').textContent=left;
+    arc.style.strokeDashoffset=circ*(1-left/10);
+    if(left<=3)arc.style.stroke='var(--orange)';
+    if(left<=0){clearInterval(timerId);revealAnswers();}
+  },1000);
+}
+$('skipBtn').addEventListener('click',()=>{clearInterval(timerId);revealAnswers();});
+
+function revealAnswers(){
+  const q=QUESTIONS[order[qi]];
+  $('timer').classList.add('hide');$('timerhint').style.display='none';$('skipBtn').style.display='none';
+  const wrap=$('answers');wrap.innerHTML='';
+  const letters=['A','B','C','D'];
+  q.a.forEach((a,i)=>{
+    const b=document.createElement('button');b.className='ans';b.style.setProperty('--delay',(i*0.12)+'s');
+    b.dataset.i=i;
+    b.innerHTML=`<div class="head"><div class="letter">${letters[i]}</div>${a.planet?`<div class="pl ${a.planet}"></div>`:''}<div class="text">${a.t}</div></div><div class="explain">${a.e}</div>`;
+    b.addEventListener('click',()=>onAnswer(b,a,q));
+    wrap.appendChild(b);
+  });
+  if(q.multi){
+    const btn=document.createElement('button');btn.className='bigbtn green';btn.id='checkBtn';btn.textContent='✅ Controleer!';btn.style.display='none';
+    btn.addEventListener('click',()=>checkMulti(q));$('bottom').appendChild(btn);
+  }
+}
+
+function onAnswer(btn,a,q){
+  if(solved||btn.classList.contains('locked')) return;
+  if(q.multi){
+    // selecteren / deselecteren
+    btn.classList.toggle('selected');
+    const sel=[...document.querySelectorAll('.ans.selected')];
+    const already=document.querySelectorAll('.ans.correct').length;
+    if(sel.length>q.multi-already){btn.classList.remove('selected');return;}
+    $('checkBtn').style.display=(document.querySelectorAll('.ans.selected, .ans.correct').length>=q.multi)?'':'none';
+    return;
+  }
+  // enkel antwoord
+  btn.classList.add('revealed','locked');
+  if(a.ok){ success(btn); }
+  else{ btn.classList.add('wrong','shake'); }
+}
+
+function checkMulti(q){
+  const sel=[...document.querySelectorAll('.ans.selected')];
+  let allGood=true;
+  sel.forEach(b=>{
+    const a=q.a[b.dataset.i];
+    b.classList.remove('selected');b.classList.add('revealed','locked');
+    if(a.ok){ b.classList.add('correct','bounce'); }
+    else{ b.classList.add('wrong','shake'); allGood=false; }
+  });
+  $('checkBtn').style.display='none';
+  const correctCount=document.querySelectorAll('.ans.correct').length;
+  if(allGood && correctCount>=q.multi){ celebrate(); }
+  else{
+    // fout: laat opnieuw kiezen voor de resterende
+    const rest=$('bottom');
+    let msg=document.createElement('div');msg.className='feedback';msg.style.color='#bfc9ff';msg.style.fontSize='clamp(1.2rem,3.2vmin,2.4rem)';
+    msg.textContent=correctCount?'Al één goed! Kies nog een andere planeet en klik opnieuw op Controleer.':'Nog niet juist… probeer nog eens!';
+    rest.appendChild(msg);
+    setTimeout(()=>msg.remove(),3500);
+  }
+}
+
+function success(btn){
+  btn.classList.add('correct','bounce');
+  celebrate();
+}
+function celebrate(){
+  solved=true;
+  const q=QUESTIONS[order[qi]];
+  document.querySelectorAll('.ans').forEach(b=>b.classList.add('locked'));
+  soundCorrect();confetti();rocketFly();
+  const c=document.querySelector('.ans.correct');
+  if(c){const r=c.getBoundingClientRect();starBurst(r.left+r.width/2,r.top+r.height/2);}
+  $('progbar').style.width=((qi+1)/QUESTIONS.length*100)+'%';
+  const praise=['Knap gedaan','Super','Fantastisch','Wauw','Geweldig','Topper','Yes'][Math.floor(Math.random()*7)];
+  const bottom=$('bottom');bottom.innerHTML='';
+  const fb=document.createElement('div');fb.className='feedback';fb.textContent=`🎉 ${praise}, ${currentName}!`;bottom.appendChild(fb);
+  const next=document.createElement('button');next.className='bigbtn secondary';
+  next.textContent=(qi+1<QUESTIONS.length)?'Volgende vraag ➡️':'Bekijk het resultaat 🏆';
+  next.addEventListener('click',()=>{qi++;nextTurn();});
+  bottom.appendChild(next);
+  setTimeout(()=>next.scrollIntoView({behavior:'smooth',block:'end'}),300);
+}
+
+function finish(){
+  show('end');soundFanfare();confetti(400);
+  let n=0;const iv=setInterval(()=>{confetti(120);starBurst(Math.random()*innerWidth,Math.random()*innerHeight*0.6);if(++n>5)clearInterval(iv);},700);
+}
+
+$('startBtn').addEventListener('click',startQuiz);
+$('againBtn').addEventListener('click',startQuiz);
+// sneltoets: spatie of Enter op het startscherm
+addEventListener('keydown',e=>{ if((e.key===' '||e.key==='Enter')&&$('start').classList.contains('active')&&$('startBtn').style.display!=='none'&&QUESTIONS.length) startQuiz(); });
+</script>
+</body>
+</html>
