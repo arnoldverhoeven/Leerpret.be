@@ -278,7 +278,7 @@
 <section class="screen" id="end">
   <div class="trophy">🏆</div>
   <h1 class="title" id="endTitle">Fantastisch!</h1>
-  <div class="subtitle">Jullie zijn echte ruimtehelden! 🚀🪐⭐</div>
+  <div class="subtitle" id="endSub">Jullie hebben fantastisch gespeeld! 🎉🌟</div>
   <button class="bigbtn" id="againBtn">🔁 Nog een keer</button>
 </section>
 
@@ -291,6 +291,8 @@
    ========================================================= */
 let NAMES = [];
 let QUESTIONS = [];
+let QUIZ_THEME = '';
+let QUIZ_TITLE = '';
 const DEMO_NAMES = ["Noor","Liam","Emma","Adam","Lina","Milan","Sara","Finn","Yara","Louis","Nour","Jules","Amira","Arthur","Mila","Ayoub"];
 
 /* Laadt quiz + klas: ?demo=1  of  ?quiz=<id>&class=<id> (Supabase) */
@@ -300,9 +302,11 @@ async function loadData(){
   try{
     if(q.get('demo')==='cirkel'){
       QUESTIONS=genCircle({op:q.get('op')||'mix',count:10}); NAMES=DEMO_NAMES; T.textContent='Cirkelrekenen'; S.textContent='Demo · Optellen en aftrekken tot 100'; E.textContent='🔢';
+      QUIZ_THEME='Rekenen'; QUIZ_TITLE=T.textContent;
     }else if(q.get('demo')){
       const r=await fetch('/js/demo-ruimte.json'); QUESTIONS=await r.json(); NAMES=DEMO_NAMES;
       T.textContent='Ruimte Quiz'; S.textContent='Demo · Planeten & vliegende dingen'; E.textContent='🪐';
+      QUIZ_THEME='Ruimte'; QUIZ_TITLE=T.textContent;
     }else{
       if(!window.LP||!LP.configured) throw new Error('Leerpret is nog niet verbonden met de database (js/config.js).');
       const user=await LP.requireAuth(); if(!user) return;
@@ -312,6 +316,7 @@ async function loadData(){
       if(e1||!quiz) throw new Error('Quiz niet gevonden.'); if(e2||!klas) throw new Error('Klas niet gevonden.');
       QUESTIONS=quiz.kind==='circle'?genCircle(quiz.settings||{}):(quiz.questions||[]); NAMES=(klas.pupils||[]).slice();
       T.textContent=quiz.title; E.textContent=quiz.emoji||'🚀';
+      QUIZ_THEME=quiz.theme||''; QUIZ_TITLE=quiz.title||'';
       S.textContent=[klas.schools&&klas.schools.name,'Klas '+klas.name,quiz.theme].filter(Boolean).join(' · ');
       document.getElementById('endTitle').textContent='Fantastisch, '+klas.name+'!';
       if(!NAMES.length) throw new Error('Deze klas heeft nog geen namenlijst. Vul ze in op het dashboard.');
@@ -650,7 +655,24 @@ function celebrate(){
   setTimeout(()=>next.scrollIntoView({behavior:'smooth',block:'end'}),300);
 }
 
+/* Leuke eindslogan op basis van het thema/de titel van de quiz */
+const END_SLOGANS=[
+  {re:/ruimte|planeet|planeten|sterr|heelal|astrona/i, text:'Jullie zijn echte ruimtehelden! 🚀🪐⭐'},
+  {re:/reken|wiskunde|getal|getallen|tafel|cirkelreken|optel|aftrek/i, text:'Jullie zijn echte rekenkampioenen! 🔢🏆✨'},
+  {re:/taal|spelling|letter|woord|lezen/i, text:'Jullie zijn echte taaltovenaars! 🔤📖✨'},
+  {re:/klok|tijd|uur/i, text:'Jullie kunnen de klok al perfect lezen! ⏰🌟'},
+  {re:/dier|dieren/i, text:'Jullie zijn echte dierenexperts! 🐾🦁✨'},
+  {re:/wereld|aardrijkskunde|land|landen/i, text:'Jullie kennen de wereld al goed! 🌍✨'},
+  {re:/vliegtuig|helikopter|lucht/i, text:'Jullie zijn echte luchtvaartpiloten! ✈️🚁⭐'},
+];
+function endSlogan(){
+  const s=[QUIZ_THEME,QUIZ_TITLE].filter(Boolean).join(' ');
+  const hit=END_SLOGANS.find(x=>x.re.test(s));
+  return hit?hit.text:'Jullie hebben fantastisch gespeeld! 🎉🌟';
+}
+
 function finish(){
+  $('endSub').textContent=endSlogan();
   show('end');soundFanfare();confetti(400);
   let n=0;const iv=setInterval(()=>{confetti(120);starBurst(Math.random()*innerWidth,Math.random()*innerHeight*0.6);if(++n>5)clearInterval(iv);},700);
 }
