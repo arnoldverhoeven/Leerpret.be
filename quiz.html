@@ -14,18 +14,28 @@
 </style>
 <style>
   :root{
-    --bg1:#050b2e; --bg2:#1a0f4d; --bg3:#2b1463;
+    --bg1:#050b2e; --bg2:#1a0f4d; --bg3:#2b1463; --rad1:#3a1f7a; --rad2:#0c3b6e;
     --yellow:#ffd93d; --orange:#ff8c42; --pink:#ff5fa2; --green:#3ddc84; --blue:#4cc9f0; --purple:#b388ff;
     --card:rgba(255,255,255,0.10); --card2:rgba(255,255,255,0.18);
   }
+  /* ---------- Thema-achtergronden (per quizthema) ---------- */
+  body.theme-rekenen{--bg1:#052e1e;--bg2:#0f4d33;--bg3:#146342;--rad1:#1f7a5a;--rad2:#0c6e4a}
+  body.theme-taal{--bg1:#2e0b3a;--bg2:#4d1a5e;--bg3:#63207e;--rad1:#8a2a7a;--rad2:#3b0c5e}
+  body.theme-klok{--bg1:#301c05;--bg2:#4d3410;--bg3:#634414;--rad1:#a06a1f;--rad2:#6e4a0c}
+  body.theme-dieren{--bg1:#052e0e;--bg2:#0f4d1e;--bg3:#146322;--rad1:#2f8a3f;--rad2:#0c6e2a}
+  body.theme-wereld{--bg1:#052a2e;--bg2:#0f4247;--bg3:#145a63;--rad1:#1f8a9a;--rad2:#0c4f6e}
+  body.theme-geschiedenis{--bg1:#2a1505;--bg2:#47240f;--bg3:#5e3014;--rad1:#8a5220;--rad2:#6e330c}
+  body.theme-vliegtuig{--bg1:#04182e;--bg2:#0c2f4d;--bg3:#0f3f63;--rad1:#2f6fa8;--rad2:#0c3a6e}
+  body.theme-algemeen{--bg1:#1c0b2e;--bg2:#33104d;--bg3:#421463;--rad1:#7a2f9a;--rad2:#3b0c6e}
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%;overflow:hidden}
   body{
     font-family:'Baloo 2','Nunito','Trebuchet MS','Verdana',sans-serif;
     color:#fff;
-    background:radial-gradient(ellipse at 20% 10%,#3a1f7a 0%,transparent 55%),
-               radial-gradient(ellipse at 80% 90%,#0c3b6e 0%,transparent 55%),
+    background:radial-gradient(ellipse at 20% 10%,var(--rad1) 0%,transparent 55%),
+               radial-gradient(ellipse at 80% 90%,var(--rad2) 0%,transparent 55%),
                linear-gradient(180deg,var(--bg1),var(--bg2) 60%,var(--bg3));
+    transition:background .6s ease;
     user-select:none;-webkit-user-select:none;
   }
 
@@ -37,14 +47,22 @@
     transform:rotate(-30deg);animation:shoot 2.2s linear forwards;opacity:0}
   @keyframes shoot{0%{opacity:0;transform:translate(0,0) rotate(-30deg)}10%{opacity:1}100%{opacity:0;transform:translate(-700px,400px) rotate(-30deg)}}
 
-  /* decoratieve planeten op startscherm */
-  .deco{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:drop-shadow(0 0 30px rgba(255,255,255,.15))}
+  /* decoratieve planeten (thema ruimte) / thema-emoji's (andere thema's) op startscherm */
+  .deco{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:drop-shadow(0 0 30px rgba(255,255,255,.15));
+    display:flex;align-items:center;justify-content:center;line-height:1}
   .deco.p1{width:22vmin;height:22vmin;right:8vw;top:12vh;background:radial-gradient(circle at 35% 35%,#ffb86b,#e0682d 60%,#8e3a16);animation:floaty 9s ease-in-out infinite}
   .deco.p1::after{content:"";position:absolute;left:-35%;top:40%;width:170%;height:22%;border-radius:50%;border:2.2vmin solid rgba(255,220,170,.75);border-top-color:transparent;transform:rotate(-15deg)}
   .deco.p2{width:12vmin;height:12vmin;left:7vw;bottom:14vh;background:radial-gradient(circle at 35% 35%,#7fe3ff,#2b8fd6 60%,#123c73);animation:floaty 11s ease-in-out infinite reverse}
   .deco.p3{width:8vmin;height:8vmin;left:18vw;top:14vh;background:radial-gradient(circle at 35% 35%,#ff9e8a,#d2412b 60%,#6e1a10);animation:floaty 7s ease-in-out infinite}
   .deco.moon{width:6vmin;height:6vmin;right:22vw;bottom:10vh;background:radial-gradient(circle at 35% 35%,#fff,#cfd6e6 60%,#8a93a8);animation:floaty 13s ease-in-out infinite reverse}
   @keyframes floaty{0%,100%{transform:translateY(0)}50%{transform:translateY(-3vh)}}
+  /* niet-ruimte thema's: geen planeetbolletjes, wel een gekleurde gloed met een groot thema-emoji erin */
+  body:not(.theme-ruimte) .deco{background:radial-gradient(circle at 35% 35%,var(--rad1),var(--rad2) 70%)!important}
+  body:not(.theme-ruimte) .deco.p1::after{display:none}
+  body:not(.theme-ruimte) .deco.p1{font-size:10vmin}
+  body:not(.theme-ruimte) .deco.p2{font-size:5.5vmin}
+  body:not(.theme-ruimte) .deco.p3{font-size:4vmin}
+  body:not(.theme-ruimte) .deco.moon{font-size:3vmin}
 
   /* ---------- Schermen ---------- */
   .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:4vh 5vw;z-index:2;text-align:center}
@@ -258,7 +276,7 @@
 
     <div class="timer" id="timer">
       <svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52"/><circle class="arc" id="arc" cx="60" cy="60" r="52"/></svg>
-      <div class="num" id="tnum">10</div>
+      <div class="num" id="tnum">5</div>
     </div>
     <div class="timerhint" id="timerhint">Lees de vraag goed… de antwoorden komen zo!</div>
     <button class="skip" id="skipBtn">Antwoorden nu tonen ⏩</button>
@@ -295,6 +313,30 @@ let QUIZ_THEME = '';
 let QUIZ_TITLE = '';
 const DEMO_NAMES = ["Noor","Liam","Emma","Adam","Lina","Milan","Sara","Finn","Yara","Louis","Nour","Jules","Amira","Arthur","Mila","Ayoub"];
 
+/* Thema-uitstraling: eindslogan + achtergrond + decoratie, op basis van het thema/de titel van de quiz */
+const THEME_PACKS=[
+  {key:'ruimte', re:/ruimte|planeet|planeten|sterr|heelal|astrona/i, slogan:'Jullie zijn echte ruimtehelden! 🚀🪐⭐', deco:['','','','']},
+  {key:'rekenen', re:/reken|wiskunde|getal|getallen|tafel|cirkelreken|optel|aftrek/i, slogan:'Jullie zijn echte rekenkampioenen! 🔢🏆✨', deco:['🔢','➕','➗','✖️']},
+  {key:'taal', re:/taal|spelling|letter|woord|lezen/i, slogan:'Jullie zijn echte taaltovenaars! 🔤📖✨', deco:['🔤','📖','✏️','💬']},
+  {key:'klok', re:/klok|tijd|uur/i, slogan:'Jullie kunnen de klok al perfect lezen! ⏰🌟', deco:['⏰','🕐','⏳','🌙']},
+  {key:'dieren', re:/dier|dieren/i, slogan:'Jullie zijn echte dierenexperts! 🐾🦁✨', deco:['🐶','🦁','🐦','🐟']},
+  {key:'wereld', re:/wereld|aardrijkskunde|land|landen/i, slogan:'Jullie kennen de wereld al goed! 🌍✨', deco:['🌍','🗺️','🏔️','🌋']},
+  {key:'geschiedenis', re:/geschiedenis|ridder|kasteel|romeinen|prehistor/i, slogan:'Jullie zijn echte geschiedeniskenners! 🏰📜✨', deco:['🏰','📜','⚔️','👑']},
+  {key:'vliegtuig', re:/vliegtuig|helikopter|lucht/i, slogan:'Jullie zijn echte luchtvaartpiloten! ✈️🚁⭐', deco:['✈️','🚁','☁️','🛩️']},
+];
+const DEFAULT_PACK={key:'algemeen', slogan:'Jullie hebben fantastisch gespeeld! 🎉🌟', deco:['💡','🎯','🧠','⭐']};
+function findPack(){
+  const s=[QUIZ_THEME,QUIZ_TITLE].filter(Boolean).join(' ');
+  return THEME_PACKS.find(p=>p.re.test(s))||DEFAULT_PACK;
+}
+function applyThemeVisuals(){
+  const pack=findPack();
+  document.body.className=document.body.className.replace(/\btheme-\S+/g,'').trim();
+  document.body.classList.add('theme-'+pack.key);
+  document.querySelectorAll('.deco').forEach((el,i)=>{ el.textContent=pack.deco[i]||''; });
+}
+function endSlogan(){ return findPack().slogan; }
+
 /* Laadt quiz + klas: ?demo=1  of  ?quiz=<id>&class=<id> (Supabase) */
 async function loadData(){
   const q=new URLSearchParams(location.search);
@@ -323,6 +365,7 @@ async function loadData(){
     }
     if(!QUESTIONS.length) throw new Error('Deze quiz heeft nog geen vragen.');
     document.title=T.textContent+' – Leerpret';
+    applyThemeVisuals();
     document.getElementById('startBtn').style.display='';
   }catch(err){ S.textContent='Oeps…'; const x=document.getElementById('startErr'); x.style.display=''; x.textContent=err.message; }
 }
@@ -501,12 +544,13 @@ function showQuestion(){
   // timer
   const timer=$('timer');timer.classList.remove('hide');$('timerhint').style.display='';$('skipBtn').style.display='';
   const arc=$('arc'),circ=2*Math.PI*52;arc.style.strokeDasharray=circ;arc.style.strokeDashoffset=0;arc.style.stroke='var(--blue)';
-  let left=10;$('tnum').textContent=left;
+  const READ_SECS=5;
+  let left=READ_SECS;$('tnum').textContent=left;
   clearInterval(timerId);
   timerId=setInterval(()=>{
     left--;$('tnum').textContent=left;
-    arc.style.strokeDashoffset=circ*(1-left/10);
-    if(left<=3)arc.style.stroke='var(--orange)';
+    arc.style.strokeDashoffset=circ*(1-left/READ_SECS);
+    if(left<=Math.ceil(READ_SECS*0.3))arc.style.stroke='var(--orange)';
     if(left<=0){clearInterval(timerId);revealAnswers();}
   },1000);
 }
@@ -653,22 +697,6 @@ function celebrate(){
   next.addEventListener('click',()=>{qi++;cState=null;nextTurn();});
   bottom.appendChild(next);
   setTimeout(()=>next.scrollIntoView({behavior:'smooth',block:'end'}),300);
-}
-
-/* Leuke eindslogan op basis van het thema/de titel van de quiz */
-const END_SLOGANS=[
-  {re:/ruimte|planeet|planeten|sterr|heelal|astrona/i, text:'Jullie zijn echte ruimtehelden! 🚀🪐⭐'},
-  {re:/reken|wiskunde|getal|getallen|tafel|cirkelreken|optel|aftrek/i, text:'Jullie zijn echte rekenkampioenen! 🔢🏆✨'},
-  {re:/taal|spelling|letter|woord|lezen/i, text:'Jullie zijn echte taaltovenaars! 🔤📖✨'},
-  {re:/klok|tijd|uur/i, text:'Jullie kunnen de klok al perfect lezen! ⏰🌟'},
-  {re:/dier|dieren/i, text:'Jullie zijn echte dierenexperts! 🐾🦁✨'},
-  {re:/wereld|aardrijkskunde|land|landen/i, text:'Jullie kennen de wereld al goed! 🌍✨'},
-  {re:/vliegtuig|helikopter|lucht/i, text:'Jullie zijn echte luchtvaartpiloten! ✈️🚁⭐'},
-];
-function endSlogan(){
-  const s=[QUIZ_THEME,QUIZ_TITLE].filter(Boolean).join(' ');
-  const hit=END_SLOGANS.find(x=>x.re.test(s));
-  return hit?hit.text:'Jullie hebben fantastisch gespeeld! 🎉🌟';
 }
 
 function finish(){

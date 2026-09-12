@@ -29,6 +29,12 @@
   .filters button{font-family:var(--head);font-weight:700;font-size:.95rem;padding:.4em 1em;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--navy);cursor:pointer}
   .filters button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
   .filters .count{margin-left:auto;color:var(--muted);font-weight:700;font-size:.95rem}
+  /* vakgroepen */
+  .vakgroup{margin-bottom:34px}
+  .vakhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .vakhead .vico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex:none}
+  .vakhead h2{margin:0;font-size:1.5rem}
+  .vakhead .n{color:var(--muted);font-weight:700}
   /* quizkaarten – groot, leesbaar op het digibord */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
   .qcard{position:relative;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:10px;border:2px solid transparent;transition:transform .15s,border-color .15s;min-height:210px}
@@ -73,7 +79,7 @@
     <span class="count" id="count"></span>
   </div>
 
-  <div class="grid" id="quizzes"></div>
+  <div id="quizzes"></div>
 </main>
 
 <footer class="site-footer"><div class="wrap"><small>© <span id="year"></span> Leerpret</small><div><a href="/privacy.html">Privacy</a><a href="/">Home</a></div></div></footer>
@@ -98,7 +104,7 @@ async function init(){
   $('school').textContent=profile.schools?profile.schools.name:'';
   const [c,q]=await Promise.all([
     LP.sb.from('classes').select('id,name,grade,pupils').eq('school_id',profile.school_id).order('grade').order('name'),
-    LP.sb.from('quizzes').select('id,title,theme,emoji,grade_min,grade_max,school_id,questions,created_at,kind,settings').eq('published',true).order('created_at',{ascending:false})
+    LP.sb.from('quizzes').select('id,title,theme,vak,emoji,grade_min,grade_max,school_id,questions,created_at,kind,settings').eq('published',true).order('created_at',{ascending:false})
   ]);
   if(c.error||q.error){note('Laden mislukt: '+esc((c.error||q.error).message),'err');return;}
   classes=c.data||[]; quizzes=q.data||[];
@@ -114,6 +120,29 @@ function renderKlassen(){
 $('klasbtns').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;activeClass=b.dataset.id;try{localStorage.setItem('lp_class',activeClass)}catch(x){}renderKlassen();renderQuizzes();});
 $('filters').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;filter=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('active',x===b));renderQuizzes();});
 
+const VAK_ORDER=['Rekenen','Taal','Wereldoriëntatie','Geschiedenis','Algemene kennis','Varia'];
+const VAK_META={
+  'Rekenen':{icon:'🔢',bg:'#e5f0ff',fg:'#1e5fd9'},
+  'Taal':{icon:'🔤',bg:'#ffe9f5',fg:'#c92a7a'},
+  'Wereldoriëntatie':{icon:'🌍',bg:'#e7fbef',fg:'#1a9a5c'},
+  'Geschiedenis':{icon:'🏰',bg:'#fdf0e3',fg:'#b4611a'},
+  'Algemene kennis':{icon:'💡',bg:'#f4edff',fg:'#7231c9'},
+  'Varia':{icon:'🎲',bg:'#f0f2f8',fg:'#556'},
+};
+function vakMeta(v){ return VAK_META[v]||VAK_META['Varia']; }
+
+function cardHtml(q,c,fit,fresh){
+  const n=Array.isArray(q.questions)?q.questions.length:0, isNew=q.created_at&&new Date(q.created_at).getTime()>fresh;
+  const lj=q.grade_min===q.grade_max?`${ord(q.grade_min)} leerjaar`:`${ord(q.grade_min)} – ${ord(q.grade_max)} leerjaar`;
+  return `<article class="qcard ${c&&!fit?'dim':''}">
+    ${isNew?'<span class="badge-new">Nieuw!</span>':''}
+    <div class="head"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h3>${esc(q.title)}</h3><div class="m">${esc(q.theme||'')}${q.theme?' · ':''}${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':n+' vragen'}</div></div></div>
+    <div class="tags"><span class="tag">${lj}</span>${q.school_id?'<span class="tag orange">eigen quiz</span>':''}${fit?'<span class="tag green">past bij deze klas</span>':''}</div>
+    <div class="foot"><span class="m">${c?'Speelt met klas '+esc(c.name):''}</span>
+      <a class="btn btn-primary" ${c?`href="/quiz.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="/klassen.html" title="Maak eerst een klas aan"'}>▶ Start</a></div>
+  </article>`;
+}
+
 function renderQuizzes(){
   const box=$('quizzes'); const c=classes.find(x=>x.id===activeClass);
   $('filters').hidden=!c;
@@ -123,16 +152,17 @@ function renderQuizzes(){
   $('count').textContent=`${list.length} ${list.length===1?'quiz':'quizzen'}`;
   if(!list.length){box.innerHTML='<div class="empty">Geen quizzen die precies bij dit leerjaar passen. Kies "Alle quizzen".</div>';return;}
   const fresh=Date.now()-14*864e5;
-  box.innerHTML=list.map(q=>{
-    const n=Array.isArray(q.questions)?q.questions.length:0, fit=fits(q), isNew=q.created_at&&new Date(q.created_at).getTime()>fresh;
-    const lj=q.grade_min===q.grade_max?`${ord(q.grade_min)} leerjaar`:`${ord(q.grade_min)} – ${ord(q.grade_max)} leerjaar`;
-    return `<article class="qcard ${c&&!fit?'dim':''}">
-      ${isNew?'<span class="badge-new">Nieuw!</span>':''}
-      <div class="head"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h3>${esc(q.title)}</h3><div class="m">${esc(q.theme||'')}${q.theme?' · ':''}${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':n+' vragen'}</div></div></div>
-      <div class="tags"><span class="tag">${lj}</span>${q.school_id?'<span class="tag orange">eigen quiz</span>':''}${fit?'<span class="tag green">past bij deze klas</span>':''}</div>
-      <div class="foot"><span class="m">${c?'Speelt met klas '+esc(c.name):''}</span>
-        <a class="btn btn-primary" ${c?`href="/quiz.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="/klassen.html" title="Maak eerst een klas aan"'}>▶ Start</a></div>
-    </article>`;}).join('');
+  // groeperen per vak, in een vaste volgorde; onbekende/lege vakken vallen onder Varia
+  const groups=new Map();
+  list.forEach(q=>{ const v=q.vak&&VAK_ORDER.includes(q.vak)?q.vak:(q.vak||'Varia'); if(!groups.has(v))groups.set(v,[]); groups.get(v).push(q); });
+  const order=[...VAK_ORDER,...[...groups.keys()].filter(v=>!VAK_ORDER.includes(v))];
+  box.innerHTML=order.filter(v=>groups.has(v)).map(v=>{
+    const items=groups.get(v), meta=vakMeta(v);
+    return `<div class="vakgroup">
+      <div class="vakhead"><div class="vico" style="background:${meta.bg};color:${meta.fg}">${meta.icon}</div><h2>${esc(v)}</h2><span class="n">${items.length} ${items.length===1?'quiz':'quizzen'}</span></div>
+      <div class="grid">${items.map(q=>cardHtml(q,c,fits(q),fresh)).join('')}</div>
+    </div>`;
+  }).join('');
 }
 init();
 </script>
