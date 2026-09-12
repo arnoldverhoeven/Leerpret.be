@@ -24,7 +24,11 @@
     return data;
   }
 
+  // 'voornaam.achternaam' -> 'voornaam.achternaam@login.leerpret.be'; een echt e-mailadres blijft ongewijzigd
+  function toEmail(u){ u=String(u||'').trim().toLowerCase(); return u.includes('@')?u:u+'@'+(C.LOGIN_DOMAIN||'login.leerpret.be'); }
+  function toUsername(e){ e=String(e||''); const d='@'+(C.LOGIN_DOMAIN||'login.leerpret.be'); return e.endsWith(d)?e.slice(0,-d.length):e; }
+
   function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
-  window.LP = { sb, configured, currentUser, requireAuth, myProfile, esc };
+  window.LP = { sb, configured, currentUser, requireAuth, myProfile, esc, toEmail, toUsername };
 })();
