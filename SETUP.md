@@ -49,7 +49,7 @@ Voor e-mail op `info@leerpret.be`: dat blijft via Easyhost (MX-records niet aanr
 
 - `https://leerpret.be` → homepage, favicon in het tabblad.
 - `https://leerpret.be/quiz?demo=1` → demo zonder login (met neutrale namen, niet de echte klas).
-- `https://leerpret.be/login` → inloggen als de juf (gebruikersnaam `voornaam.achternaam`) → dashboard → klas 3A → **Start** bij Ruimte Quiz.
+- `https://leerpret.be/login` → inloggen als de juf (gebruikersnaam `voornaam.achternaam`) → quiz-overzicht → klas 3A kiezen → **Start** bij Ruimte Quiz. Namenlijsten aanpassen: knop *Mijn klassen*.
 - Deelvoorvertoning: plak `https://leerpret.be` in https://www.opengraph.xyz of in een WhatsApp-chat. Facebook kan een oude versie cachen: https://developers.facebook.com/tools/debug/ → *Scrape again*.
 
 ## 5. Beheerdersscherm: quizzen, scholen en leerkrachten
@@ -79,7 +79,8 @@ Het interne vraagformaat (voor wie JSON wil aanleveren):
 ```
 index.html          homepage (thema's, leerjaarfilter, OG-tags)
 login.html          inloggen (gebruikersnaam voornaam.achternaam + wachtwoord)
-dashboard.html      klassen, namenlijsten, quizzen starten
+dashboard.html      startscherm na login: alle quizzen (nieuwste eerst), klas kiezen, starten
+klassen.html        klassen en namenlijsten beheren
 admin.html          beheer: quizzen (import uit .docx/tekst/JSON), scholen, leerkrachten
 quiz.html           de quiz zelf (?demo=1 of ?quiz=<id>&class=<id>)
 privacy.html        privacyverklaring (eerste versie)

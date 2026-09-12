@@ -34,6 +34,10 @@
   to = "/quiz.html"
   status = 200
 [[redirects]]
+  from = "/klassen"
+  to = "/klassen.html"
+  status = 200
+[[redirects]]
   from = "/admin"
   to = "/admin.html"
   status = 200
