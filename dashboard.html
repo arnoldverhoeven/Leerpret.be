@@ -98,7 +98,7 @@ async function init(){
   $('school').textContent=profile.schools?profile.schools.name:'';
   const [c,q]=await Promise.all([
     LP.sb.from('classes').select('id,name,grade,pupils').eq('school_id',profile.school_id).order('grade').order('name'),
-    LP.sb.from('quizzes').select('id,title,theme,emoji,grade_min,grade_max,school_id,questions,created_at').eq('published',true).order('created_at',{ascending:false})
+    LP.sb.from('quizzes').select('id,title,theme,emoji,grade_min,grade_max,school_id,questions,created_at,kind,settings').eq('published',true).order('created_at',{ascending:false})
   ]);
   if(c.error||q.error){note('Laden mislukt: '+esc((c.error||q.error).message),'err');return;}
   classes=c.data||[]; quizzes=q.data||[];
@@ -128,7 +128,7 @@ function renderQuizzes(){
     const lj=q.grade_min===q.grade_max?`${ord(q.grade_min)} leerjaar`:`${ord(q.grade_min)} – ${ord(q.grade_max)} leerjaar`;
     return `<article class="qcard ${c&&!fit?'dim':''}">
       ${isNew?'<span class="badge-new">Nieuw!</span>':''}
-      <div class="head"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h3>${esc(q.title)}</h3><div class="m">${esc(q.theme||'')}${q.theme?' · ':''}${n} vragen</div></div></div>
+      <div class="head"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h3>${esc(q.title)}</h3><div class="m">${esc(q.theme||'')}${q.theme?' · ':''}${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':n+' vragen'}</div></div></div>
       <div class="tags"><span class="tag">${lj}</span>${q.school_id?'<span class="tag orange">eigen quiz</span>':''}${fit?'<span class="tag green">past bij deze klas</span>':''}</div>
       <div class="foot"><span class="m">${c?'Speelt met klas '+esc(c.name):''}</span>
         <a class="btn btn-primary" ${c?`href="/quiz.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="/klassen.html" title="Maak eerst een klas aan"'}>▶ Start</a></div>

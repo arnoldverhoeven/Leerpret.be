@@ -171,6 +171,36 @@
   .pl.venus{background:radial-gradient(circle at 35% 35%,#fff3cf,#e6b96a 60%,#9a6b2a)}
   .pl.mercury{background:radial-gradient(circle at 35% 35%,#e6e6e6,#9a9a9a 60%,#4a4a4a)}
 
+
+  /* ---------- Cirkelrekenen ---------- */
+  #circle{display:none;width:100%;flex-direction:column;align-items:center;margin-top:2vh}
+  #circle.on{display:flex}
+  .cq{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:1.6vmin;font-size:clamp(2.2rem,6.5vmin,5.5rem);font-weight:800;text-shadow:0 4px 0 rgba(0,0,0,.3)}
+  .cq .sum{color:#fff;margin-right:1vmin}
+  .cq .sum b{color:var(--yellow)}
+  .cbox{width:clamp(90px,15vmin,170px);height:clamp(90px,15vmin,170px);border-radius:50%;border:.7vmin solid rgba(255,255,255,.45);background:rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;color:#fff;transition:all .15s;font-size:clamp(2rem,6vmin,5rem);position:relative}
+  .cbox.t{border-color:#8fe3a7}.cbox.u{border-color:#ffe066}.cbox.r{border-radius:2.5vmin;border-color:rgba(255,255,255,.55);width:clamp(110px,18vmin,200px)}
+  .cbox.active{background:rgba(255,255,255,.22);box-shadow:0 0 0 .8vmin rgba(76,201,240,.55);transform:scale(1.06)}
+  .cbox.wrong{border-color:var(--pink);background:rgba(255,95,162,.25);animation:shake .5s cubic-bezier(.36,.07,.19,.97) both}
+  .cbox.good{border-color:var(--green);background:rgba(61,220,132,.25)}
+  .cbox.empty::after{content:"?";opacity:.35}
+  .cbox.active.empty::after{content:"";}
+  .cbox.active::before{content:"";position:absolute;bottom:18%;width:.6em;height:.12em;background:#fff;animation:blink 1s step-end infinite}
+  .cbox:not(.active)::before{display:none}
+  @keyframes blink{50%{opacity:0}}
+  .opbtn{width:clamp(60px,9vmin,100px);height:clamp(60px,9vmin,100px);border-radius:50%;border:.5vmin solid var(--blue);background:rgba(76,201,240,.15);color:#fff;font-size:clamp(1.8rem,5vmin,4rem);font-weight:800;cursor:pointer;font-family:inherit}
+  .opbtn.fixed{border-color:transparent;background:none;cursor:default}
+  .opbtn.wrong{border-color:var(--pink);animation:shake .5s both}
+  .pad{display:grid;grid-template-columns:repeat(6,1fr);gap:1.2vmin;margin-top:3vh;width:min(90vw,900px)}
+  .pad button{font-family:inherit;font-weight:800;font-size:clamp(1.6rem,4.5vmin,3.4rem);padding:1.2vh 0;border-radius:2vmin;border:3px solid rgba(255,255,255,.25);background:var(--card2);color:#fff;cursor:pointer;transition:transform .08s,background .15s}
+  .pad button:hover{background:rgba(255,255,255,.3)}
+  .pad button:active{transform:scale(.94)}
+  .pad button.wide{grid-column:span 2}
+  .pad button.check{background:linear-gradient(180deg,#7dffb6,#3ddc84);color:#04301a;border-color:transparent;box-shadow:0 6px 0 #1f8c50}
+  .pad button.del{background:rgba(255,95,162,.25)}
+  .chint{margin-top:2vh;font-size:clamp(1.1rem,3vmin,2.2rem);color:var(--yellow);font-weight:700;min-height:1.5em;text-align:center;max-width:90vw}
+  .chint.sol{color:#fff;background:rgba(0,0,0,.3);padding:1.2vmin 2vmin;border-radius:1.5vmin}
+  @media (max-width:800px){.pad{grid-template-columns:repeat(4,1fr)}}
   .bottom{margin-top:auto;padding-top:2vh;padding-bottom:1vh;display:flex;gap:2vw;justify-content:center;align-items:center;min-height:12vh}
   .feedback{font-size:clamp(1.6rem,5vmin,4rem);font-weight:800;color:var(--yellow);text-shadow:0 4px 0 rgba(0,0,0,.35);animation:popIn .5s cubic-bezier(.2,1.4,.4,1) both}
 
@@ -234,6 +264,11 @@
     <button class="skip" id="skipBtn">Antwoorden nu tonen ⏩</button>
 
     <div class="answers" id="answers"></div>
+    <div id="circle">
+      <div class="cq" id="cq"></div>
+      <div class="chint" id="chint"></div>
+      <div class="pad" id="pad"></div>
+    </div>
 
     <div class="bottom" id="bottom"></div>
   </div>
@@ -263,17 +298,19 @@ async function loadData(){
   const q=new URLSearchParams(location.search);
   const T=document.getElementById('startTitle'),S=document.getElementById('startSub'),E=document.getElementById('startEmoji');
   try{
-    if(q.get('demo')){
+    if(q.get('demo')==='cirkel'){
+      QUESTIONS=genCircle({op:q.get('op')||'mix',count:10}); NAMES=DEMO_NAMES; T.textContent='Cirkelrekenen'; S.textContent='Demo · Optellen en aftrekken tot 100'; E.textContent='🔢';
+    }else if(q.get('demo')){
       const r=await fetch('/js/demo-ruimte.json'); QUESTIONS=await r.json(); NAMES=DEMO_NAMES;
       T.textContent='Ruimte Quiz'; S.textContent='Demo · Planeten & vliegende dingen'; E.textContent='🪐';
     }else{
       if(!window.LP||!LP.configured) throw new Error('Leerpret is nog niet verbonden met de database (js/config.js).');
       const user=await LP.requireAuth(); if(!user) return;
       const [{data:quiz,error:e1},{data:klas,error:e2}]=await Promise.all([
-        LP.sb.from('quizzes').select('title,theme,emoji,questions').eq('id',q.get('quiz')).single(),
+        LP.sb.from('quizzes').select('title,theme,emoji,questions,kind,settings').eq('id',q.get('quiz')).single(),
         LP.sb.from('classes').select('name,pupils,schools(name)').eq('id',q.get('class')).single()]);
       if(e1||!quiz) throw new Error('Quiz niet gevonden.'); if(e2||!klas) throw new Error('Klas niet gevonden.');
-      QUESTIONS=quiz.questions||[]; NAMES=(klas.pupils||[]).slice();
+      QUESTIONS=quiz.kind==='circle'?genCircle(quiz.settings||{}):(quiz.questions||[]); NAMES=(klas.pupils||[]).slice();
       T.textContent=quiz.title; E.textContent=quiz.emoji||'🚀';
       S.textContent=[klas.schools&&klas.schools.name,'Klas '+klas.name,quiz.theme].filter(Boolean).join(' · ');
       document.getElementById('endTitle').textContent='Fantastisch, '+klas.name+'!';
@@ -285,6 +322,38 @@ async function loadData(){
   }catch(err){ S.textContent='Oeps…'; const x=document.getElementById('startErr'); x.style.display=''; x.textContent=err.message; }
 }
 loadData();
+
+
+/* ---------- Cirkelrekenen: oefeningen genereren ----------
+   settings: { op:'+'|'-'|'mix', count:10, kinds:['TE+E','TE+TE'], bridge:'mix'|'yes'|'no' } */
+function genCircle(st){
+  const count=Math.min(30,Math.max(1,+st.count||10)), kinds=(st.kinds&&st.kinds.length)?st.kinds:['TE+E','TE+TE'], bridge=st.bridge||'mix';
+  const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1)); const out=[]; const seen=new Set(); let guard=0;
+  while(out.length<count&&guard++<2000){
+    const op=st.op==='mix'||!st.op?(Math.random()<0.5?'+':'-'):st.op;
+    const kind=kinds[Math.floor(Math.random()*kinds.length)];
+    let a,b;
+    if(op==='+'){
+      if(kind==='TE+E'){a=ri(11,89);b=ri(2,9);if(Math.random()<0.3)[a,b]=[b,a];}else{a=ri(11,79);b=ri(11,99-a);}
+      if(a+b>100)continue;
+      const br=(a%10+b%10)>=10; if(bridge==='yes'&&!br)continue; if(bridge==='no'&&br)continue;
+    }else{
+      if(kind==='TE+E'||kind==='TE-E'){a=ri(12,99);b=ri(2,9);}else{a=ri(21,99);b=ri(11,a-1);}
+      if(a-b<1)continue;
+      const br=(a%10)<(b%10); if(bridge==='yes'&&!br)continue; if(bridge==='no'&&br)continue;
+      if(Math.floor(a/10)<Math.floor(b/10))continue;
+    }
+    const key=a+op+b; if(seen.has(key))continue; seen.add(key);
+    out.push({kind:'circle',a,b,op});
+  }
+  return out;
+}
+// juiste oplossing volgens de cirkelmethode
+function circleSolution(q){
+  const at=Math.floor(q.a/10)*10, bt=Math.floor(q.b/10)*10, au=q.a%10, bu=q.b%10;
+  if(q.op==='+') return {tens:at+bt, mid:'+', units:au+bu, result:q.a+q.b, fixed:true};
+  const mid=au>=bu?'+':'-'; return {tens:at-bt, mid, units:Math.abs(au-bu), result:q.a-q.b, fixed:false, tie:au===bu};
+}
 
 /* =========================================================
    STERREN
@@ -418,6 +487,8 @@ function showQuestion(){
   $('qcount').textContent=qi+1;$('whoName').textContent=currentName;
   $('progbar').style.width=((qi)/QUESTIONS.length*100)+'%';
   $('qnum').textContent=(qi+1)+'.';
+  $('circle').classList.remove('on');
+  if(q.kind==='circle'){ showCircle(q); return; }
   $('qtext').textContent=q.q;
   $('multihint').textContent=q.multi?`Let op: kies ${q.multi} antwoorden en klik dan op "Controleer!"`:'';
   $('answers').innerHTML='';$('bottom').innerHTML='';
@@ -434,6 +505,69 @@ function showQuestion(){
     if(left<=0){clearInterval(timerId);revealAnswers();}
   },1000);
 }
+
+/* =========================================================
+   CIRKELREKENEN – scherm
+   ========================================================= */
+let cState=null;
+function showCircle(q){
+  clearInterval(timerId);
+  $('qtext').textContent='Reken uit met de cirkels';
+  $('multihint').textContent=q.op==='+'?'Eerst de tientallen, dan de eenheden.':'Tientallen min tientallen. Eenheden: gaat het niet? Draai om en schrijf min.';
+  $('timer').classList.add('hide');$('timerhint').style.display='none';$('skipBtn').style.display='none';
+  $('answers').innerHTML='';$('bottom').innerHTML='';
+  const sol=circleSolution(q);
+  cState={q,sol,vals:{t:'',u:'',r:''},mid:sol.fixed?'+':'',active:'t',tries:0};
+  $('circle').classList.add('on');
+  renderCircle(); $('chint').className='chint'; $('chint').textContent='';
+  $('pad').innerHTML=[1,2,3,4,5,6,7,8,9,0].map(n=>`<button data-k="${n}">${n}</button>`).join('')
+    +`<button class="del" data-k="del">⌫</button><button data-k="next">➡️</button>`
+    +(sol.fixed?'':`<button class="wide" data-k="plus">＋ plus</button><button class="wide" data-k="min">－ min</button>`)
+    +`<button class="check ${sol.fixed?'wide':''}" data-k="check" style="grid-column:span ${sol.fixed?4:2}">✅ Controleer</button>`;
+}
+function renderCircle(){
+  const {q,vals,mid,active,sol}=cState;
+  const box=(k,cls)=>`<div class="cbox ${cls} ${active===k?'active':''} ${vals[k]===''?'empty':''}" data-k="${k}">${vals[k]}</div>`;
+  $('cq').innerHTML=`<span class="sum"><b>${q.a}</b> ${q.op} <b>${q.b}</b> =</span>${box('t','t')}<button class="opbtn ${sol.fixed?'fixed':''}" id="opbtn">${mid||'?'}</button>${box('u','u')}<span class="sum">=</span>${box('r','r')}`;
+}
+$('cq').addEventListener('click',e=>{
+  if(!cState||solved)return;
+  const b=e.target.closest('.cbox'); if(b){cState.active=b.dataset.k;renderCircle();return;}
+  if(e.target.id==='opbtn'&&!cState.sol.fixed){cState.mid=cState.mid==='+'?'-':'+';renderCircle();}
+});
+$('pad').addEventListener('click',e=>{
+  const b=e.target.closest('button'); if(!b||!cState||solved)return; const k=b.dataset.k, st=cState;
+  const order3=['t','u','r'];
+  if(k==='del'){st.vals[st.active]=st.vals[st.active].slice(0,-1);}
+  else if(k==='next'){st.active=order3[(order3.indexOf(st.active)+1)%3];}
+  else if(k==='plus'){st.mid='+';} else if(k==='min'){st.mid='-';}
+  else if(k==='check'){checkCircle();return;}
+  else{ if(st.vals[st.active].length<3){st.vals[st.active]+=k; if(st.vals[st.active].length===2&&st.active!=='r'){st.active=order3[order3.indexOf(st.active)+1];}} }
+  renderCircle();
+});
+function checkCircle(){
+  const st=cState,{sol,vals}=st; st.tries++;
+  const okT=+vals.t===sol.tens&&vals.t!=='', okU=+vals.u===sol.units&&vals.u!=='', okR=+vals.r===sol.result&&vals.r!=='';
+  const okM=sol.fixed||(st.mid&&(st.mid===sol.mid||(sol.tie&&st.mid)));
+  const first=!okT?'t':!okM?'m':!okU?'u':!okR?'r':null;
+  renderCircle();
+  document.querySelectorAll('.cbox').forEach(b=>{const k=b.dataset.k;b.classList.toggle('good',{t:okT,u:okU,r:okR}[k]);b.classList.toggle('wrong',!{t:okT,u:okU,r:okR}[k]);});
+  if(!okM)$('opbtn').classList.add('wrong');
+  const hint=$('chint'); hint.className='chint';
+  if(!first){ solved=true; celebrate(); hint.textContent=`${st.q.a} ${st.q.op} ${st.q.b} = ${sol.tens} ${sol.mid} ${sol.units} = ${sol.result} 🎉`; return; }
+  const q=st.q, at=Math.floor(q.a/10)*10, bt=Math.floor(q.b/10)*10, au=q.a%10, bu=q.b%10;
+  const msgs={
+    t:q.op==='+'?`Kijk naar de tientallen: ${at} + ${bt} = ?`:`Kijk naar de tientallen: ${at} − ${bt} = ?`,
+    m:au>=bu?`${au} − ${bu} gaat gewoon. Je hebt er ${au-bu} over, dus schrijf plus.`:`${au} − ${bu} gaat niet! Doe ${bu} − ${au}. Je komt er ${bu-au} te kort, dus schrijf min.`,
+    u:q.op==='+'?`Kijk naar de eenheden: ${au} + ${bu} = ?`:(au>=bu?`Eenheden: ${au} − ${bu} = ?`:`Eenheden: draai om, ${bu} − ${au} = ?`),
+    r:`Bijna! Reken nu de twee cirkels samen: ${sol.tens} ${sol.mid} ${sol.units} = ?`
+  };
+  if(st.tries>=3){ hint.className='chint sol'; hint.textContent=`Oplossing: ${q.a} ${q.op} ${q.b} = ${sol.tens} ${sol.mid} ${sol.units} = ${sol.result}. Typ het over en klik op Controleer.`; }
+  else hint.textContent=msgs[first];
+  st.active=first==='m'?'u':first; cState.active=st.active;
+  setTimeout(()=>{document.querySelectorAll('.cbox.wrong').forEach(b=>b.classList.remove('wrong'));},600);
+}
+
 $('skipBtn').addEventListener('click',()=>{clearInterval(timerId);revealAnswers();});
 
 function revealAnswers(){
@@ -505,12 +639,13 @@ function celebrate(){
   const c=document.querySelector('.ans.correct');
   if(c){const r=c.getBoundingClientRect();starBurst(r.left+r.width/2,r.top+r.height/2);}
   $('progbar').style.width=((qi+1)/QUESTIONS.length*100)+'%';
+  if(cState){document.querySelectorAll('#pad button').forEach(b=>b.disabled=true);}
   const praise=['Knap gedaan','Super','Fantastisch','Wauw','Geweldig','Topper','Yes'][Math.floor(Math.random()*7)];
   const bottom=$('bottom');bottom.innerHTML='';
   const fb=document.createElement('div');fb.className='feedback';fb.textContent=`🎉 ${praise}, ${currentName}!`;bottom.appendChild(fb);
   const next=document.createElement('button');next.className='bigbtn secondary';
   next.textContent=(qi+1<QUESTIONS.length)?'Volgende vraag ➡️':'Bekijk het resultaat 🏆';
-  next.addEventListener('click',()=>{qi++;nextTurn();});
+  next.addEventListener('click',()=>{qi++;cState=null;nextTurn();});
   bottom.appendChild(next);
   setTimeout(()=>next.scrollIntoView({behavior:'smooth',block:'end'}),300);
 }

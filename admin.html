@@ -95,6 +95,18 @@
           <div class="field"><label>Van leerjaar</label><select id="f_gmin"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
           <div class="field"><label>Tot leerjaar</label><select id="f_gmax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select></div>
           <div class="field"><label>Zichtbaar voor</label><select id="f_school"><option value="">Alle scholen</option></select></div>
+          <div class="field"><label>Soort</label><select id="f_kind"><option value="mc">Meerkeuzequiz</option><option value="circle">Cirkelrekenen</option></select></div>
+        </div>
+
+        <div class="imp" id="circleSettings" hidden style="border-color:var(--green);background:#f0fff6">
+          <h3>🔢 Cirkelrekenen – instellingen</h3>
+          <p class="muted" style="margin:0 0 10px">De oefeningen worden elke keer opnieuw willekeurig gemaakt. Het kind vult de tientallen-cirkel, de eenheden-cirkel en het resultaat in op het bord; bij aftrekken kiest het ook plus of min.</p>
+          <div class="meta" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+            <div class="field"><label>Bewerking</label><select id="c_op"><option value="+">Optellen</option><option value="-">Aftrekken</option><option value="mix">Gemengd</option></select></div>
+            <div class="field"><label>Soorten</label><select id="c_kinds"><option value="TE+E">Alleen TE ± E (bv. 33 + 5)</option><option value="TE+TE">Alleen TE ± TE (bv. 29 + 35)</option><option value="both" selected>Beide</option></select></div>
+            <div class="field"><label>Brug over het tiental</label><select id="c_bridge"><option value="mix" selected>Gemengd</option><option value="no">Zonder brug</option><option value="yes">Alleen met brug</option></select></div>
+            <div class="field"><label>Aantal oefeningen</label><input id="c_count" type="number" min="1" max="30" value="10"></div>
+          </div>
         </div>
 
         <div class="imp">
@@ -174,7 +186,7 @@ async function loadUsers(){const {data,error}=await LP.sb.from('profiles').selec
 
 /* ---------- lijst ---------- */
 function renderQuizList(){
-  $('quizList').innerHTML=quizzes.length?quizzes.map(q=>`<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'}</h4><div class="m">${esc(q.theme||'')} · ${(q.questions||[]).length} vragen · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`).join(''):'<div class="muted">Nog geen quizzen.</div>';
+  $('quizList').innerHTML=quizzes.length?quizzes.map(q=>`<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'}</h4><div class="m">${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`).join(''):'<div class="muted">Nog geen quizzen.</div>';
 }
 $('quizList').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));});
 $('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:null,published:true,questions:[]}));
@@ -185,9 +197,19 @@ function openQuiz(q){
   $('editor').hidden=false; $('edTitle').textContent=cur.id?'Quiz bewerken':'Nieuwe quiz';
   $('f_title').value=cur.title||'';$('f_theme').value=cur.theme||'';$('f_emoji').value=cur.emoji||'🎯';
   $('f_gmin').value=cur.grade_min||1;$('f_gmax').value=cur.grade_max||6;$('f_school').value=cur.school_id||'';$('f_pub').checked=cur.published!==false;
+  $('f_kind').value=cur.kind||'mc'; const cs=cur.settings||{};
+  $('c_op').value=cs.op||'+'; $('c_kinds').value=(cs.kinds&&cs.kinds.length===1)?cs.kinds[0]:'both'; $('c_bridge').value=cs.bridge||'mix'; $('c_count').value=cs.count||10;
+  applyKind();
   $('delQuiz').hidden=!cur.id; $('preview').hidden=!cur.id; $('warn').hidden=true;
   renderQuestions(); renderQuizList(); $('editor').scrollIntoView({behavior:'smooth',block:'start'});
 }
+function applyKind(){
+  const circle=$('f_kind').value==='circle';
+  $('circleSettings').hidden=!circle;
+  document.querySelector('#editor .imp:not(#circleSettings)').hidden=circle;
+  $('qs').hidden=circle; $('qs').previousElementSibling.hidden=circle;
+}
+$('f_kind').addEventListener('change',applyKind);
 function renderQuestions(){
   $('qcount').textContent=cur.questions.length;
   $('qs').innerHTML=cur.questions.map((q,i)=>`<div class="qcard" data-i="${i}">
@@ -245,9 +267,11 @@ $('parsePaste').addEventListener('click',()=>{const t=$('paste').value.trim();if
 /* ---------- bewaren ---------- */
 $('save').addEventListener('click',async()=>{
   const title=$('f_title').value.trim(); if(!title){note('Geef de quiz een titel.','err');$('f_title').focus();return;}
-  const w=QuizImport.validate({questions:cur.questions}); const blocking=w.filter(x=>!/geen uitleg/.test(x));
+  const circle=$('f_kind').value==='circle';
+  const w=circle?[]:QuizImport.validate({questions:cur.questions}); const blocking=w.filter(x=>!/geen uitleg/.test(x));
   if(blocking.length){showWarnings(w);if(!confirm('Er zijn nog problemen met de vragen (zie geel kader). Toch bewaren?'))return;}
   const rec={title,theme:$('f_theme').value.trim()||null,emoji:$('f_emoji').value.trim()||'🎯',grade_min:+$('f_gmin').value,grade_max:+$('f_gmax').value,school_id:$('f_school').value||null,published:$('f_pub').checked,
+    kind:circle?'circle':'mc',settings:circle?{op:$('c_op').value,kinds:$('c_kinds').value==='both'?['TE+E','TE+TE']:[$('c_kinds').value],bridge:$('c_bridge').value,count:+$('c_count').value||10}:{},
     questions:cur.questions.map(q=>{const o={q:q.q.trim(),a:q.a.map(a=>{const x={t:a.t.trim(),ok:!!a.ok,e:(a.e||'').trim()};if(a.planet)x.planet=a.planet;return x;})};if(q.multi)o.multi=q.multi;return o;})};
   if(rec.grade_min>rec.grade_max)[rec.grade_min,rec.grade_max]=[rec.grade_max,rec.grade_min];
   $('save').disabled=true;

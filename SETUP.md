@@ -52,7 +52,13 @@ Voor e-mail op `info@leerpret.be`: dat blijft via Easyhost (MX-records niet aanr
 - `https://leerpret.be/login` → inloggen als de juf (gebruikersnaam `voornaam.achternaam`) → quiz-overzicht → klas 3A kiezen → **Start** bij Ruimte Quiz. Namenlijsten aanpassen: knop *Mijn klassen*.
 - Deelvoorvertoning: plak `https://leerpret.be` in https://www.opengraph.xyz of in een WhatsApp-chat. Facebook kan een oude versie cachen: https://developers.facebook.com/tools/debug/ → *Scrape again*.
 
-## 5. Beheerdersscherm: quizzen, scholen en leerkrachten
+## 5. Extra quizzen voor het 3de leerjaar
+
+`supabase/seed-3de-leerjaar.sql` voegt in één keer toe (uitvoeren na het vernieuwde `schema.sql`): drie **Cirkelrekenen**-oefeningen (optellen, aftrekken, gemengd – de sommen worden elke keer opnieuw willekeurig gemaakt), en vier meerkeuzequizzen: *Getallen tot 100*, *Tafels van 2, 5 en 10*, *Taal: letters en woorden* en *Klok kijken*. De brontekst van die vier staat in `supabase/quizzen/*.txt` (in het importformaat, dus ook bruikbaar als voorbeeld).
+
+**Cirkelrekenen** werkt anders dan een quiz: het kind ziet bv. `36 − 16 = ( ) ± ( ) = ( )`, tikt de cirkels aan en typt op het cijferblok op het bord de tientallen, plus of min, de eenheden en het resultaat, precies zoals op het werkblad. Bij een fout schudt de foute cirkel en krijgt het kind een hint ("7 − 9 gaat niet! Doe 9 − 7…"); na drie pogingen verschijnt de oplossing. In het beheerscherm kies je bij *Soort* "Cirkelrekenen" en stel je bewerking, soorten (TE ± E, TE ± TE), brug over het tiental en het aantal in. Demo zonder login: `leerpret.be/quiz?demo=cirkel` (voeg `&op=-` toe voor aftrekken).
+
+## 6. Beheerdersscherm: quizzen, scholen en leerkrachten
 
 Log in als beheerder en ga naar **leerpret.be/admin** (ook via de knop *Beheer* op het dashboard).
 
@@ -91,7 +97,7 @@ js/quiz-import.js   .docx/tekst/JSON → quizformaat (zonder externe bibliotheke
 js/demo-ruimte.json de 20 ruimtevragen (ook in seed.sql)
 assets/sjabloon-quiz.docx / .txt   invulsjablonen voor nieuwe quizzen
 assets/             logo's (3 concepten + witte varianten), icon, favicons, og-image.png, fonts
-supabase/           schema.sql (tabellen + toegangsregels), seed.sql (startgegevens)
+supabase/           schema.sql (tabellen + toegangsregels), seed.sql (startgegevens), seed-3de-leerjaar.sql (extra quizzen), quizzen/*.txt (bronnen)
 netlify.toml        headers + nette URL's
 site.webmanifest    icoon op beginscherm van tablet/telefoon
 ```
