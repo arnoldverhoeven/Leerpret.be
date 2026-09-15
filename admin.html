@@ -18,15 +18,17 @@
   .tabs button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
   .pane{display:none}.pane.active{display:block}
   .grid{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
+  .grid,.grid>*{min-width:0}
   @media (max-width:1000px){.grid{grid-template-columns:1fr}}
   .list .row{display:flex;gap:12px;align-items:center;padding:12px 14px;border:2px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer;background:#fff}
   .list .row:hover{border-color:var(--sky)}
   .list .row.active{border-color:var(--orange);box-shadow:0 0 0 3px #ffe9d9}
   .list .ico{width:40px;height:40px;border-radius:10px;background:#eef1ff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:none}
   .list h4{margin:0;font-size:1.05rem}.list .m{color:var(--muted);font-size:.85rem;font-weight:700}
-  .meta{display:grid;grid-template-columns:2fr 1fr 1fr 80px 1fr 1fr 1fr 1fr;gap:12px}
+  .meta{display:grid;grid-template-columns:2fr 1fr 1fr 80px 1fr 1fr 1fr 1fr;gap:12px;min-width:0}
   @media (max-width:900px){.meta{grid-template-columns:1fr 1fr}}
-  .meta .field{margin:0}
+  .meta .field{margin:0;min-width:0}
+  .meta .field input,.meta .field select{min-width:0}
   .imp{border:2px dashed var(--sky);background:#f0fbff;border-radius:16px;padding:18px;margin:18px 0}
   .imp h3{margin:0 0 6px;font-size:1.2rem}
   .imp .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -38,11 +40,12 @@
   /* vragen-editor */
   .qs{margin-top:8px}
   .qcard{border:2px solid var(--line);border-radius:16px;padding:16px;margin-bottom:14px;background:#fff}
-  .qcard .qh{display:flex;gap:10px;align-items:flex-start}
+  .qcard .qh{display:flex;gap:10px;align-items:flex-start;min-width:0}
   .qcard .qn{font-family:var(--head);font-weight:800;color:var(--orange);font-size:1.3rem;min-width:36px;padding-top:8px}
-  .qcard .qh input{flex:1;font-family:var(--head);font-weight:800;font-size:1.1rem}
+  .qcard .qh input{flex:1;min-width:0;font-family:var(--head);font-weight:800;font-size:1.1rem}
   .qcard .tools{display:flex;gap:6px;flex-wrap:wrap}
-  .ans{display:grid;grid-template-columns:36px 1fr 2fr 130px 32px;gap:8px;align-items:center;margin-top:8px}
+  .ans{display:grid;grid-template-columns:36px 1fr 2fr 130px 32px;gap:8px;align-items:center;margin-top:8px;min-width:0}
+  .ans input,.ans select{min-width:0}
   @media (max-width:900px){.ans{grid-template-columns:36px 1fr 32px}.ans .e,.ans select{grid-column:2/-1}}
   .ans .L{font-family:var(--head);font-weight:800;text-align:center}
   .ans input,.ans select{font:inherit;font-size:.95rem;padding:.5em .7em;border:2px solid var(--line);border-radius:10px;width:100%}
@@ -218,12 +221,18 @@ function applyKind(){
   $('qs').hidden=circle; $('qs').previousElementSibling.hidden=circle;
 }
 $('f_kind').addEventListener('change',applyKind);
+$('f_theme').addEventListener('input',()=>{ if(cur)renderQuestions(); });
+$('f_title').addEventListener('input',()=>{ if(cur)renderQuestions(); });
+// het planeetje-kiesmenu is enkel zinvol bij een ruimte-thema (of als een antwoord er al één heeft staan)
+const RUIMTE_RE=/ruimte|planeet|planeten|sterr|heelal|astrona/i;
+function isRuimteQuiz(){ return RUIMTE_RE.test(($('f_theme').value||'')+' '+($('f_title').value||'')); }
 function renderQuestions(){
   $('qcount').textContent=cur.questions.length;
+  const showPlanet=isRuimteQuiz();
   $('qs').innerHTML=cur.questions.map((q,i)=>`<div class="qcard" data-i="${i}">
     <div class="qh"><div class="qn">${i+1}.</div><input class="qt" value="${esc(q.q)}" placeholder="Vraag…">
-      <div class="tools"><button class="ic mv" data-d="-1" title="Omhoog">↑</button><button class="ic mv" data-d="1" title="Omlaag">↓</button><button class="ic rm" title="Vraag verwijderen">🗑</button></div></div>
-    ${(q.a||[]).map((a,j)=>`<div class="ans ${a.ok?'ok':''}" data-j="${j}"><span class="ok" title="Juist antwoord">✔</span><input class="t" value="${esc(a.t)}" placeholder="Antwoord ${L[j]}"><input class="e" value="${esc(a.e||'')}" placeholder="Uitleg (waarom juist/fout)"><select class="p" title="Visueel planeetje (optioneel)">${PLANETS.map(p=>`<option value="${p[0]}" ${(a.planet||'')===p[0]?'selected':''}>${p[1]}</option>`).join('')}</select><button class="del" title="Antwoord verwijderen">×</button></div>`).join('')}
+      <div class="tools"><button class="ic shuf" title="Antwoorden door elkaar husselen">🔀</button><button class="ic mv" data-d="-1" title="Omhoog">↑</button><button class="ic mv" data-d="1" title="Omlaag">↓</button><button class="ic rm" title="Vraag verwijderen">🗑</button></div></div>
+    ${(q.a||[]).map((a,j)=>`<div class="ans ${a.ok?'ok':''}" data-j="${j}"><span class="ok" title="Juist antwoord">✔</span><input class="t" value="${esc(a.t)}" placeholder="Antwoord ${L[j]}"><input class="e" value="${esc(a.e||'')}" placeholder="Uitleg (waarom juist/fout)">${(showPlanet||a.planet)?`<select class="p" title="Visueel planeetje (optioneel)">${PLANETS.map(p=>`<option value="${p[0]}" ${(a.planet||'')===p[0]?'selected':''}>${p[1]}</option>`).join('')}</select>`:''}<button class="del" title="Antwoord verwijderen">×</button></div>`).join('')}
     <div class="multi">${(q.a||[]).length<4?'<button class="ic addA">+ Antwoord</button>':''}<span>Aantal juiste antwoorden dat gekozen moet worden:</span><select class="mu"><option value="">1 (gewoon)</option><option value="2" ${q.multi==2?'selected':''}>2</option><option value="3" ${q.multi==3?'selected':''}>3</option></select></div>
   </div>`).join('')||'<div class="muted" style="padding:14px">Nog geen vragen. Importeer hierboven of klik op “+ Vraag toevoegen”.</div>';
 }
@@ -241,7 +250,9 @@ $('qs').addEventListener('click',e=>{
   else if(e.target.classList.contains('addA')){q.a.push({t:'',ok:false,e:''});renderQuestions();}
   else if(e.target.classList.contains('rm')){if(confirm('Vraag verwijderen?')){cur.questions.splice(i,1);renderQuestions();}}
   else if(e.target.classList.contains('mv')){const d=+e.target.dataset.d,k=i+d;if(k<0||k>=cur.questions.length)return;[cur.questions[i],cur.questions[k]]=[cur.questions[k],cur.questions[i]];renderQuestions();}
+  else if(e.target.classList.contains('shuf')){shuffleArr(q.a);renderQuestions();}
 });
+function shuffleArr(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 $('addQ').addEventListener('click',()=>{cur.questions.push({q:'',a:[{t:'',ok:true,e:''},{t:'',ok:false,e:''},{t:'',ok:false,e:''}]});renderQuestions();window.scrollTo({top:document.body.scrollHeight,behavior:'smooth'});});
 $('checkQ').addEventListener('click',()=>showWarnings(QuizImport.validate({questions:cur.questions}),true));
 $('exportJson').addEventListener('click',()=>{const blob=new Blob([JSON.stringify(cur.questions,null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(cur.title||'quiz').replace(/\W+/g,'-').toLowerCase()+'.json';a.click();});
