@@ -1,0 +1,77 @@
+[
+  {"q":"Hoeveel gewesten heeft België?","a":[
+    {"t":"2","ok":false,"e":"Bijna! Er is nog een derde gewest: Brussel."},
+    {"t":"3","ok":true,"e":"Juist! België heeft 3 gewesten: Vlaanderen, Wallonië en Brussel."},
+    {"t":"5","ok":false,"e":"Nee, dat zijn er te veel. Het zijn er maar 3."}
+  ]},
+  {"q":"Wat is de hoofdstad van België?","a":[
+    {"t":"Antwerpen","ok":false,"e":"Nee, Antwerpen is wel een grote stad, maar niet de hoofdstad."},
+    {"t":"Brussel","ok":true,"e":"Juist! Brussel is de hoofdstad van België én van Europa."},
+    {"t":"Gent","ok":false,"e":"Nee, Gent is een mooie stad in Oost-Vlaanderen, maar geen hoofdstad."}
+  ]},
+  {"q":"Welke taal spreekt men vooral in Vlaanderen?","a":[
+    {"t":"Frans","ok":false,"e":"Nee, Frans spreekt men vooral in Wallonië."},
+    {"t":"Nederlands","ok":true,"e":"Juist! In Vlaanderen spreken de meeste mensen Nederlands."},
+    {"t":"Duits","ok":false,"e":"Nee, Duits spreekt een klein groepje mensen in het oosten van Wallonië."}
+  ]},
+  {"q":"Welke taal spreekt men vooral in Wallonië?","a":[
+    {"t":"Nederlands","ok":false,"e":"Nee, Nederlands spreekt men vooral in Vlaanderen."},
+    {"t":"Frans","ok":true,"e":"Juist! In Wallonië spreken de meeste mensen Frans."},
+    {"t":"Engels","ok":false,"e":"Nee, Engels is geen landstaal van België."}
+  ]},
+  {"q":"Hoeveel provincies heeft België?","a":[
+    {"t":"5","ok":false,"e":"Bijna! Dat zijn er 5 in Vlaanderen alleen. Wallonië heeft er ook 5."},
+    {"t":"10","ok":true,"e":"Juist! België heeft 10 provincies: 5 in Vlaanderen en 5 in Wallonië. Brussel is geen provincie."},
+    {"t":"15","ok":false,"e":"Nee, dat zijn er te veel. Het zijn er 10."}
+  ]},
+  {"q":"Welke provincie ligt helemaal in het westen, aan de Noordzee?","a":[
+    {"t":"West-Vlaanderen","ok":true,"e":"Juist! West-Vlaanderen ligt aan de zee. Daar vind je de Belgische kust!"},
+    {"t":"Limburg","ok":false,"e":"Nee, Limburg ligt net aan de andere kant, helemaal in het oosten."},
+    {"t":"Luik","ok":false,"e":"Nee, Luik ligt in het oosten van het land."}
+  ]},
+  {"q":"Wat is de hoofdstad van Oost-Vlaanderen?","a":[
+    {"t":"Brugge","ok":false,"e":"Nee, Brugge is de hoofdstad van West-Vlaanderen."},
+    {"t":"Gent","ok":true,"e":"Juist! Gent is de hoofdstad van Oost-Vlaanderen, met het beroemde kasteel Gravensteen."},
+    {"t":"Hasselt","ok":false,"e":"Nee, Hasselt is de hoofdstad van Limburg."}
+  ]},
+  {"q":"Antwerpen is beroemd om zijn grote haven en om...?","a":[
+    {"t":"Diamanten","ok":true,"e":"Juist! Antwerpen is wereldberoemd om zijn diamanten."},
+    {"t":"Chocolade fabrieken","ok":false,"e":"Lekker, maar dat is niet waarom Antwerpen zo beroemd is."},
+    {"t":"Bergen","ok":false,"e":"Nee, België heeft geen echte bergen."}
+  ]},
+  {"q":"Welke provincie ligt helemaal in het oosten van Vlaanderen en is beroemd om zijn fruitboomgaarden?","a":[
+    {"t":"Limburg","ok":true,"e":"Juist! Limburg heeft heel veel fruitboomgaarden."},
+    {"t":"Antwerpen","ok":false,"e":"Nee, Antwerpen ligt meer centraal."},
+    {"t":"Vlaams-Brabant","ok":false,"e":"Nee, Vlaams-Brabant ligt rond Brussel."}
+  ]},
+  {"q":"In welke provincie ligt Leuven, met een van de oudste universiteiten van Europa?","a":[
+    {"t":"Vlaams-Brabant","ok":true,"e":"Juist! Leuven ligt in Vlaams-Brabant."},
+    {"t":"Waals-Brabant","ok":false,"e":"Nee, dat is de Franstalige provincie rond Brussel."},
+    {"t":"Namen","ok":false,"e":"Nee, Namen ligt verder naar het zuiden."}
+  ]},
+  {"q":"Wat is de grootste provincie van Wallonië?","a":[
+    {"t":"Namen","ok":false,"e":"Nee, Namen is kleiner."},
+    {"t":"Henegouwen","ok":true,"e":"Juist! Henegouwen is de grootste provincie van Wallonië. De hoofdstad is Bergen."},
+    {"t":"Waals-Brabant","ok":false,"e":"Nee, Waals-Brabant is juist de kleinste provincie van heel België!"}
+  ]},
+  {"q":"Welke provincie is de kleinste van heel België?","a":[
+    {"t":"Waals-Brabant","ok":true,"e":"Juist! Waals-Brabant is de kleinste provincie van België."},
+    {"t":"Luxemburg","ok":false,"e":"Nee, Luxemburg is net de grootste provincie van België!"},
+    {"t":"Luik","ok":false,"e":"Nee, Luik is een van de grotere provincies."}
+  ]},
+  {"q":"Namen, de hoofdstad van de provincie Namen, ligt op de plek waar twee rivieren samenkomen. Welke?","a":[
+    {"t":"De Maas en de Samber","ok":true,"e":"Juist! De Maas en de Samber komen samen in Namen."},
+    {"t":"De Schelde en de Leie","ok":false,"e":"Nee, die rivieren stromen door Gent."},
+    {"t":"De Rijn en de Donau","ok":false,"e":"Nee, die rivieren liggen niet in België."}
+  ]},
+  {"q":"Aan welke twee landen grenst de provincie Luik?","a":[
+    {"t":"Frankrijk en Luxemburg","ok":false,"e":"Nee, denk aan de buren in het oosten."},
+    {"t":"Nederland en Duitsland","ok":true,"e":"Juist! De provincie Luik grenst zowel aan Nederland als aan Duitsland."},
+    {"t":"Nederland en Frankrijk","ok":false,"e":"Nee, dat klopt niet helemaal."}
+  ]},
+  {"q":"De provincie Luxemburg is de grootste van België en heeft heel veel bossen. Hoe heten die bossen?","a":[
+    {"t":"De Ardennen","ok":true,"e":"Juist! De Ardennen zijn de bekende bossen en heuvels in Luxemburg."},
+    {"t":"Het Zoniënwoud","ok":false,"e":"Dat bos ligt bij Brussel, niet in de provincie Luxemburg."},
+    {"t":"De Kempen","ok":false,"e":"De Kempen liggen meer in Antwerpen en Limburg."}
+  ]}
+]

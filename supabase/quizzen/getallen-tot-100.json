@@ -1,0 +1,242 @@
+[
+ {
+  "q": "Welk getal is 4 tientallen en 7 eenheden?",
+  "a": [
+   {
+    "t": "74",
+    "ok": false,
+    "e": "Nee, dat zijn 7 tientallen en 4 eenheden. Andersom dus!"
+   },
+   {
+    "t": "47",
+    "ok": true,
+    "e": "Juist! 4 tientallen is 40, plus 7 eenheden is 47."
+   },
+   {
+    "t": "11",
+    "ok": false,
+    "e": "Nee, 4 + 7 is 11, maar tientallen zijn 10 waard. 40 + 7 = 47."
+   }
+  ]
+ },
+ {
+  "q": "Welk getal komt net na 69?",
+  "a": [
+   {
+    "t": "60",
+    "ok": false,
+    "e": "Nee, 60 komt vóór 69."
+   },
+   {
+    "t": "70",
+    "ok": true,
+    "e": "Juist! Na 69 begint een nieuw tiental: 70."
+   },
+   {
+    "t": "79",
+    "ok": false,
+    "e": "Nee, dat is 10 meer. Na 69 komt 70."
+   }
+  ]
+ },
+ {
+  "q": "Welk getal is het grootste?",
+  "a": [
+   {
+    "t": "78",
+    "ok": false,
+    "e": "Nee, 78 heeft 7 tientallen. Er is een getal met meer tientallen."
+   },
+   {
+    "t": "87",
+    "ok": true,
+    "e": "Juist! 87 heeft 8 tientallen, dat is meer dan 7 tientallen."
+   },
+   {
+    "t": "81",
+    "ok": false,
+    "e": "Bijna! 81 heeft ook 8 tientallen, maar 87 heeft meer eenheden."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 10 meer dan 56?",
+  "a": [
+   {
+    "t": "57",
+    "ok": false,
+    "e": "Nee, dat is maar 1 meer. Bij 10 meer verandert het tiental."
+   },
+   {
+    "t": "66",
+    "ok": true,
+    "e": "Juist! 56 + 10 = 66. Alleen het tiental wordt één groter."
+   },
+   {
+    "t": "65",
+    "ok": false,
+    "e": "Bijna! Het tiental wordt 6, maar de eenheden blijven 6: 66."
+   }
+  ]
+ },
+ {
+  "q": "Welk getal ontbreekt: 25, 30, 35, ___, 45?",
+  "a": [
+   {
+    "t": "36",
+    "ok": false,
+    "e": "Nee, we springen telkens 5 verder: 35 + 5 = ?"
+   },
+   {
+    "t": "40",
+    "ok": true,
+    "e": "Juist! We tellen met sprongen van 5: 35 + 5 = 40."
+   },
+   {
+    "t": "44",
+    "ok": false,
+    "e": "Nee, we springen met 5, niet met 9."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 100 − 10?",
+  "a": [
+   {
+    "t": "90",
+    "ok": true,
+    "e": "Juist! 10 tientallen min 1 tiental is 9 tientallen: 90."
+   },
+   {
+    "t": "99",
+    "ok": false,
+    "e": "Nee, dat is 100 − 1. We doen 10 eraf."
+   },
+   {
+    "t": "80",
+    "ok": false,
+    "e": "Nee, dat is 100 − 20."
+   }
+  ]
+ },
+ {
+  "q": "Welk getal is even?",
+  "a": [
+   {
+    "t": "33",
+    "ok": false,
+    "e": "Nee, 33 eindigt op 3. Even getallen eindigen op 0, 2, 4, 6 of 8."
+   },
+   {
+    "t": "47",
+    "ok": false,
+    "e": "Nee, 47 eindigt op 7, dat is oneven."
+   },
+   {
+    "t": "58",
+    "ok": true,
+    "e": "Juist! 58 eindigt op 8, dus het is even. Je kan het eerlijk in twee delen."
+   }
+  ]
+ },
+ {
+  "q": "Wat is 8 tientallen?",
+  "a": [
+   {
+    "t": "8",
+    "ok": false,
+    "e": "Nee, 8 is 8 eenheden. Een tiental is 10 waard."
+   },
+   {
+    "t": "18",
+    "ok": false,
+    "e": "Nee, dat is 1 tiental en 8 eenheden."
+   },
+   {
+    "t": "80",
+    "ok": true,
+    "e": "Juist! 8 keer 10 is 80."
+   }
+  ]
+ },
+ {
+  "q": "Tussen welke twee tientallen ligt 63?",
+  "a": [
+   {
+    "t": "Tussen 50 en 60",
+    "ok": false,
+    "e": "Nee, 63 is groter dan 60."
+   },
+   {
+    "t": "Tussen 60 en 70",
+    "ok": true,
+    "e": "Juist! 63 komt na 60 en vóór 70."
+   },
+   {
+    "t": "Tussen 70 en 80",
+    "ok": false,
+    "e": "Nee, 63 is kleiner dan 70."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 45 + 5?",
+  "a": [
+   {
+    "t": "40",
+    "ok": false,
+    "e": "Nee, we tellen erbij, dus het getal wordt groter."
+   },
+   {
+    "t": "50",
+    "ok": true,
+    "e": "Juist! 45 + 5 = 50, precies een rond tiental."
+   },
+   {
+    "t": "55",
+    "ok": false,
+    "e": "Nee, dat is 45 + 10."
+   }
+  ]
+ },
+ {
+  "q": "Welk getal is kleiner dan 32?",
+  "a": [
+   {
+    "t": "41",
+    "ok": false,
+    "e": "Nee, 41 heeft 4 tientallen, dat is meer."
+   },
+   {
+    "t": "29",
+    "ok": true,
+    "e": "Juist! 29 heeft maar 2 tientallen, dus het is kleiner dan 32."
+   },
+   {
+    "t": "33",
+    "ok": false,
+    "e": "Nee, 33 is net 1 meer dan 32."
+   }
+  ]
+ },
+ {
+  "q": "Tel verder: 92, 94, 96, ___?",
+  "a": [
+   {
+    "t": "97",
+    "ok": false,
+    "e": "Nee, we springen met 2 tegelijk."
+   },
+   {
+    "t": "98",
+    "ok": true,
+    "e": "Juist! 96 + 2 = 98."
+   },
+   {
+    "t": "100",
+    "ok": false,
+    "e": "Nee, dat is 96 + 4. Eerst komt 98."
+   }
+  ]
+ }
+]

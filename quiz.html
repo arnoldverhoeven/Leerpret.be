@@ -24,6 +24,7 @@
   body.theme-klok{--bg1:#301c05;--bg2:#4d3410;--bg3:#634414;--rad1:#a06a1f;--rad2:#6e4a0c}
   body.theme-dieren{--bg1:#052e0e;--bg2:#0f4d1e;--bg3:#146322;--rad1:#2f8a3f;--rad2:#0c6e2a}
   body.theme-wereld{--bg1:#052a2e;--bg2:#0f4247;--bg3:#145a63;--rad1:#1f8a9a;--rad2:#0c4f6e}
+  body.theme-belgie{--bg1:#1a0e05;--bg2:#3a1f0a;--bg3:#5c2e0c;--rad1:#c99a1f;--rad2:#a8281f}
   body.theme-geschiedenis{--bg1:#2a1505;--bg2:#47240f;--bg3:#5e3014;--rad1:#8a5220;--rad2:#6e330c}
   body.theme-vliegtuig{--bg1:#04182e;--bg2:#0c2f4d;--bg3:#0f3f63;--rad1:#2f6fa8;--rad2:#0c3a6e}
   body.theme-algemeen{--bg1:#1c0b2e;--bg2:#33104d;--bg3:#421463;--rad1:#7a2f9a;--rad2:#3b0c6e}
@@ -287,7 +288,6 @@
       <div class="chint" id="chint"></div>
       <div class="pad" id="pad"></div>
     </div>
-
     <div class="bottom" id="bottom"></div>
   </div>
 </section>
@@ -320,6 +320,7 @@ const THEME_PACKS=[
   {key:'taal', re:/taal|spelling|letter|woord|lezen/i, slogan:'Jullie zijn echte taaltovenaars! 🔤📖✨', deco:['🔤','📖','✏️','💬']},
   {key:'klok', re:/klok|tijd|uur/i, slogan:'Jullie kunnen de klok al perfect lezen! ⏰🌟', deco:['⏰','🕐','⏳','🌙']},
   {key:'dieren', re:/dier|dieren/i, slogan:'Jullie zijn echte dierenexperts! 🐾🦁✨', deco:['🐶','🦁','🐦','🐟']},
+  {key:'belgie', re:/belgië|belgie|provincie|gewest|vlaanderen|wallonië|wallonie/i, slogan:'Jullie kennen België als hun broekzak! 🇧🇪🗺️✨', deco:['🇧🇪','🗺️','🏰','🚲']},
   {key:'wereld', re:/wereld|aardrijkskunde|land|landen/i, slogan:'Jullie kennen de wereld al goed! 🌍✨', deco:['🌍','🗺️','🏔️','🌋']},
   {key:'geschiedenis', re:/geschiedenis|ridder|kasteel|romeinen|prehistor/i, slogan:'Jullie zijn echte geschiedeniskenners! 🏰📜✨', deco:['🏰','📜','⚔️','👑']},
   {key:'vliegtuig', re:/vliegtuig|helikopter|lucht/i, slogan:'Jullie zijn echte luchtvaartpiloten! ✈️🚁⭐', deco:['✈️','🚁','☁️','🛩️']},
@@ -345,6 +346,10 @@ async function loadData(){
     if(q.get('demo')==='cirkel'){
       QUESTIONS=genCircle({op:q.get('op')||'mix',count:10}); NAMES=DEMO_NAMES; T.textContent='Cirkelrekenen'; S.textContent='Demo · Optellen en aftrekken tot 100'; E.textContent='🔢';
       QUIZ_THEME='Rekenen'; QUIZ_TITLE=T.textContent;
+    }else if(q.get('demo')==='belgie'){
+      const r=await fetch('/js/demo-belgie.json'); QUESTIONS=await r.json(); NAMES=DEMO_NAMES;
+      T.textContent='België: provincies en gewesten'; S.textContent='Demo · Alles over de gewesten en provincies van België'; E.textContent='🇧🇪';
+      QUIZ_THEME='België'; QUIZ_TITLE=T.textContent;
     }else if(q.get('demo')){
       const r=await fetch('/js/demo-ruimte.json'); QUESTIONS=await r.json(); NAMES=DEMO_NAMES;
       T.textContent='Ruimte Quiz'; S.textContent='Demo · Planeten & vliegende dingen'; E.textContent='🪐';
@@ -498,7 +503,7 @@ function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random
 
 function startQuiz(){
   ctx(); // audio ontgrendelen bij eerste klik
-  order=QUESTIONS.map((_,i)=>i); // vaste volgorde; wil je willekeurig: shuffle(order)
+  order=shuffle(QUESTIONS.map((_,i)=>i)); // vragen komen elke beurt in een andere, willekeurige volgorde
   qi=0;namePool=shuffle([...NAMES]);
   $('qtotal').textContent=QUESTIONS.length;
   nextTurn();
@@ -616,6 +621,7 @@ function checkCircle(){
   st.active=first==='m'?'u':first; cState.active=st.active;
   setTimeout(()=>{document.querySelectorAll('.cbox.wrong').forEach(b=>b.classList.remove('wrong'));},600);
 }
+
 
 $('skipBtn').addEventListener('click',()=>{clearInterval(timerId);revealAnswers();});
 

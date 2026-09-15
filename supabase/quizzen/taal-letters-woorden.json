@@ -1,0 +1,242 @@
+[
+ {
+  "q": "Welke letter komt in het alfabet net na de m?",
+  "a": [
+   {
+    "t": "l",
+    "ok": false,
+    "e": "Nee, de l komt vóór de m."
+   },
+   {
+    "t": "n",
+    "ok": true,
+    "e": "Juist! ... k, l, m, n, o ..."
+   },
+   {
+    "t": "o",
+    "ok": false,
+    "e": "Bijna! Eerst komt de n, dan pas de o."
+   }
+  ]
+ },
+ {
+  "q": "Welk woord is een klinker-woord? Kies het woord dat begint met een klinker.",
+  "a": [
+   {
+    "t": "boom",
+    "ok": false,
+    "e": "Nee, de b is een medeklinker."
+   },
+   {
+    "t": "appel",
+    "ok": true,
+    "e": "Juist! De a is een klinker: a, e, i, o, u."
+   },
+   {
+    "t": "tafel",
+    "ok": false,
+    "e": "Nee, de t is een medeklinker."
+   }
+  ]
+ },
+ {
+  "q": "Wat is het meervoud van \"boek\"?",
+  "a": [
+   {
+    "t": "boekjes",
+    "ok": false,
+    "e": "Nee, dat is een verkleinwoord. Meervoud betekent: meer dan één."
+   },
+   {
+    "t": "boeken",
+    "ok": true,
+    "e": "Juist! Eén boek, twee boeken."
+   },
+   {
+    "t": "boeks",
+    "ok": false,
+    "e": "Nee, in het Nederlands zeggen we boeken."
+   }
+  ]
+ },
+ {
+  "q": "Welk woord is juist geschreven?",
+  "a": [
+   {
+    "t": "Sgool",
+    "ok": false,
+    "e": "Nee, we schrijven het met sch: school."
+   },
+   {
+    "t": "School",
+    "ok": true,
+    "e": "Juist! School schrijf je met s-c-h."
+   },
+   {
+    "t": "Schoel",
+    "ok": false,
+    "e": "Nee, het is school met een dubbele o."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel lettergrepen heeft het woord \"banaan\"?",
+  "a": [
+   {
+    "t": "1",
+    "ok": false,
+    "e": "Nee, klap maar mee: ba-naan. Dat zijn er meer."
+   },
+   {
+    "t": "2",
+    "ok": true,
+    "e": "Juist! ba-naan, twee klappen."
+   },
+   {
+    "t": "3",
+    "ok": false,
+    "e": "Nee, ba-naan zijn twee lettergrepen."
+   }
+  ]
+ },
+ {
+  "q": "Welk woord moet met een hoofdletter beginnen?",
+  "a": [
+   {
+    "t": "hond",
+    "ok": false,
+    "e": "Nee, een gewoon woord krijgt geen hoofdletter."
+   },
+   {
+    "t": "antwerpen",
+    "ok": true,
+    "e": "Juist! Namen van steden schrijf je met een hoofdletter: Antwerpen."
+   },
+   {
+    "t": "tafel",
+    "ok": false,
+    "e": "Nee, tafel is een gewoon woord."
+   }
+  ]
+ },
+ {
+  "q": "Wat is het tegenovergestelde van \"groot\"?",
+  "a": [
+   {
+    "t": "hoog",
+    "ok": false,
+    "e": "Nee, hoog is het tegenovergestelde van laag."
+   },
+   {
+    "t": "klein",
+    "ok": true,
+    "e": "Juist! Groot en klein zijn tegenstellingen."
+   },
+   {
+    "t": "dik",
+    "ok": false,
+    "e": "Nee, dik is het tegenovergestelde van dun."
+   }
+  ]
+ },
+ {
+  "q": "Welk woord hoort niet in het rijtje: appel, peer, banaan, wortel?",
+  "a": [
+   {
+    "t": "appel",
+    "ok": false,
+    "e": "Nee, een appel is fruit, net als de andere."
+   },
+   {
+    "t": "banaan",
+    "ok": false,
+    "e": "Nee, een banaan is ook fruit."
+   },
+   {
+    "t": "wortel",
+    "ok": true,
+    "e": "Juist! Een wortel is een groente, de andere drie zijn fruit."
+   }
+  ]
+ },
+ {
+  "q": "Welke letter hoor je vooraan in \"zon\"?",
+  "a": [
+   {
+    "t": "s",
+    "ok": false,
+    "e": "Nee, luister goed: zzzon. Dat is een z."
+   },
+   {
+    "t": "z",
+    "ok": true,
+    "e": "Juist! Zon begint met de z."
+   },
+   {
+    "t": "n",
+    "ok": false,
+    "e": "Nee, de n hoor je achteraan."
+   }
+  ]
+ },
+ {
+  "q": "Welk woord rijmt op \"muis\"?",
+  "a": [
+   {
+    "t": "muur",
+    "ok": false,
+    "e": "Nee, muur eindigt op -uur. Rijmen betekent: het einde klinkt hetzelfde."
+   },
+   {
+    "t": "huis",
+    "ok": true,
+    "e": "Juist! Muis en huis eindigen allebei op -uis."
+   },
+   {
+    "t": "mus",
+    "ok": false,
+    "e": "Nee, mus lijkt erop, maar eindigt op -us."
+   }
+  ]
+ },
+ {
+  "q": "Wat is het verkleinwoord van \"bal\"?",
+  "a": [
+   {
+    "t": "ballen",
+    "ok": false,
+    "e": "Nee, dat is het meervoud."
+   },
+   {
+    "t": "balletje",
+    "ok": true,
+    "e": "Juist! Een klein balletje."
+   },
+   {
+    "t": "balje",
+    "ok": false,
+    "e": "Nee, we schrijven balletje met dubbele l en -etje."
+   }
+  ]
+ },
+ {
+  "q": "Welk woord is een werkwoord (iets wat je doet)?",
+  "a": [
+   {
+    "t": "stoel",
+    "ok": false,
+    "e": "Nee, een stoel is een ding."
+   },
+   {
+    "t": "lopen",
+    "ok": true,
+    "e": "Juist! Lopen is iets wat je doet, dus een werkwoord."
+   },
+   {
+    "t": "rood",
+    "ok": false,
+    "e": "Nee, rood is een kleur."
+   }
+  ]
+ }
+]

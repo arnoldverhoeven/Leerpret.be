@@ -47,6 +47,7 @@ create table if not exists public.quizzes (
   school_id   uuid references public.schools(id) on delete cascade,
   title       text not null,
   theme       text,                          -- bv. 'Ruimte', 'Rekenen'
+  vak         text,                          -- vak/rubriek waaronder gegroepeerd wordt op het dashboard, bv. 'Rekenen', 'Taal'
   emoji       text default '🎯',
   grade_min   int not null default 1 check (grade_min between 1 and 6),
   grade_max   int not null default 6 check (grade_max between 1 and 6),
@@ -54,7 +55,12 @@ create table if not exists public.quizzes (
   published   boolean not null default true,
   created_at  timestamptz not null default now()
 );
+-- soort quiz: 'mc' (meerkeuze, vragen in questions) of 'circle' (cirkelrekenen, instellingen in settings)
+alter table public.quizzes add column if not exists kind text not null default 'mc';
+alter table public.quizzes add column if not exists settings jsonb not null default '{}'::jsonb;
+alter table public.quizzes add column if not exists vak text;
 create index if not exists quizzes_school_idx on public.quizzes(school_id);
+create index if not exists quizzes_vak_idx on public.quizzes(vak);
 
 -- ---------- Automatisch profiel bij nieuwe gebruiker ----------
 create or replace function public.handle_new_user()

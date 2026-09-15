@@ -1,0 +1,202 @@
+[
+ {
+  "q": "Hoeveel minuten zitten er in een uur?",
+  "a": [
+   {
+    "t": "30",
+    "ok": false,
+    "e": "Nee, 30 minuten is een half uur."
+   },
+   {
+    "t": "60",
+    "ok": true,
+    "e": "Juist! Een uur is 60 minuten."
+   },
+   {
+    "t": "100",
+    "ok": false,
+    "e": "Nee, een uur heeft 60 minuten, niet 100."
+   }
+  ]
+ },
+ {
+  "q": "De kleine wijzer wijst naar de 3 en de grote wijzer naar de 12. Hoe laat is het?",
+  "a": [
+   {
+    "t": "Half 3",
+    "ok": false,
+    "e": "Nee, bij half wijst de grote wijzer naar de 6."
+   },
+   {
+    "t": "3 uur",
+    "ok": true,
+    "e": "Juist! Grote wijzer op de 12 betekent: precies ... uur."
+   },
+   {
+    "t": "12 uur",
+    "ok": false,
+    "e": "Nee, de kleine wijzer zegt welk uur het is, en die staat op de 3."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel minuten is een kwartier?",
+  "a": [
+   {
+    "t": "10",
+    "ok": false,
+    "e": "Nee, een kwartier is een kwart van een uur."
+   },
+   {
+    "t": "15",
+    "ok": true,
+    "e": "Juist! Een kwart van 60 minuten is 15 minuten."
+   },
+   {
+    "t": "25",
+    "ok": false,
+    "e": "Nee, een kwartier is 15 minuten."
+   }
+  ]
+ },
+ {
+  "q": "Het is half 4. Wat betekent dat?",
+  "a": [
+   {
+    "t": "Het is 4 uur en 30 minuten",
+    "ok": false,
+    "e": "Nee! Half 4 betekent: het is halfweg naar 4 uur, dus nog vóór 4 uur."
+   },
+   {
+    "t": "Het is 3 uur en 30 minuten",
+    "ok": true,
+    "e": "Juist! Half 4 is 3:30. Nog een half uur en dan is het 4 uur."
+   },
+   {
+    "t": "Het is 4 uur",
+    "ok": false,
+    "e": "Nee, bij 4 uur staat de grote wijzer op de 12."
+   }
+  ]
+ },
+ {
+  "q": "Waar staat de grote wijzer bij \"half\"?",
+  "a": [
+   {
+    "t": "Op de 12",
+    "ok": false,
+    "e": "Nee, op de 12 is het precies ... uur."
+   },
+   {
+    "t": "Op de 6",
+    "ok": true,
+    "e": "Juist! Bij half staat de grote wijzer onderaan, op de 6."
+   },
+   {
+    "t": "Op de 3",
+    "ok": false,
+    "e": "Nee, op de 3 is het kwart over."
+   }
+  ]
+ },
+ {
+  "q": "Het is 7 uur. Hoe laat is het over een uur?",
+  "a": [
+   {
+    "t": "6 uur",
+    "ok": false,
+    "e": "Nee, over een uur is het later, niet vroeger."
+   },
+   {
+    "t": "8 uur",
+    "ok": true,
+    "e": "Juist! 7 uur + 1 uur = 8 uur."
+   },
+   {
+    "t": "Half 8",
+    "ok": false,
+    "e": "Nee, dat is over een half uur."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel uren heeft een dag?",
+  "a": [
+   {
+    "t": "12",
+    "ok": false,
+    "e": "Nee, 12 is maar een halve dag. De klok gaat twee keer rond."
+   },
+   {
+    "t": "24",
+    "ok": true,
+    "e": "Juist! Een dag heeft 24 uren."
+   },
+   {
+    "t": "60",
+    "ok": false,
+    "e": "Nee, 60 is het aantal minuten in een uur."
+   }
+  ]
+ },
+ {
+  "q": "Wat is later op de dag?",
+  "a": [
+   {
+    "t": "8 uur 's morgens",
+    "ok": false,
+    "e": "Nee, 's morgens is vroeg."
+   },
+   {
+    "t": "12 uur 's middags",
+    "ok": false,
+    "e": "Nee, dat is het midden van de dag."
+   },
+   {
+    "t": "5 uur 's avonds",
+    "ok": true,
+    "e": "Juist! 's Avonds is het al laat op de dag."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel dagen heeft een week?",
+  "a": [
+   {
+    "t": "5",
+    "ok": false,
+    "e": "Nee, 5 zijn de schooldagen. Het weekend telt ook mee!"
+   },
+   {
+    "t": "7",
+    "ok": true,
+    "e": "Juist! Maandag, dinsdag, woensdag, donderdag, vrijdag, zaterdag, zondag."
+   },
+   {
+    "t": "10",
+    "ok": false,
+    "e": "Nee, een week heeft 7 dagen."
+   }
+  ]
+ },
+ {
+  "q": "Welke dag komt na woensdag?",
+  "a": [
+   {
+    "t": "Dinsdag",
+    "ok": false,
+    "e": "Nee, dinsdag komt vóór woensdag."
+   },
+   {
+    "t": "Donderdag",
+    "ok": true,
+    "e": "Juist! Maandag, dinsdag, woensdag, donderdag."
+   },
+   {
+    "t": "Vrijdag",
+    "ok": false,
+    "e": "Nee, eerst komt donderdag."
+   }
+  ]
+ }
+]

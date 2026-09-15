@@ -1,0 +1,100 @@
+Titel: Getallen tot 100
+Thema: Rekenen
+Emoji: 💯
+Leerjaar: 3
+
+1. Welk getal is 4 tientallen en 7 eenheden?
+A. 74
+   Nee, dat zijn 7 tientallen en 4 eenheden. Andersom dus!
+*B. 47
+   Juist! 4 tientallen is 40, plus 7 eenheden is 47.
+C. 11
+   Nee, 4 + 7 is 11, maar tientallen zijn 10 waard. 40 + 7 = 47.
+
+2. Welk getal komt net na 69?
+A. 60
+   Nee, 60 komt vóór 69.
+*B. 70
+   Juist! Na 69 begint een nieuw tiental: 70.
+C. 79
+   Nee, dat is 10 meer. Na 69 komt 70.
+
+3. Welk getal is het grootste?
+A. 78
+   Nee, 78 heeft 7 tientallen. Er is een getal met meer tientallen.
+*B. 87
+   Juist! 87 heeft 8 tientallen, dat is meer dan 7 tientallen.
+C. 81
+   Bijna! 81 heeft ook 8 tientallen, maar 87 heeft meer eenheden.
+
+4. Hoeveel is 10 meer dan 56?
+A. 57
+   Nee, dat is maar 1 meer. Bij 10 meer verandert het tiental.
+*B. 66
+   Juist! 56 + 10 = 66. Alleen het tiental wordt één groter.
+C. 65
+   Bijna! Het tiental wordt 6, maar de eenheden blijven 6: 66.
+
+5. Welk getal ontbreekt: 25, 30, 35, ___, 45?
+A. 36
+   Nee, we springen telkens 5 verder: 35 + 5 = ?
+*B. 40
+   Juist! We tellen met sprongen van 5: 35 + 5 = 40.
+C. 44
+   Nee, we springen met 5, niet met 9.
+
+6. Hoeveel is 100 − 10?
+*A. 90
+   Juist! 10 tientallen min 1 tiental is 9 tientallen: 90.
+B. 99
+   Nee, dat is 100 − 1. We doen 10 eraf.
+C. 80
+   Nee, dat is 100 − 20.
+
+7. Welk getal is even?
+A. 33
+   Nee, 33 eindigt op 3. Even getallen eindigen op 0, 2, 4, 6 of 8.
+B. 47
+   Nee, 47 eindigt op 7, dat is oneven.
+*C. 58
+   Juist! 58 eindigt op 8, dus het is even. Je kan het eerlijk in twee delen.
+
+8. Wat is 8 tientallen?
+A. 8
+   Nee, 8 is 8 eenheden. Een tiental is 10 waard.
+B. 18
+   Nee, dat is 1 tiental en 8 eenheden.
+*C. 80
+   Juist! 8 keer 10 is 80.
+
+9. Tussen welke twee tientallen ligt 63?
+A. Tussen 50 en 60
+   Nee, 63 is groter dan 60.
+*B. Tussen 60 en 70
+   Juist! 63 komt na 60 en vóór 70.
+C. Tussen 70 en 80
+   Nee, 63 is kleiner dan 70.
+
+10. Hoeveel is 45 + 5?
+A. 40
+   Nee, we tellen erbij, dus het getal wordt groter.
+*B. 50
+   Juist! 45 + 5 = 50, precies een rond tiental.
+C. 55
+   Nee, dat is 45 + 10.
+
+11. Welk getal is kleiner dan 32?
+A. 41
+   Nee, 41 heeft 4 tientallen, dat is meer.
+*B. 29
+   Juist! 29 heeft maar 2 tientallen, dus het is kleiner dan 32.
+C. 33
+   Nee, 33 is net 1 meer dan 32.
+
+12. Tel verder: 92, 94, 96, ___?
+A. 97
+   Nee, we springen met 2 tegelijk.
+*B. 98
+   Juist! 96 + 2 = 98.
+C. 100
+   Nee, dat is 96 + 4. Eerst komt 98.

@@ -29,12 +29,17 @@
   .filters button{font-family:var(--head);font-weight:700;font-size:.95rem;padding:.4em 1em;border-radius:999px;border:2px solid var(--line);background:#fff;color:var(--navy);cursor:pointer}
   .filters button.active{background:var(--navy);color:#fff;border-color:var(--navy)}
   .filters .count{margin-left:auto;color:var(--muted);font-weight:700;font-size:.95rem}
-  /* vakgroepen */
-  .vakgroup{margin-bottom:34px}
-  .vakhead{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  /* vakgroepen – enkel het vak is zichtbaar, klik om de quizzen te tonen */
+  .vakgroup{margin-bottom:16px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden}
+  .vakhead{display:flex;align-items:center;gap:12px;padding:16px 20px;cursor:pointer;user-select:none;border:none;background:none;width:100%;text-align:left;font:inherit}
+  .vakhead:hover{background:#f7f9ff}
   .vakhead .vico{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;flex:none}
-  .vakhead h2{margin:0;font-size:1.5rem}
+  .vakhead h2{margin:0;font-size:1.5rem;flex:1}
   .vakhead .n{color:var(--muted);font-weight:700}
+  .vakhead .chev{flex:none;font-size:1.3rem;color:var(--muted);transition:transform .2s}
+  .vakgroup.open .vakhead .chev{transform:rotate(180deg)}
+  .vakgroup .grid{display:none;padding:4px 20px 24px}
+  .vakgroup.open .grid{display:grid}
   /* quizkaarten – groot, leesbaar op het digibord */
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px}
   .qcard{position:relative;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;display:flex;flex-direction:column;gap:10px;border:2px solid transparent;transition:transform .15s,border-color .15s;min-height:210px}
@@ -130,6 +135,7 @@ const VAK_META={
   'Varia':{icon:'🎲',bg:'#f0f2f8',fg:'#556'},
 };
 function vakMeta(v){ return VAK_META[v]||VAK_META['Varia']; }
+let openVaks=new Set();
 
 function cardHtml(q,c,fit,fresh){
   const n=Array.isArray(q.questions)?q.questions.length:0, isNew=q.created_at&&new Date(q.created_at).getTime()>fresh;
@@ -157,13 +163,19 @@ function renderQuizzes(){
   list.forEach(q=>{ const v=q.vak&&VAK_ORDER.includes(q.vak)?q.vak:(q.vak||'Varia'); if(!groups.has(v))groups.set(v,[]); groups.get(v).push(q); });
   const order=[...VAK_ORDER,...[...groups.keys()].filter(v=>!VAK_ORDER.includes(v))];
   box.innerHTML=order.filter(v=>groups.has(v)).map(v=>{
-    const items=groups.get(v), meta=vakMeta(v);
-    return `<div class="vakgroup">
-      <div class="vakhead"><div class="vico" style="background:${meta.bg};color:${meta.fg}">${meta.icon}</div><h2>${esc(v)}</h2><span class="n">${items.length} ${items.length===1?'quiz':'quizzen'}</span></div>
+    const items=groups.get(v), meta=vakMeta(v), open=openVaks.has(v);
+    return `<div class="vakgroup ${open?'open':''}" data-vak="${esc(v)}">
+      <button type="button" class="vakhead"><div class="vico" style="background:${meta.bg};color:${meta.fg}">${meta.icon}</div><h2>${esc(v)}</h2><span class="n">${items.length} ${items.length===1?'quiz':'quizzen'}</span><span class="chev">▾</span></button>
       <div class="grid">${items.map(q=>cardHtml(q,c,fits(q),fresh)).join('')}</div>
     </div>`;
   }).join('');
 }
+$('quizzes').addEventListener('click',e=>{
+  const h=e.target.closest('.vakhead'); if(!h)return;
+  const v=h.closest('.vakgroup').dataset.vak;
+  if(openVaks.has(v))openVaks.delete(v); else openVaks.add(v);
+  renderQuizzes();
+});
 init();
 </script>
 </body>

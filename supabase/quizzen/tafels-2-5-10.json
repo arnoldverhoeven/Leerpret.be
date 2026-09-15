@@ -1,0 +1,242 @@
+[
+ {
+  "q": "Hoeveel is 5 × 2?",
+  "a": [
+   {
+    "t": "7",
+    "ok": false,
+    "e": "Nee, dat is 5 + 2. Bij keer tel je 5 keer 2: 2 + 2 + 2 + 2 + 2."
+   },
+   {
+    "t": "10",
+    "ok": true,
+    "e": "Juist! 5 keer 2 is 10."
+   },
+   {
+    "t": "12",
+    "ok": false,
+    "e": "Nee, dat is 6 × 2."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 3 × 10?",
+  "a": [
+   {
+    "t": "13",
+    "ok": false,
+    "e": "Nee, dat is 3 + 10. Bij de tafel van 10 zet je een 0 achter het getal."
+   },
+   {
+    "t": "30",
+    "ok": true,
+    "e": "Juist! 3 × 10 = 30."
+   },
+   {
+    "t": "300",
+    "ok": false,
+    "e": "Nee, dat is veel te veel. 3 × 10 = 30."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 4 × 5?",
+  "a": [
+   {
+    "t": "9",
+    "ok": false,
+    "e": "Nee, dat is 4 + 5."
+   },
+   {
+    "t": "20",
+    "ok": true,
+    "e": "Juist! 5, 10, 15, 20: vier sprongen van 5."
+   },
+   {
+    "t": "25",
+    "ok": false,
+    "e": "Nee, dat is 5 × 5."
+   }
+  ]
+ },
+ {
+  "q": "Welke som hoort bij 7 × 2?",
+  "a": [
+   {
+    "t": "7 + 2",
+    "ok": false,
+    "e": "Nee, 7 × 2 betekent 7 keer het getal 2."
+   },
+   {
+    "t": "2 + 2 + 2 + 2 + 2 + 2 + 2",
+    "ok": true,
+    "e": "Juist! Zeven keer 2 optellen is hetzelfde als 7 × 2 = 14."
+   },
+   {
+    "t": "7 + 7 + 7",
+    "ok": false,
+    "e": "Nee, dat is 3 × 7."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 10 × 10?",
+  "a": [
+   {
+    "t": "20",
+    "ok": false,
+    "e": "Nee, dat is 10 + 10."
+   },
+   {
+    "t": "100",
+    "ok": true,
+    "e": "Juist! 10 × 10 = 100."
+   },
+   {
+    "t": "1000",
+    "ok": false,
+    "e": "Nee, dat is 10 × 100."
+   }
+  ]
+ },
+ {
+  "q": "Wat komt er uit: 6 × 5?",
+  "a": [
+   {
+    "t": "11",
+    "ok": false,
+    "e": "Nee, dat is 6 + 5."
+   },
+   {
+    "t": "30",
+    "ok": true,
+    "e": "Juist! 5, 10, 15, 20, 25, 30."
+   },
+   {
+    "t": "35",
+    "ok": false,
+    "e": "Nee, dat is 7 × 5."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 8 × 2?",
+  "a": [
+   {
+    "t": "10",
+    "ok": false,
+    "e": "Nee, dat is 8 + 2."
+   },
+   {
+    "t": "16",
+    "ok": true,
+    "e": "Juist! 8 × 2 = 16. Het dubbele van 8."
+   },
+   {
+    "t": "18",
+    "ok": false,
+    "e": "Nee, dat is 9 × 2."
+   }
+  ]
+ },
+ {
+  "q": "Welk getal komt NIET in de tafel van 5?",
+  "a": [
+   {
+    "t": "15",
+    "ok": false,
+    "e": "Nee, 15 zit erin: 3 × 5 = 15."
+   },
+   {
+    "t": "35",
+    "ok": false,
+    "e": "Nee, 35 zit erin: 7 × 5 = 35."
+   },
+   {
+    "t": "22",
+    "ok": true,
+    "e": "Juist! Getallen in de tafel van 5 eindigen op 0 of 5. 22 hoort er niet bij."
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 9 × 10?",
+  "a": [
+   {
+    "t": "19",
+    "ok": false,
+    "e": "Nee, dat is 9 + 10."
+   },
+   {
+    "t": "90",
+    "ok": true,
+    "e": "Juist! 9 × 10 = 90."
+   },
+   {
+    "t": "99",
+    "ok": false,
+    "e": "Nee, 9 × 10 is precies 90."
+   }
+  ]
+ },
+ {
+  "q": "Er zijn 6 fietsen. Hoeveel wielen zijn dat samen?",
+  "a": [
+   {
+    "t": "8",
+    "ok": false,
+    "e": "Nee, elke fiets heeft 2 wielen: 6 × 2."
+   },
+   {
+    "t": "12",
+    "ok": true,
+    "e": "Juist! 6 fietsen × 2 wielen = 12 wielen."
+   },
+   {
+    "t": "6",
+    "ok": false,
+    "e": "Nee, dat is het aantal fietsen. Elke fiets heeft 2 wielen."
+   }
+  ]
+ },
+ {
+  "q": "In elke hand zitten 5 vingers. Hoeveel vingers hebben 3 kinderen samen?",
+  "a": [
+   {
+    "t": "15",
+    "ok": false,
+    "e": "Bijna! Elk kind heeft 2 handen, dus 10 vingers. 3 × 10 = ?"
+   },
+   {
+    "t": "30",
+    "ok": true,
+    "e": "Juist! 3 kinderen × 10 vingers = 30 vingers."
+   },
+   {
+    "t": "8",
+    "ok": false,
+    "e": "Nee, dat is 3 + 5. Denk aan keer!"
+   }
+  ]
+ },
+ {
+  "q": "Hoeveel is 2 × 9?",
+  "a": [
+   {
+    "t": "11",
+    "ok": false,
+    "e": "Nee, dat is 2 + 9."
+   },
+   {
+    "t": "18",
+    "ok": true,
+    "e": "Juist! 2 × 9 = 18, net als 9 × 2."
+   },
+   {
+    "t": "16",
+    "ok": false,
+    "e": "Nee, dat is 2 × 8."
+   }
+  ]
+ }
+]
