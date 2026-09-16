@@ -109,10 +109,15 @@ async function init(){
   $('school').textContent=profile.schools?profile.schools.name:'';
   const [c,q]=await Promise.all([
     LP.sb.from('classes').select('id,name,grade,pupils').eq('school_id',profile.school_id).order('grade').order('name'),
-    LP.sb.from('quizzes').select('id,title,theme,vak,emoji,grade_min,grade_max,school_id,questions,created_at,kind,settings').eq('published',true).order('created_at',{ascending:false})
+    LP.sb.from('quizzes').select('id,title,theme,vak,emoji,grade_min,grade_max,school_id,questions,created_at,kind,settings,avail_from_month,avail_to_month').eq('published',true).order('created_at',{ascending:false})
   ]);
   if(c.error||q.error){note('Laden mislukt: '+esc((c.error||q.error).message),'err');return;}
-  classes=c.data||[]; quizzes=q.data||[];
+  classes=c.data||[];
+  // quizzen met een seizoensperiode (bv. enkel september t/m juni) enkel tonen tijdens die maanden —
+  // komt zo elk schooljaar vanzelf terug, zonder dat er iets herhaald moet worden ingesteld.
+  const nowMonth=new Date().getMonth()+1;
+  const inSeason=q=>{ if(!q.avail_from_month||!q.avail_to_month) return true; const f=q.avail_from_month,t=q.avail_to_month; return f<=t?(nowMonth>=f&&nowMonth<=t):(nowMonth>=f||nowMonth<=t); };
+  quizzes=(q.data||[]).filter(inSeason);
   try{ const last=localStorage.getItem('lp_class'); if(last&&classes.find(x=>x.id===last)) activeClass=last; }catch(e){}
   if(!activeClass&&classes.length) activeClass=classes[0].id;
   renderKlassen(); renderQuizzes();

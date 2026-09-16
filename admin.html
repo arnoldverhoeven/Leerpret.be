@@ -25,10 +25,17 @@
   .list .row.active{border-color:var(--orange);box-shadow:0 0 0 3px #ffe9d9}
   .list .ico{width:40px;height:40px;border-radius:10px;background:#eef1ff;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex:none}
   .list h4{margin:0;font-size:1.05rem}.list .m{color:var(--muted);font-size:.85rem;font-weight:700}
-  .meta{display:grid;grid-template-columns:2fr 1fr 1fr 80px 1fr 1fr 1fr 1fr;gap:12px;min-width:0}
-  @media (max-width:900px){.meta{grid-template-columns:1fr 1fr}}
+  .meta{display:grid;gap:12px;min-width:0}
+  .meta.line1{grid-template-columns:2fr 1fr 1fr 80px}
+  .meta.line2{grid-template-columns:1fr 1fr 1fr 1fr;margin-top:12px}
+  @media (max-width:900px){.meta.line1,.meta.line2{grid-template-columns:1fr 1fr}}
   .meta .field{margin:0;min-width:0}
   .meta .field input,.meta .field select{min-width:0}
+  .avail{border:2px solid var(--line);border-radius:16px;padding:14px 16px;margin-top:14px}
+  .avail h3{margin:0 0 4px;font-size:1.05rem}
+  .avail p{margin:0 0 10px}
+  .avail .row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .avail .field{min-width:150px}
   .imp{border:2px dashed var(--sky);background:#f0fbff;border-radius:16px;padding:18px;margin:18px 0}
   .imp h3{margin:0 0 6px;font-size:1.2rem}
   .imp .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -91,7 +98,7 @@
 
       <section class="card" id="editor" hidden>
         <h2 style="font-size:1.4rem" id="edTitle">Nieuwe quiz</h2>
-        <div class="meta">
+        <div class="meta line1">
           <div class="field"><label>Titel</label><input id="f_title" placeholder="bv. Dieren Quiz"></div>
           <div class="field"><label>Thema</label><input id="f_theme" placeholder="bv. Dieren"></div>
           <div class="field"><label>Vak</label><select id="f_vak">
@@ -103,10 +110,21 @@
             <option value="Varia">Varia</option>
           </select></div>
           <div class="field"><label>Emoji</label><input id="f_emoji" placeholder="🐾"></div>
+        </div>
+        <div class="meta line2">
           <div class="field"><label>Van leerjaar</label><select id="f_gmin"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
           <div class="field"><label>Tot leerjaar</label><select id="f_gmax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select></div>
           <div class="field"><label>Zichtbaar voor</label><select id="f_school"><option value="">Alle scholen</option></select></div>
           <div class="field"><label>Soort</label><select id="f_kind"><option value="mc">Meerkeuzequiz</option><option value="circle">Cirkelrekenen</option></select></div>
+        </div>
+
+        <div class="avail">
+          <h3>📅 Seizoensgebonden beschikbaarheid</h3>
+          <p class="muted">Optioneel: enkel zichtbaar voor leerkrachten tijdens een bepaalde periode van het schooljaar — bv. van september tot juni. Loopt de periode over de zomer heen, dan komt de quiz automatisch elk schooljaar opnieuw beschikbaar in die maanden, zonder dat je dit moet herhalen.</p>
+          <div class="row">
+            <div class="field"><label>Beschikbaar van</label><select id="f_avail_from"><option value="">Het hele jaar</option></select></div>
+            <div class="field"><label>Tot en met</label><select id="f_avail_to"><option value="">Het hele jaar</option></select></div>
+          </div>
         </div>
 
         <div class="imp" id="circleSettings" hidden style="border-color:var(--green);background:#f0fff6">
@@ -178,6 +196,15 @@
 document.getElementById('year').textContent=new Date().getFullYear();
 const $=id=>document.getElementById(id), esc=LP.esc, L='ABCD';
 const PLANETS=[['','– geen –'],['saturn ring','Saturnus (ringen)'],['jupiter','Jupiter'],['mars','Mars'],['earth','Aarde'],['uranus ring thin','Uranus (dunne ring)'],['neptune','Neptunus'],['venus','Venus'],['mercury','Mercurius']];
+const MONTHS=['januari','februari','maart','april','mei','juni','juli','augustus','september','oktober','november','december'];
+$('f_avail_from').insertAdjacentHTML('beforeend',MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''));
+$('f_avail_to').insertAdjacentHTML('beforeend',MONTHS.map((m,i)=>`<option value="${i+1}">${m}</option>`).join(''));
+// is een quiz met een seizoensperiode deze maand beschikbaar? (periode die over de jaarwissel loopt, bv. sep t/m jun, komt vanzelf elk schooljaar terug)
+function inSeason(q,now){
+  if(!q.avail_from_month||!q.avail_to_month)return true;
+  const m=(now||new Date()).getMonth()+1,f=q.avail_from_month,t=q.avail_to_month;
+  return f<=t ? (m>=f&&m<=t) : (m>=f||m<=t);
+}
 let profile=null, schools=[], quizzes=[], users=[], cur=null; // cur = quiz in bewerking {id?, ...}
 function note(t,cls){$('msg').innerHTML=t?`<div class="notice ${cls}">${t}</div>`:'';if(t&&cls!=='err')setTimeout(()=>{$('msg').innerHTML=''},4000);}
 $('logout').addEventListener('click',async e=>{e.preventDefault();await LP.sb.auth.signOut();location.href='/';});
@@ -197,10 +224,14 @@ async function loadUsers(){const {data,error}=await LP.sb.from('profiles').selec
 
 /* ---------- lijst ---------- */
 function renderQuizList(){
-  $('quizList').innerHTML=quizzes.length?quizzes.map(q=>`<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`).join(''):'<div class="muted">Nog geen quizzen.</div>';
+  $('quizList').innerHTML=quizzes.length?quizzes.map(q=>{
+    const seasonal=q.avail_from_month&&q.avail_to_month;
+    const badge=seasonal?`<span class="tag ${inSeason(q)?'':'orange'}" title="${inSeason(q)?'Nu zichtbaar voor leerkrachten':'Nu niet zichtbaar — komt vanzelf terug in '+MONTHS[q.avail_from_month-1]}">📅 ${MONTHS[q.avail_from_month-1].slice(0,3)}–${MONTHS[q.avail_to_month-1].slice(0,3)}</span>`:'';
+    return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
+  }).join(''):'<div class="muted">Nog geen quizzen.</div>';
 }
 $('quizList').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));});
-$('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',vak:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:null,published:true,questions:[]}));
+$('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',vak:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:null,published:true,questions:[],avail_from_month:null,avail_to_month:null}));
 
 /* ---------- editor ---------- */
 function openQuiz(q){
@@ -208,6 +239,7 @@ function openQuiz(q){
   $('editor').hidden=false; $('edTitle').textContent=cur.id?'Quiz bewerken':'Nieuwe quiz';
   $('f_title').value=cur.title||'';$('f_theme').value=cur.theme||'';$('f_vak').value=cur.vak||'Rekenen';$('f_emoji').value=cur.emoji||'🎯';
   $('f_gmin').value=cur.grade_min||1;$('f_gmax').value=cur.grade_max||6;$('f_school').value=cur.school_id||'';$('f_pub').checked=cur.published!==false;
+  $('f_avail_from').value=cur.avail_from_month||'';$('f_avail_to').value=cur.avail_to_month||'';
   $('f_kind').value=cur.kind||'mc'; const cs=cur.settings||{};
   $('c_op').value=cs.op||'+'; $('c_kinds').value=(cs.kinds&&cs.kinds.length===1)?cs.kinds[0]:'both'; $('c_bridge').value=cs.bridge||'mix'; $('c_count').value=cs.count||10;
   applyKind();
@@ -289,7 +321,10 @@ $('save').addEventListener('click',async()=>{
   const circle=$('f_kind').value==='circle';
   const w=circle?[]:QuizImport.validate({questions:cur.questions}); const blocking=w.filter(x=>!/geen uitleg/.test(x));
   if(blocking.length){showWarnings(w);if(!confirm('Er zijn nog problemen met de vragen (zie geel kader). Toch bewaren?'))return;}
+  const availFrom=$('f_avail_from').value?+$('f_avail_from').value:null, availTo=$('f_avail_to').value?+$('f_avail_to').value:null;
+  if((availFrom&&!availTo)||(!availFrom&&availTo)){note('Kies zowel een start- als een eindmaand voor de beschikbaarheid (of laat beide leeg).','err');return;}
   const rec={title,theme:$('f_theme').value.trim()||null,vak:$('f_vak').value||null,emoji:$('f_emoji').value.trim()||'🎯',grade_min:+$('f_gmin').value,grade_max:+$('f_gmax').value,school_id:$('f_school').value||null,published:$('f_pub').checked,
+    avail_from_month:availFrom,avail_to_month:availTo,
     kind:circle?'circle':'mc',settings:circle?{op:$('c_op').value,kinds:$('c_kinds').value==='both'?['TE+E','TE+TE']:[$('c_kinds').value],bridge:$('c_bridge').value,count:+$('c_count').value||10}:{},
     questions:cur.questions.map(q=>{const o={q:q.q.trim(),a:q.a.map(a=>{const x={t:a.t.trim(),ok:!!a.ok,e:(a.e||'').trim()};if(a.planet)x.planet=a.planet;return x;})};if(q.multi)o.multi=q.multi;return o;})};
   if(rec.grade_min>rec.grade_max)[rec.grade_min,rec.grade_max]=[rec.grade_max,rec.grade_min];
