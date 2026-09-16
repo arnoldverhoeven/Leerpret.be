@@ -140,7 +140,7 @@
 
         <div class="imp">
           <h3>📥 Vragen importeren</h3>
-          <p class="muted" style="margin:0 0 10px">Sleep een <b>Word-bestand (.docx)</b>, tekstbestand of JSON hierheen, of plak tekst. Formaat: vraag op een lijn die begint met <code>1.</code>, antwoorden met <code>A.</code> <code>B.</code>…, een <code>*</code> voor het juiste antwoord, en de uitleg op de lijn eronder. <a href="/assets/sjabloon-quiz.docx" download>Download het Word-sjabloon</a> · <a href="/assets/sjabloon-quiz.txt" download>tekst-sjabloon</a></p>
+          <p class="muted" style="margin:0 0 10px">Sleep een <b>Word-bestand (.docx)</b>, tekstbestand of JSON hierheen, of plak tekst. Formaat: vraag op een lijn die begint met <code>1.</code>, antwoorden met <code>A.</code> <code>B.</code>…, een <code>*</code> voor het juiste antwoord, en de uitleg op de lijn eronder. Bovenaan mag je optioneel <code>Titel:</code>, <code>Thema:</code>, <code>Vak:</code>, <code>Emoji:</code>, <code>Leerjaar:</code>, <code>Beschikbaar van:</code> en <code>Tot en met:</code> (maandnaam) meegeven — die worden dan automatisch overgenomen, net als de beschikbaarheidsperiode uit een JSON-bestand. Geen periode meegegeven? Dan stelt Leerpret er zelf één voor op basis van de jaarplanning, als titel/thema herkend worden. <a href="/assets/sjabloon-quiz.docx" download>Download het Word-sjabloon</a> · <a href="/assets/sjabloon-quiz.txt" download>tekst-sjabloon</a></p>
           <div class="row">
             <label class="drop" id="drop">📄 Klik of sleep een bestand hierheen (.docx, .txt, .json)<input type="file" id="file" accept=".docx,.txt,.md,.json"></label>
           </div>
@@ -204,6 +204,31 @@ function inSeason(q,now){
   if(!q.avail_from_month||!q.avail_to_month)return true;
   const m=(now||new Date()).getMonth()+1,f=q.avail_from_month,t=q.avail_to_month;
   return f<=t ? (m>=f&&m<=t) : (m>=f||m<=t);
+}
+// jaarplanning 3de leerjaar → automatische seizoenssuggestie bij import (titel/thema-matching, zie jaarplanning-3de-leerjaar.xlsx)
+const JAARPLANNING=[
+  [/school|klas.*(plattegrond|windrichting)/i,9,10],
+  [/getallen tot 1000/i,9,1],
+  [/dieren indelen|zoogdier|gewervelde/i,10,11],
+  [/herfst/i,10,11],
+  [/veilig op straat|verkeer/i,11,12],
+  [/andere landen|feest.*wereld|klimaatzone/i,12,1],
+  [/sinterklaas/i,12,12],
+  [/menselijk lichaam|spijsvertering|skelet|ons lichaam/i,2,3],
+  [/gezond eten|voeding/i,2,2],
+  [/provincies|gewesten/i,3,5],
+  [/lente.*(zaaien|kiemen)/i,3,4],
+  [/meten.*(lengte|gewicht)/i,3,4],
+  [/van ei tot dier|voortplanting/i,4,4],
+  [/klok.*tijd|tijdsduur/i,4,6],
+  [/minibeest|insect|spin/i,5,5],
+  [/europa|buurland/i,5,6],
+  [/terugblik/i,6,6],
+];
+function suggestSeason(title,theme){
+  const s=`${title||''} ${theme||''}`;
+  const hit=JAARPLANNING.find(([re])=>re.test(s));
+  return hit?[hit[1],hit[2]]:null;
 }
 let profile=null, schools=[], quizzes=[], users=[], cur=null; // cur = quiz in bewerking {id?, ...}
 function note(t,cls){$('msg').innerHTML=t?`<div class="notice ${cls}">${t}</div>`:'';if(t&&cls!=='err')setTimeout(()=>{$('msg').innerHTML=''},4000);}
@@ -297,9 +322,19 @@ function applyImport(quiz,source){
   if($('append').checked)cur.questions=cur.questions.concat(quiz.questions);else cur.questions=quiz.questions;
   if(quiz.title&&!$('f_title').value){$('f_title').value=quiz.title;cur.title=quiz.title;}
   if(quiz.theme&&!$('f_theme').value){$('f_theme').value=quiz.theme;}
+  if(quiz.vak&&!$('f_vak').value){$('f_vak').value=quiz.vak;}
   if(quiz.emoji){$('f_emoji').value=quiz.emoji;}
   if(quiz.title&&quiz.grade_min){$('f_gmin').value=quiz.grade_min;$('f_gmax').value=quiz.grade_max;}
-  renderQuestions(); showWarnings(w,true); note(`${quiz.questions.length} vragen ingelezen uit ${source}. Kijk ze na en klik op Bewaren.`,'ok');
+  // seizoensperiode: overnemen als het bestand er een meegeeft, anders zelf voorstellen o.b.v. de jaarplanning
+  let seasonMsg='';
+  if(quiz.avail_from_month&&quiz.avail_to_month){
+    $('f_avail_from').value=quiz.avail_from_month; $('f_avail_to').value=quiz.avail_to_month;
+    seasonMsg=` · beschikbaarheid ${MONTHS[quiz.avail_from_month-1]}–${MONTHS[quiz.avail_to_month-1]} overgenomen uit het bestand.`;
+  } else if(!$('f_avail_from').value){
+    const sug=suggestSeason($('f_title').value,$('f_theme').value);
+    if(sug){$('f_avail_from').value=sug[0];$('f_avail_to').value=sug[1];seasonMsg=` · periode ${MONTHS[sug[0]-1]}–${MONTHS[sug[1]-1]} automatisch voorgesteld o.b.v. de jaarplanning — controleer gerust.`;}
+  }
+  renderQuestions(); showWarnings(w,true); note(`${quiz.questions.length} vragen ingelezen uit ${source}.${seasonMsg} Kijk ze na en klik op Bewaren.`,'ok');
 }
 async function importFile(file){
   try{
