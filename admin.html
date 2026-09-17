@@ -20,6 +20,16 @@
   .grid{display:grid;grid-template-columns:380px 1fr;gap:24px;align-items:start}
   .grid,.grid>*{min-width:0}
   @media (max-width:1000px){.grid{grid-template-columns:1fr}}
+  .vgroup{margin-bottom:10px;border:2px solid var(--line);border-radius:14px;overflow:hidden}
+  .vhead{display:flex;align-items:center;gap:10px;padding:10px 12px;cursor:pointer;user-select:none;border:none;background:#fff;width:100%;text-align:left;font:inherit}
+  .vhead:hover{background:#f7f9ff}
+  .vhead .vico{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex:none}
+  .vhead h3{margin:0;font-size:1.05rem;flex:1;font-family:var(--head);color:var(--navy)}
+  .vhead .n{color:var(--muted);font-weight:700;font-size:.85rem}
+  .vhead .chev{flex:none;font-size:1.1rem;color:var(--muted);transition:transform .2s}
+  .vgroup.open .vhead .chev{transform:rotate(180deg)}
+  .vgroup .list{display:none;padding:8px 10px 10px}
+  .vgroup.open .list{display:block}
   .list .row{display:flex;gap:12px;align-items:center;padding:12px 14px;border:2px solid var(--line);border-radius:14px;margin-bottom:8px;cursor:pointer;background:#fff}
   .list .row:hover{border-color:var(--sky)}
   .list .row.active{border-color:var(--orange);box-shadow:0 0 0 3px #ffe9d9}
@@ -98,6 +108,20 @@
 
       <section class="card" id="editor" hidden>
         <h2 style="font-size:1.4rem" id="edTitle">Nieuwe quiz</h2>
+
+        <div class="imp">
+          <h3>📥 Vragen importeren</h3>
+          <p class="muted" style="margin:0 0 10px">Sleep een <b>Word-bestand (.docx)</b>, tekstbestand of JSON hierheen, of plak tekst. Formaat: vraag op een lijn die begint met <code>1.</code>, antwoorden met <code>A.</code> <code>B.</code>…, een <code>*</code> voor het juiste antwoord, en de uitleg op de lijn eronder. Bovenaan mag je optioneel <code>Titel:</code>, <code>Thema:</code>, <code>Vak:</code>, <code>Emoji:</code>, <code>Leerjaar:</code>, <code>Beschikbaar van:</code> en <code>Tot en met:</code> (maandnaam) meegeven — die worden dan automatisch overgenomen, net als de beschikbaarheidsperiode uit een JSON-bestand. Geen periode meegegeven? Dan stelt Leerpret er zelf één voor op basis van de jaarplanning, als titel/thema herkend worden. <a href="/assets/sjabloon-quiz.docx" download>Download het Word-sjabloon</a> · <a href="/assets/sjabloon-quiz.txt" download>tekst-sjabloon</a></p>
+          <div class="row">
+            <label class="drop" id="drop">📄 Klik of sleep een bestand hierheen (.docx, .txt, .json)<input type="file" id="file" accept=".docx,.txt,.md,.json"></label>
+          </div>
+          <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Of plak tekst / JSON</summary>
+            <textarea id="paste" placeholder="1. Welk dier zegt miauw?&#10;A. Hond&#10;   Nee, een hond blaft.&#10;*B. Kat&#10;   Juist! Een kat miauwt."></textarea>
+            <div class="row" style="margin-top:8px"><button class="btn btn-navy btn-sm" id="parsePaste">Tekst omzetten</button><label style="font-weight:700;color:var(--muted)"><input type="checkbox" id="append"> Toevoegen aan bestaande vragen (i.p.v. vervangen)</label></div>
+          </details>
+          <div id="warn" class="warn" hidden></div>
+        </div>
+
         <div class="meta line1">
           <div class="field"><label>Titel</label><input id="f_title" placeholder="bv. Dieren Quiz"></div>
           <div class="field"><label>Thema</label><input id="f_theme" placeholder="bv. Dieren"></div>
@@ -136,19 +160,6 @@
             <div class="field"><label>Brug over het tiental</label><select id="c_bridge"><option value="mix" selected>Gemengd</option><option value="no">Zonder brug</option><option value="yes">Alleen met brug</option></select></div>
             <div class="field"><label>Aantal oefeningen</label><input id="c_count" type="number" min="1" max="30" value="10"></div>
           </div>
-        </div>
-
-        <div class="imp">
-          <h3>📥 Vragen importeren</h3>
-          <p class="muted" style="margin:0 0 10px">Sleep een <b>Word-bestand (.docx)</b>, tekstbestand of JSON hierheen, of plak tekst. Formaat: vraag op een lijn die begint met <code>1.</code>, antwoorden met <code>A.</code> <code>B.</code>…, een <code>*</code> voor het juiste antwoord, en de uitleg op de lijn eronder. Bovenaan mag je optioneel <code>Titel:</code>, <code>Thema:</code>, <code>Vak:</code>, <code>Emoji:</code>, <code>Leerjaar:</code>, <code>Beschikbaar van:</code> en <code>Tot en met:</code> (maandnaam) meegeven — die worden dan automatisch overgenomen, net als de beschikbaarheidsperiode uit een JSON-bestand. Geen periode meegegeven? Dan stelt Leerpret er zelf één voor op basis van de jaarplanning, als titel/thema herkend worden. <a href="/assets/sjabloon-quiz.docx" download>Download het Word-sjabloon</a> · <a href="/assets/sjabloon-quiz.txt" download>tekst-sjabloon</a></p>
-          <div class="row">
-            <label class="drop" id="drop">📄 Klik of sleep een bestand hierheen (.docx, .txt, .json)<input type="file" id="file" accept=".docx,.txt,.md,.json"></label>
-          </div>
-          <details style="margin-top:10px"><summary style="cursor:pointer;font-weight:700;color:var(--navy)">Of plak tekst / JSON</summary>
-            <textarea id="paste" placeholder="1. Welk dier zegt miauw?&#10;A. Hond&#10;   Nee, een hond blaft.&#10;*B. Kat&#10;   Juist! Een kat miauwt."></textarea>
-            <div class="row" style="margin-top:8px"><button class="btn btn-navy btn-sm" id="parsePaste">Tekst omzetten</button><label style="font-weight:700;color:var(--muted)"><input type="checkbox" id="append"> Toevoegen aan bestaande vragen (i.p.v. vervangen)</label></div>
-          </details>
-          <div id="warn" class="warn" hidden></div>
         </div>
 
         <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px">
@@ -231,6 +242,18 @@ function suggestSeason(title,theme){
   const hit=JAARPLANNING.find(([re])=>re.test(s));
   return hit?[hit[1],hit[2]]:null;
 }
+// groepering per vak, zoals op het dashboard
+const VAK_ORDER=['Rekenen','Taal','Wereldoriëntatie','Geschiedenis','Algemene kennis','Varia'];
+const VAK_META={
+  'Rekenen':{icon:'🔢',bg:'#e5f0ff',fg:'#1e5fd9'},
+  'Taal':{icon:'🔤',bg:'#ffe9f5',fg:'#c92a7a'},
+  'Wereldoriëntatie':{icon:'🌍',bg:'#e7fbef',fg:'#1a9a5c'},
+  'Geschiedenis':{icon:'🏰',bg:'#fdf0e3',fg:'#b4611a'},
+  'Algemene kennis':{icon:'💡',bg:'#f4edff',fg:'#7231c9'},
+  'Varia':{icon:'🎲',bg:'#f0f2f8',fg:'#556'},
+};
+function vakMeta(v){ return VAK_META[v]||VAK_META['Varia']; }
+let openVaks=new Set();
 let profile=null, schools=[], quizzes=[], users=[], cur=null, isSuper=false; // cur = quiz in bewerking {id?, ...}
 function note(t,cls){$('msg').innerHTML=t?`<div class="notice ${cls}">${t}</div>`:'';if(t&&cls!=='err')setTimeout(()=>{$('msg').innerHTML=''},4000);}
 $('logout').addEventListener('click',async e=>{e.preventDefault();await LP.sb.auth.signOut();location.href='/';});
@@ -269,16 +292,33 @@ async function loadQuizzes(){
 function canEdit(q){ return isSuper || (q.school_id||null)===profile.school_id; }
 async function loadUsers(){const {data,error}=await LP.sb.from('profiles').select('id,full_name,email,role,school_id').order('email');if(error)note(esc(error.message),'err');users=data||[];}
 
-/* ---------- lijst ---------- */
-function renderQuizList(){
-  $('quizList').innerHTML=quizzes.length?quizzes.map(q=>{
-    const seasonal=q.avail_from_month&&q.avail_to_month;
-    const badge=seasonal?`<span class="tag ${inSeason(q)?'':'orange'}" title="${inSeason(q)?'Nu zichtbaar voor leerkrachten':'Nu niet zichtbaar — komt vanzelf terug in '+MONTHS[q.avail_from_month-1]}">📅 ${MONTHS[q.avail_from_month-1].slice(0,3)}–${MONTHS[q.avail_to_month-1].slice(0,3)}</span>`:'';
-    const ro=!canEdit(q);
-    return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${ro?'<span class="tag" title="Algemene bibliotheek — enkel-lezen, kopieer naar je school om aan te passen">🔒 enkel-lezen</span>':''} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
-  }).join(''):'<div class="muted">Nog geen quizzen.</div>';
+/* ---------- lijst (gegroepeerd per vak) ---------- */
+function rowHtml(q){
+  const seasonal=q.avail_from_month&&q.avail_to_month;
+  const badge=seasonal?`<span class="tag ${inSeason(q)?'':'orange'}" title="${inSeason(q)?'Nu zichtbaar voor leerkrachten':'Nu niet zichtbaar — komt vanzelf terug in '+MONTHS[q.avail_from_month-1]}">📅 ${MONTHS[q.avail_from_month-1].slice(0,3)}–${MONTHS[q.avail_to_month-1].slice(0,3)}</span>`:'';
+  const ro=!canEdit(q);
+  return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${ro?'<span class="tag" title="Algemene bibliotheek — enkel-lezen, kopieer naar je school om aan te passen">🔒 enkel-lezen</span>':''} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
 }
-$('quizList').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));});
+function renderQuizList(){
+  if(!quizzes.length){$('quizList').innerHTML='<div class="muted">Nog geen quizzen.</div>';return;}
+  const groups=new Map();
+  quizzes.forEach(q=>{ const v=q.vak&&VAK_ORDER.includes(q.vak)?q.vak:(q.vak||'Varia'); if(!groups.has(v))groups.set(v,[]); groups.get(v).push(q); });
+  const order=[...VAK_ORDER,...[...groups.keys()].filter(v=>!VAK_ORDER.includes(v))];
+  // groep met de geopende quiz staat automatisch open
+  if(cur&&cur.id){ const cq=quizzes.find(q=>q.id===cur.id); if(cq) openVaks.add(cq.vak&&VAK_ORDER.includes(cq.vak)?cq.vak:(cq.vak||'Varia')); }
+  $('quizList').innerHTML=order.filter(v=>groups.has(v)).map(v=>{
+    const items=groups.get(v), meta=vakMeta(v), open=openVaks.has(v);
+    return `<div class="vgroup ${open?'open':''}" data-vak="${esc(v)}">
+      <button type="button" class="vhead"><div class="vico" style="background:${meta.bg};color:${meta.fg}">${meta.icon}</div><h3>${esc(v)}</h3><span class="n">${items.length} ${items.length===1?'quiz':'quizzen'}</span><span class="chev">▾</span></button>
+      <div class="list">${items.map(rowHtml).join('')}</div>
+    </div>`;
+  }).join('');
+}
+$('quizList').addEventListener('click',e=>{
+  const h=e.target.closest('.vhead');
+  if(h){const v=h.closest('.vgroup').dataset.vak;openVaks.has(v)?openVaks.delete(v):openVaks.add(v);renderQuizList();return;}
+  const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));
+});
 $('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',vak:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:isSuper?null:profile.school_id,published:true,questions:[],avail_from_month:null,avail_to_month:null}));
 
 /* ---------- editor ---------- */
