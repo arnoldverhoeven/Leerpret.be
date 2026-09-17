@@ -104,7 +104,7 @@ async function init(){
   const user=await LP.requireAuth(); if(!user) return;
   profile=await LP.myProfile();
   $('hello').textContent=`Dag ${(profile&&profile.full_name)||LP.toUsername(user.email)}! 👋`;
-  if(profile&&profile.role==='admin') $('adminLink').hidden=false;
+  if(profile&&['schooladmin','superadmin'].includes(profile.role)) $('adminLink').hidden=false;
   if(!profile||!profile.school_id){ $('school').textContent='Je account is nog niet aan een school gekoppeld. Mail naar info@leerpret.be.'; return; }
   $('school').textContent=profile.schools?profile.schools.name:'';
   const [c,q]=await Promise.all([

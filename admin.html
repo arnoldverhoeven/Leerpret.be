@@ -83,7 +83,7 @@
 <main class="wrap">
   <div class="top"><h1>Beheer 🛠️</h1><div id="who" class="muted"></div></div>
   <div id="msg"></div>
-  <div class="tabs"><button class="active" data-pane="quizzes">Quizzen</button><button data-pane="schools">Scholen &amp; leerkrachten</button></div>
+  <div class="tabs"><button class="active" data-pane="quizzes">Quizzen</button><button data-pane="schools" id="tabSchools" hidden>Scholen &amp; leerkrachten</button></div>
 
   <!-- ================= QUIZZEN ================= -->
   <div class="pane active" id="pane-quizzes">
@@ -230,7 +230,7 @@ function suggestSeason(title,theme){
   const hit=JAARPLANNING.find(([re])=>re.test(s));
   return hit?[hit[1],hit[2]]:null;
 }
-let profile=null, schools=[], quizzes=[], users=[], cur=null; // cur = quiz in bewerking {id?, ...}
+let profile=null, schools=[], quizzes=[], users=[], cur=null, isSuper=false; // cur = quiz in bewerking {id?, ...}
 function note(t,cls){$('msg').innerHTML=t?`<div class="notice ${cls}">${t}</div>`:'';if(t&&cls!=='err')setTimeout(()=>{$('msg').innerHTML=''},4000);}
 $('logout').addEventListener('click',async e=>{e.preventDefault();await LP.sb.auth.signOut();location.href='/';});
 document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.tabs button').forEach(x=>x.classList.toggle('active',x===b));document.querySelectorAll('.pane').forEach(p=>p.classList.toggle('active',p.id==='pane-'+b.dataset.pane));}));
@@ -238,13 +238,30 @@ document.querySelectorAll('.tabs button').forEach(b=>b.addEventListener('click',
 async function init(){
   const user=await LP.requireAuth(); if(!user) return;
   profile=await LP.myProfile();
-  if(!profile||profile.role!=='admin'){document.querySelector('main').innerHTML='<div class="card"><h2>Geen toegang</h2><p>Dit scherm is enkel voor beheerders. <a href="/dashboard.html">Naar mijn klassen</a></p></div>';return;}
-  $('who').textContent=profile.full_name||LP.toUsername(user.email);
-  await Promise.all([loadSchools(),loadQuizzes(),loadUsers()]);
-  renderSchools(); renderQuizList(); renderUsers();
+  if(!profile||!['schooladmin','superadmin'].includes(profile.role)){document.querySelector('main').innerHTML='<div class="card"><h2>Geen toegang</h2><p>Dit scherm is enkel voor beheerders. <a href="/dashboard.html">Naar mijn klassen</a></p></div>';return;}
+  isSuper=profile.role==='superadmin';
+  if(!isSuper&&!profile.school_id){document.querySelector('main').innerHTML='<div class="card"><h2>Nog geen school gekoppeld</h2><p>Je account is schoolbeheerder, maar nog niet aan een school gekoppeld. Vraag de hoofdbeheerder om dit in te stellen.</p></div>';return;}
+  $('who').textContent=(profile.full_name||LP.toUsername(user.email))+' · '+(isSuper?'Superbeheerder':'Schoolbeheerder'+(profile.schools?' — '+profile.schools.name:''));
+  $('tabSchools').hidden=!isSuper;
+  const tasks=[loadQuizzes()];
+  if(isSuper) tasks.push(loadSchools(),loadUsers());
+  await Promise.all(tasks);
+  if(!isSuper){
+    // schoolbeheerder: enkel de eigen school, geen "alle scholen"-optie en geen scholenlijst nodig
+    schools=profile.schools?[{id:profile.school_id,name:profile.schools.name}]:[];
+    $('f_school').innerHTML=`<option value="${profile.school_id}">${esc(profile.schools?profile.schools.name:'Mijn school')}</option>`;
+    $('f_school').disabled=true;
+  }
+  if(isSuper){renderSchools();renderUsers();}
+  renderQuizList();
 }
 async function loadSchools(){const {data,error}=await LP.sb.from('schools').select('id,name,slug').order('name');if(error)note(esc(error.message),'err');schools=data||[];$('f_school').innerHTML='<option value="">Alle scholen</option>'+schools.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');}
-async function loadQuizzes(){const {data,error}=await LP.sb.from('quizzes').select('*').order('title');if(error)note(esc(error.message),'err');quizzes=data||[];}
+async function loadQuizzes(){
+  const {data,error}=await LP.sb.from('quizzes').select('*').order('title');if(error)note(esc(error.message),'err');
+  quizzes=data||[];
+  // een schoolbeheerder beheert enkel de quizzen van de eigen school, niet de algemene Leerpret-quizzen
+  if(!isSuper) quizzes=quizzes.filter(q=>q.school_id===profile.school_id);
+}
 async function loadUsers(){const {data,error}=await LP.sb.from('profiles').select('id,full_name,email,role,school_id').order('email');if(error)note(esc(error.message),'err');users=data||[];}
 
 /* ---------- lijst ---------- */
@@ -256,7 +273,7 @@ function renderQuizList(){
   }).join(''):'<div class="muted">Nog geen quizzen.</div>';
 }
 $('quizList').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));});
-$('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',vak:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:null,published:true,questions:[],avail_from_month:null,avail_to_month:null}));
+$('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',vak:'',emoji:'🎯',grade_min:1,grade_max:6,school_id:isSuper?null:profile.school_id,published:true,questions:[],avail_from_month:null,avail_to_month:null}));
 
 /* ---------- editor ---------- */
 function openQuiz(q){
@@ -395,13 +412,13 @@ function renderUsers(){
   $('users').querySelector('tbody').innerHTML=users.map(u=>`<tr data-id="${u.id}">
     <td><input class="fn" value="${esc(u.full_name||'')}" placeholder="Naam"></td><td><code>${esc(LP.toUsername(u.email)||'–')}</code></td>
     <td><select class="sc"><option value="">– geen –</option>${schools.map(s=>`<option value="${s.id}" ${u.school_id===s.id?'selected':''}>${esc(s.name)}</option>`).join('')}</select></td>
-    <td><select class="ro"><option value="teacher" ${u.role==='teacher'?'selected':''}>Leerkracht</option><option value="admin" ${u.role==='admin'?'selected':''}>Beheerder</option></select></td>
+    <td><select class="ro"><option value="teacher" ${u.role==='teacher'?'selected':''}>Leerkracht</option><option value="schooladmin" ${u.role==='schooladmin'?'selected':''}>Schoolbeheerder</option><option value="superadmin" ${u.role==='superadmin'?'selected':''}>Superbeheerder</option></select></td>
     <td><button class="btn btn-navy btn-sm sv">Bewaren</button></td></tr>`).join('')||'<tr><td colspan="5" class="muted">Nog geen accounts. Maak ze aan in Supabase → Authentication → Users.</td></tr>';
 }
 $('users').addEventListener('click',async e=>{
   const b=e.target.closest('.sv');if(!b)return;const tr=b.closest('tr');
   const rec={full_name:tr.querySelector('.fn').value.trim()||null,school_id:tr.querySelector('.sc').value||null,role:tr.querySelector('.ro').value};
-  if(tr.dataset.id===profile.id&&rec.role!=='admin'&&!confirm('Je maakt jezelf geen beheerder meer. Zeker?'))return;
+  if(tr.dataset.id===profile.id&&rec.role!=='superadmin'&&!confirm('Je maakt jezelf geen superbeheerder meer. Zeker?'))return;
   b.disabled=true;const {error}=await LP.sb.from('profiles').update(rec).eq('id',tr.dataset.id);b.disabled=false;
   if(error){note(esc(error.message),'err');return;}
   Object.assign(users.find(u=>u.id===tr.dataset.id),rec);renderSchools();note('Bewaard ✔','ok');
