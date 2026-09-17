@@ -162,6 +162,7 @@
           <label style="font-weight:700"><input type="checkbox" id="f_pub" checked> Gepubliceerd (zichtbaar voor leerkrachten)</label>
           <span style="flex:1"></span>
           <a class="btn btn-light btn-sm" id="preview" href="#" target="_blank" hidden>▶ Uitproberen</a>
+          <button class="btn btn-navy btn-sm" id="copyToSchool" hidden>📋 Kopiëren naar mijn school</button>
           <button class="btn btn-light btn-sm" id="delQuiz" hidden style="color:#c33">Verwijderen</button>
         </div>
       </section>
@@ -258,10 +259,14 @@ async function init(){
 async function loadSchools(){const {data,error}=await LP.sb.from('schools').select('id,name,slug').order('name');if(error)note(esc(error.message),'err');schools=data||[];$('f_school').innerHTML='<option value="">Alle scholen</option>'+schools.map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join('');}
 async function loadQuizzes(){
   const {data,error}=await LP.sb.from('quizzes').select('*').order('title');if(error)note(esc(error.message),'err');
+  // de toegangsregels (RLS) leveren hier al precies het juiste op: superbeheerder ziet alles, schoolbeheerder
+  // ziet de eigen-schoolquizzen (ook niet-gepubliceerde) plus de algemene "Alle scholen"-bibliotheek — die laatste
+  // wel enkel om te bekijken/dupliceren, niet om te bewerken (zie isEditable/canEdit hieronder).
   quizzes=data||[];
-  // een schoolbeheerder beheert enkel de quizzen van de eigen school, niet de algemene Leerpret-quizzen
-  if(!isSuper) quizzes=quizzes.filter(q=>q.school_id===profile.school_id);
 }
+// mag deze ingelogde gebruiker deze quiz zelf bewerken/verwijderen? superbeheerder: altijd. schoolbeheerder: enkel
+// de quizzen van de eigen school — de algemene bibliotheek ("Alle scholen", school_id null) is enkel-lezen voor hen.
+function canEdit(q){ return isSuper || (q.school_id||null)===profile.school_id; }
 async function loadUsers(){const {data,error}=await LP.sb.from('profiles').select('id,full_name,email,role,school_id').order('email');if(error)note(esc(error.message),'err');users=data||[];}
 
 /* ---------- lijst ---------- */
@@ -269,7 +274,8 @@ function renderQuizList(){
   $('quizList').innerHTML=quizzes.length?quizzes.map(q=>{
     const seasonal=q.avail_from_month&&q.avail_to_month;
     const badge=seasonal?`<span class="tag ${inSeason(q)?'':'orange'}" title="${inSeason(q)?'Nu zichtbaar voor leerkrachten':'Nu niet zichtbaar — komt vanzelf terug in '+MONTHS[q.avail_from_month-1]}">📅 ${MONTHS[q.avail_from_month-1].slice(0,3)}–${MONTHS[q.avail_to_month-1].slice(0,3)}</span>`:'';
-    return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
+    const ro=!canEdit(q);
+    return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${ro?'<span class="tag" title="Algemene bibliotheek — enkel-lezen, kopieer naar je school om aan te passen">🔒 enkel-lezen</span>':''} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
   }).join(''):'<div class="muted">Nog geen quizzen.</div>';
 }
 $('quizList').addEventListener('click',e=>{const r=e.target.closest('.row');if(!r)return;openQuiz(quizzes.find(q=>q.id===r.dataset.id));});
@@ -278,14 +284,25 @@ $('newQuiz').addEventListener('click',()=>openQuiz({title:'',theme:'',vak:'',emo
 /* ---------- editor ---------- */
 function openQuiz(q){
   cur=JSON.parse(JSON.stringify(q)); if(!Array.isArray(cur.questions))cur.questions=[];
-  $('editor').hidden=false; $('edTitle').textContent=cur.id?'Quiz bewerken':'Nieuwe quiz';
+  const ro=cur.id&&!canEdit(cur);
+  $('editor').hidden=false; $('edTitle').textContent=cur.id?(ro?'Quiz bekijken (enkel-lezen)':'Quiz bewerken'):'Nieuwe quiz';
   $('f_title').value=cur.title||'';$('f_theme').value=cur.theme||'';$('f_vak').value=cur.vak||'Rekenen';$('f_emoji').value=cur.emoji||'🎯';
   $('f_gmin').value=cur.grade_min||1;$('f_gmax').value=cur.grade_max||6;$('f_school').value=cur.school_id||'';$('f_pub').checked=cur.published!==false;
   $('f_avail_from').value=cur.avail_from_month||'';$('f_avail_to').value=cur.avail_to_month||'';
   $('f_kind').value=cur.kind||'mc'; const cs=cur.settings||{};
   $('c_op').value=cs.op||'+'; $('c_kinds').value=(cs.kinds&&cs.kinds.length===1)?cs.kinds[0]:'both'; $('c_bridge').value=cs.bridge||'mix'; $('c_count').value=cs.count||10;
   applyKind();
-  $('delQuiz').hidden=!cur.id; $('preview').hidden=!cur.id; $('warn').hidden=true;
+  // enkel-lezen: dit is een quiz uit de algemene bibliotheek ("alle scholen") en de ingelogde schoolbeheerder
+  // mag die niet aanpassen — velden op slot, geen bewaren/verwijderen/importeren, wel een knop om als eigen
+  // kopie te starten. De import-doos (niet zinvol als je toch niet mag bewaren) wordt apart verborgen.
+  document.querySelectorAll('#editor input, #editor select, #editor textarea').forEach(el=>el.disabled=ro);
+  document.getElementById('drop').closest('.imp').hidden=ro||$('f_kind').value==='circle';
+  $('save').hidden=ro; $('addQ').disabled=ro; $('checkQ').disabled=ro;
+  // de knoppen per vraag (verwijderen/verplaatsen/husselen/antwoord-toggle) zijn geen <input>, dus apart blokkeren
+  $('qs').style.pointerEvents=ro?'none':''; $('qs').style.opacity=ro?'.65':'';
+  $('delQuiz').hidden=!cur.id||ro; $('preview').hidden=!cur.id; $('copyToSchool').hidden=!ro;
+  $('warn').hidden=true;
+  if(ro) note('Dit is een quiz uit de algemene bibliotheek (alle scholen). Je kan ze bekijken, maar niet rechtstreeks aanpassen — klik op "Kopiëren naar mijn school" om er een eigen, bewerkbare versie van te maken.','ok');
   renderQuestions(); renderQuizList(); $('editor').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function applyKind(){
@@ -393,6 +410,12 @@ $('preview').addEventListener('click',async e=>{
   const {data}=await LP.sb.from('classes').select('id').limit(1);
   if(!data||!data.length){note('Maak eerst een klas aan (dashboard) om uit te proberen.','err');return;}
   window.open(`/quiz.html?quiz=${cur.id}&class=${data[0].id}`,'_blank');
+});
+$('copyToSchool').addEventListener('click',()=>{
+  const copy=JSON.parse(JSON.stringify(cur));
+  delete copy.id; delete copy.created_at; copy.school_id=profile.school_id; copy.title=(copy.title||'')+' (kopie)';
+  openQuiz(copy);
+  note('Kopie klaar om te bewaren als eigen quiz van je school. Pas gerust aan en klik op Bewaren.','ok');
 });
 $('delQuiz').addEventListener('click',async()=>{
   if(!cur.id||!confirm(`Quiz "${cur.title||$('f_title').value}" definitief verwijderen?`))return;
