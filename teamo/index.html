@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#1d2230">
+<title>Carné B · Test DGT</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@500;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --asfalto:#1d2230; --asfalto2:#2a3142; --amarillo:#ffc629; --coral:#ff5a5f; --verde:#22b867; --verde-bg:#e3f8ec;
+    --rojo-bg:#ffe6e7; --azul:#1f5fbf; --fondo:#fff8ec; --texto:#1d2230; --suave:#6b7280; --card:#ffffff; --borde:#ece3d3;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --fondo:#151924; --card:#222838; --texto:#f3f4f6; --suave:#a8b0c0; --borde:#323a4d; --verde-bg:#16382a; --rojo-bg:#3d1f24;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  html,body{min-height:100%}
+  body{font-family:'Nunito',system-ui,sans-serif;background:var(--fondo);color:var(--texto);font-size:17px;line-height:1.45;
+    padding-bottom:env(safe-area-inset-bottom)}
+  button{font-family:inherit;color:inherit;cursor:pointer;border:none;background:none}
+  .wrap{max-width:560px;margin:0 auto;padding:0 16px}
+
+  /* ---------- Cabecera con carretera ---------- */
+  .hero{background:var(--asfalto);color:#fff;padding:28px 0 46px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;left:0;right:0;bottom:18px;height:6px;
+    background:repeating-linear-gradient(90deg,var(--amarillo) 0 38px,transparent 38px 70px);
+    animation:carretera 2.4s linear infinite;opacity:.9}
+  @keyframes carretera{to{background-position:-70px 0}}
+  .hero .flag{font-size:14px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--amarillo)}
+  .hero h1{font-family:'Baloo 2',sans-serif;font-size:clamp(2.1rem,9vw,2.9rem);line-height:1.02;margin-top:6px}
+  .hero h1 span{color:var(--amarillo)}
+  .hero p{color:#c9cfdc;margin-top:8px;font-size:16px}
+  .coche{position:absolute;right:14px;top:22px;font-size:46px;animation:bote 2.2s ease-in-out infinite}
+  @keyframes bote{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+  /* ---------- Tarjetas de inicio ---------- */
+  .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:-26px;position:relative;z-index:2}
+  .stat{background:var(--card);border-radius:16px;padding:12px 8px;text-align:center;box-shadow:0 6px 18px rgba(0,0,0,.08);border:1px solid var(--borde)}
+  .stat b{display:block;font-family:'Baloo 2',sans-serif;font-size:26px;line-height:1}
+  .stat small{font-size:12.5px;color:var(--suave);font-weight:700}
+
+  .menu{display:flex;flex-direction:column;gap:12px;margin:20px 0 28px}
+  .opcion{display:flex;align-items:center;gap:14px;text-align:left;background:var(--card);border:1px solid var(--borde);
+    border-radius:20px;padding:16px;box-shadow:0 4px 14px rgba(0,0,0,.06);transition:transform .12s}
+  .opcion:active{transform:scale(.98)}
+  .opcion .ico{flex:none;width:54px;height:54px;border-radius:16px;display:grid;place-items:center;font-size:28px}
+  .opcion h3{font-family:'Baloo 2',sans-serif;font-size:20px;line-height:1.1}
+  .opcion p{font-size:14.5px;color:var(--suave);margin-top:2px}
+  .opcion.principal{background:var(--asfalto);color:#fff;border:none}
+  .opcion.principal p{color:#c9cfdc}
+  .opcion .flecha{margin-left:auto;font-size:22px;opacity:.5}
+  .bg-a{background:var(--amarillo)} .bg-c{background:#ffd9da} .bg-v{background:#d6f5e3} .bg-z{background:#dbe7fb}
+  .nota{font-size:13px;color:var(--suave);text-align:center;padding:0 8px 30px}
+
+  /* ---------- Barra superior (quiz) ---------- */
+  .topbar{position:sticky;top:0;z-index:10;background:var(--asfalto);color:#fff;padding:10px 0 12px}
+  .topbar .fila{display:flex;align-items:center;gap:10px}
+  .cerrar{width:38px;height:38px;border-radius:12px;background:rgba(255,255,255,.12);font-size:18px;color:#fff;flex:none}
+  .topbar .info{font-weight:800;font-size:15px;flex:1}
+  .reloj{font-family:'Baloo 2',sans-serif;font-size:19px;background:rgba(255,255,255,.12);padding:3px 12px;border-radius:99px}
+  .reloj.poco{background:var(--coral)}
+  .barra{height:8px;border-radius:99px;background:rgba(255,255,255,.15);margin-top:10px;overflow:hidden}
+  .barra div{height:100%;width:0;background:var(--amarillo);border-radius:99px;transition:width .35s}
+
+  /* ---------- Pregunta ---------- */
+  .pregunta{background:var(--card);border-radius:22px;padding:20px 18px;margin-top:16px;border:1px solid var(--borde);
+    box-shadow:0 6px 18px rgba(0,0,0,.06);animation:entra .3s ease}
+  @keyframes entra{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+  .chip{display:inline-flex;gap:6px;align-items:center;font-size:13px;font-weight:800;padding:4px 10px;border-radius:99px;background:var(--fondo);color:var(--suave);border:1px solid var(--borde)}
+  .senal{display:flex;justify-content:center;margin:16px 0 4px}
+  .senal svg{width:118px;height:118px;filter:drop-shadow(0 4px 6px rgba(0,0,0,.18))}
+  .pregunta h2{font-family:'Baloo 2',sans-serif;font-size:21px;line-height:1.25;margin-top:12px;font-weight:700}
+
+  .respuestas{display:flex;flex-direction:column;gap:10px;margin-top:16px}
+  .resp{display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;padding:14px;border-radius:16px;
+    background:var(--fondo);border:2px solid var(--borde);font-size:16.5px;font-weight:700;transition:transform .1s,border-color .15s,background .15s}
+  .resp:active{transform:scale(.985)}
+  .resp .letra{flex:none;width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:var(--asfalto);color:#fff;font-size:15px;font-weight:800}
+  .resp.sel{border-color:var(--azul);background:#e3edfc;color:#1d2230}
+  .resp.sel .letra{background:var(--azul)}
+  .resp.ok{border-color:var(--verde);background:var(--verde-bg)}
+  .resp.ok .letra{background:var(--verde)}
+  .resp.mal{border-color:var(--coral);background:var(--rojo-bg);animation:sacude .4s}
+  .resp.mal .letra{background:var(--coral)}
+  .resp[disabled]{cursor:default}
+  @keyframes sacude{20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}
+
+  .explica{margin-top:14px;padding:14px;border-radius:16px;font-size:15.5px;background:var(--fondo);border-left:5px solid var(--amarillo);animation:entra .25s ease}
+  .explica b{display:block;font-family:'Baloo 2',sans-serif;font-size:18px;margin-bottom:2px}
+
+  .pie{position:sticky;bottom:0;padding:14px 0 calc(14px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--fondo) 30%)}
+  .btn{width:100%;padding:16px;border-radius:18px;font-family:'Baloo 2',sans-serif;font-size:20px;font-weight:800;
+    background:var(--amarillo);color:#1d2230;box-shadow:0 6px 0 #c99500;transition:transform .1s,box-shadow .1s}
+  .btn:active{transform:translateY(4px);box-shadow:0 2px 0 #c99500}
+  .btn[disabled]{opacity:.4;pointer-events:none}
+  .btn.osc{background:var(--asfalto);color:#fff;box-shadow:0 6px 0 #000}
+  .btn + .btn{margin-top:14px}
+
+  /* ---------- Temas ---------- */
+  .titulo{font-family:'Baloo 2',sans-serif;font-size:26px;margin:20px 0 4px}
+  .sub{color:var(--suave);font-size:15px}
+  .temas{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:16px 0 30px}
+  .tema{background:var(--card);border:1px solid var(--borde);border-radius:18px;padding:14px 12px;text-align:left;box-shadow:0 4px 12px rgba(0,0,0,.05)}
+  .tema:active{transform:scale(.97)}
+  .tema .e{font-size:28px}
+  .tema b{display:block;font-size:15.5px;line-height:1.2;margin-top:6px}
+  .tema small{color:var(--suave);font-weight:700;font-size:12.5px}
+  .tema.todo{grid-column:1/-1;background:var(--asfalto);color:#fff;border:none}
+  .tema.todo small{color:#c9cfdc}
+
+  /* ---------- Resultado ---------- */
+  .sello{margin:26px auto 6px;width:200px;height:200px;border-radius:50%;display:grid;place-items:center;text-align:center;
+    border:8px solid currentColor;transform:rotate(-8deg);animation:sello .5s cubic-bezier(.2,1.5,.4,1) both}
+  @keyframes sello{from{transform:scale(2) rotate(-8deg);opacity:0}to{transform:scale(1) rotate(-8deg);opacity:1}}
+  .sello b{font-family:'Baloo 2',sans-serif;font-size:44px;line-height:1}
+  .sello > div{padding:0 22px}
+  .sello small{display:block;font-weight:800;font-size:13.5px;line-height:1.2;margin-top:4px}
+  .sello.apto{color:var(--verde)} .sello.noapto{color:var(--coral)}
+  .resumen{text-align:center;font-size:17px;margin-top:10px}
+  .resumen strong{font-family:'Baloo 2',sans-serif;font-size:22px}
+  .repaso{margin:22px 0}
+  .repaso h3{font-family:'Baloo 2',sans-serif;font-size:21px;margin-bottom:10px}
+  .fallo{background:var(--card);border:1px solid var(--borde);border-left:5px solid var(--coral);border-radius:14px;padding:14px;margin-bottom:10px;font-size:15px}
+  .fallo .q{font-weight:800}
+  .fallo .tu{color:var(--coral);margin-top:6px}
+  .fallo .bien{color:var(--verde);font-weight:800;margin-top:2px}
+  .fallo .por{color:var(--suave);margin-top:6px}
+
+  /* ---------- Chuleta ---------- */
+  .bloque{background:var(--card);border:1px solid var(--borde);border-radius:18px;padding:16px;margin-top:12px}
+  .bloque h3{font-family:'Baloo 2',sans-serif;font-size:19px;margin-bottom:8px}
+  .dato{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--borde);font-size:15.5px}
+  .dato:last-child{border-bottom:none}
+  .dato b{font-family:'Baloo 2',sans-serif;font-size:18px;white-space:nowrap;color:var(--azul)}
+  @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .dato b{color:var(--amarillo)} }
+
+  .screen{display:none}
+  .screen.on{display:block}
+  #confeti{position:fixed;inset:0;pointer-events:none;z-index:50}
+</style>
+</head>
+<body>
+<canvas id="confeti"></canvas>
+
+<!-- ===================== INICIO ===================== -->
+<section class="screen on" id="inicio">
+  <header class="hero">
+    <div class="wrap">
+      <div class="coche">🚗</div>
+      <div class="flag">DGT · Permiso B · Tenerife</div>
+      <h1>¡Aprueba a la <span>primera!</span></h1>
+      <p>Tests con las normas de tráfico españolas más preguntadas.</p>
+    </div>
+  </header>
+  <div class="wrap">
+    <div class="stats">
+      <div class="stat"><b id="sTests">0</b><small>exámenes</small></div>
+      <div class="stat"><b id="sAptos">0</b><small>aptos</small></div>
+      <div class="stat"><b id="sFallos">0</b><small>por repasar</small></div>
+    </div>
+
+    <div class="menu">
+      <button class="opcion principal" data-go="examen">
+        <div class="ico bg-a">📝</div>
+        <div><h3>Examen simulado</h3><p>30 preguntas · 30 minutos · máximo 3 fallos, como el examen real</p></div>
+        <div class="flecha">›</div>
+      </button>
+      <button class="opcion" data-go="rapido">
+        <div class="ico bg-v">⚡</div>
+        <div><h3>Práctica rápida</h3><p>10 preguntas al azar, con la solución al momento</p></div>
+        <div class="flecha">›</div>
+      </button>
+      <button class="opcion" data-go="temas">
+        <div class="ico bg-z">🗂️</div>
+        <div><h3>Practicar por temas</h3><p>Velocidad, alcohol, señales, glorietas…</p></div>
+        <div class="flecha">›</div>
+      </button>
+      <button class="opcion" data-go="fallos">
+        <div class="ico bg-c">🔁</div>
+        <div><h3>Repasar mis fallos</h3><p id="txtFallos">Aquí aparecerán las preguntas que falles</p></div>
+        <div class="flecha">›</div>
+      </button>
+      <button class="opcion" data-go="chuleta">
+        <div class="ico bg-a">💡</div>
+        <div><h3>Chuleta: cifras clave</h3><p>Velocidades, alcohol, puntos y multas de un vistazo</p></div>
+        <div class="flecha">›</div>
+      </button>
+    </div>
+    <p class="nota">Preguntas de práctica basadas en el Reglamento General de Circulación (normas vigentes en octubre de 2026). No son las preguntas oficiales de la DGT. ¡Mucha suerte! 🍀</p>
+  </div>
+</section>
+
+<!-- ===================== TEMAS ===================== -->
+<section class="screen" id="temas">
+  <div class="topbar"><div class="wrap fila">
+    <button class="cerrar" data-home aria-label="Volver">←</button>
+    <div class="info">Practicar por temas</div>
+  </div></div>
+  <div class="wrap">
+    <div class="titulo">¿Qué quieres repasar?</div>
+    <div class="sub">Verás la respuesta correcta y una explicación después de cada pregunta.</div>
+    <div class="temas" id="listaTemas"></div>
+  </div>
+</section>
+
+<!-- ===================== PREGUNTA ===================== -->
+<section class="screen" id="quiz">
+  <div class="topbar"><div class="wrap">
+    <div class="fila">
+      <button class="cerrar" id="salir" aria-label="Salir">✕</button>
+      <div class="info" id="qInfo"></div>
+      <div class="reloj" id="reloj" hidden>30:00</div>
+    </div>
+    <div class="barra"><div id="barra"></div></div>
+  </div></div>
+  <div class="wrap">
+    <div class="pregunta" id="tarjeta"></div>
+    <div class="pie"><button class="btn" id="siguiente" disabled>Siguiente</button></div>
+  </div>
+</section>
+
+<!-- ===================== RESULTADO ===================== -->
+<section class="screen" id="resultado">
+  <div class="topbar"><div class="wrap fila">
+    <button class="cerrar" data-home aria-label="Inicio">←</button>
+    <div class="info">Resultado</div>
+  </div></div>
+  <div class="wrap" id="resBody"></div>
+</section>
+
+<!-- ===================== CHULETA ===================== -->
+<section class="screen" id="chuleta">
+  <div class="topbar"><div class="wrap fila">
+    <button class="cerrar" data-home aria-label="Volver">←</button>
+    <div class="info">Chuleta: cifras clave</div>
+  </div></div>
+  <div class="wrap" style="padding-bottom:30px">
+    <div class="bloque"><h3>🚗 Velocidad máxima (turismo)</h3>
+      <div class="dato">Autopista y autovía <b>120 km/h</b></div>
+      <div class="dato">Carretera convencional <b>90 km/h</b></div>
+      <div class="dato">Ciudad, 2 o más carriles por sentido <b>50 km/h</b></div>
+      <div class="dato">Ciudad, 1 carril por sentido <b>30 km/h</b></div>
+      <div class="dato">Calle con acera y calzada al mismo nivel <b>20 km/h</b></div>
+      <div class="dato">Mínima en autopista y autovía <b>60 km/h</b></div>
+      <div class="dato">Margen para adelantar <b>ninguno</b></div>
+    </div>
+    <div class="bloque"><h3>🍷 Alcohol</h3>
+      <div class="dato">General (aire espirado) <b>0,25 mg/l</b></div>
+      <div class="dato">General (sangre) <b>0,5 g/l</b></div>
+      <div class="dato">Novel (&lt; 2 años) y profesional (aire) <b>0,15 mg/l</b></div>
+      <div class="dato">Novel y profesional (sangre) <b>0,3 g/l</b></div>
+      <div class="dato">Delito a partir de (aire) <b>0,60 mg/l</b></div>
+      <div class="dato">Negarse a la prueba <b>delito</b></div>
+    </div>
+    <div class="bloque"><h3>🪪 Permiso y puntos</h3>
+      <div class="dato">Puntos al empezar (novel) <b>8</b></div>
+      <div class="dato">Puntos tras 2 años sin perder ninguno <b>12</b></div>
+      <div class="dato">Máximo de puntos <b>15</b></div>
+      <div class="dato">Distintivo «L» obligatorio <b>1 año</b></div>
+      <div class="dato">Edad mínima permiso B <b>18 años</b></div>
+    </div>
+    <div class="bloque"><h3>📱 Multas que más caen</h3>
+      <div class="dato">Móvil en la mano <b>200 € · 6 pts</b></div>
+      <div class="dato">Sin cinturón / sin silla infantil <b>200 € · 4 pts</b></div>
+      <div class="dato">Alcohol por encima de la tasa <b>500 € · 4 pts</b></div>
+      <div class="dato">Alcohol (más del doble) o drogas <b>1.000 € · 6 pts</b></div>
+      <div class="dato">No llevar la baliza V-16 <b>80 €</b></div>
+    </div>
+    <div class="bloque"><h3>🚨 Otros números</h3>
+      <div class="dato">Emergencias <b>112</b></div>
+      <div class="dato">Separación al adelantar un ciclista <b>1,5 m</b></div>
+      <div class="dato">Niños en silla y detrás hasta <b>135 cm</b></div>
+      <div class="dato">Dibujo mínimo del neumático <b>1,6 mm</b></div>
+      <div class="dato">Descanso al conducir <b>cada 2 h / 200 km</b></div>
+      <div class="dato">Examen teórico <b>30 preg. · máx. 3 fallos</b></div>
+    </div>
+  </div>
+</section>
+
+<script>
+/* =========================================================
+   TEMAS
+   ========================================================= */
+const TEMAS = {
+  vel:{n:'Velocidad', i:'🚗'},
+  alc:{n:'Alcohol y drogas', i:'🍷'},
+  seg:{n:'Seguridad y móvil', i:'📱'},
+  sen:{n:'Señales y marcas', i:'🛑'},
+  pri:{n:'Prioridad y glorietas', i:'🔄'},
+  ade:{n:'Adelantamientos', i:'↗️'},
+  luz:{n:'Luces', i:'💡'},
+  eme:{n:'Emergencias y averías', i:'🚨'},
+  per:{n:'Permiso y puntos', i:'🪪'},
+  var:{n:'Conducción y aparcar', i:'🅿️'}
+};
+
+/* =========================================================
+   PREGUNTAS  —  o[0] es SIEMPRE la respuesta correcta
+   (el orden se mezcla al mostrar)
+   ========================================================= */
+const Q = [
+ // ---------- VELOCIDAD ----------
+ {c:'vel', q:'¿Cuál es la velocidad máxima de un turismo en autopista y autovía?', o:['120 km/h','130 km/h','100 km/h'], e:'En autopistas y autovías el límite genérico para turismos y motos es 120 km/h, salvo que una señal indique otra cosa.'},
+ {c:'vel', q:'¿Cuál es la velocidad máxima de un turismo en una carretera convencional?', o:['90 km/h','100 km/h','80 km/h'], e:'Desde 2019 el límite en carreteras convencionales es 90 km/h para turismos y motos.'},
+ {c:'vel', q:'En ciudad, en una calle con un único carril por sentido, la velocidad máxima es…', o:['30 km/h','50 km/h','40 km/h'], e:'Desde mayo de 2021: 30 km/h en vías urbanas de un único carril por sentido.'},
+ {c:'vel', q:'En ciudad, en una vía con dos o más carriles por sentido, la velocidad máxima es…', o:['50 km/h','30 km/h','60 km/h'], e:'Las vías urbanas con dos o más carriles por sentido mantienen el límite de 50 km/h.'},
+ {c:'vel', q:'En una calle de plataforma única (acera y calzada al mismo nivel), la velocidad máxima es…', o:['20 km/h','30 km/h','10 km/h'], e:'En las vías urbanas de plataforma única el límite es 20 km/h, porque se comparte el espacio con peatones.'},
+ {c:'vel', q:'Para adelantar en una carretera convencional, ¿puedes superar el límite de velocidad en 20 km/h?', o:['No, nunca se puede superar el límite para adelantar','Sí, solo para adelantar','Sí, si adelantas a un camión'], e:'Desde marzo de 2022 está prohibido superar la velocidad máxima para adelantar.'},
+ {c:'vel', q:'¿Cuál es la velocidad mínima en autopistas y autovías?', o:['60 km/h','50 km/h','80 km/h'], e:'En autopistas y autovías no se puede circular a menos de 60 km/h (salvo causa justificada, atascos, etc.).'},
+ {c:'vel', s:'vel:50', q:'¿Qué indica esta señal?', o:['Velocidad máxima permitida: 50 km/h','Velocidad mínima obligatoria: 50 km/h','Velocidad recomendada: 50 km/h'], e:'Círculo blanco con borde rojo = prohibición. Aquí: prohibido superar 50 km/h.'},
+ {c:'vel', s:'min:60', q:'¿Qué indica esta señal azul?', o:['Velocidad mínima obligatoria de 60 km/h','Velocidad máxima de 60 km/h','Velocidad aconsejada de 60 km/h'], e:'Las señales redondas azules son de obligación. Esta obliga a circular al menos a 60 km/h.'},
+ {c:'vel', q:'En general, sin causa justificada, ¿está permitido circular muy despacio?', o:['No, no se debe circular a menos de la mitad de la velocidad genérica de la vía','Sí, la lentitud nunca se sanciona','Solo está prohibido en ciudad'], e:'Circular sin motivo por debajo de la mitad de la velocidad genérica de la vía entorpece y es sancionable.'},
+ {c:'vel', q:'Llueve mucho. ¿Qué haces con la velocidad?', o:['Reducirla y aumentar la distancia de seguridad','Mantenerla si no superas el límite','Aumentarla para llegar antes'], e:'El límite es un máximo. Con lluvia la adherencia disminuye y la distancia de frenado aumenta.'},
+
+ // ---------- ALCOHOL Y DROGAS ----------
+ {c:'alc', q:'¿Cuál es la tasa máxima de alcohol en aire espirado para un conductor general?', o:['0,25 mg/l','0,15 mg/l','0,50 mg/l'], e:'General: 0,25 mg/l en aire espirado (= 0,5 g/l en sangre). La DGT ha propuesto bajarla a 0,2 g/l, pero en octubre de 2026 aún no está en vigor.'},
+ {c:'alc', q:'¿Y la tasa máxima en sangre para un conductor general?', o:['0,5 g/l','0,3 g/l','0,8 g/l'], e:'0,5 gramos por litro de sangre (equivale a 0,25 mg/l en aire espirado).'},
+ {c:'alc', q:'Eres conductor novel (menos de 2 años con el permiso). ¿Tu tasa máxima en aire espirado es…?', o:['0,15 mg/l','0,25 mg/l','0,00 mg/l'], e:'Noveles y profesionales: 0,15 mg/l en aire (0,3 g/l en sangre). ¡Esta es la que te aplica a ti después de aprobar!'},
+ {c:'alc', q:'Un conductor da 0,40 mg/l en aire espirado (límite 0,25). ¿Qué sanción tiene?', o:['500 € y 4 puntos','200 € y 2 puntos','1.000 € y 6 puntos'], e:'Superar la tasa sin llegar al doble: 500 € y 4 puntos. Más del doble (o reincidir): 1.000 € y 6 puntos.'},
+ {c:'alc', q:'¿A partir de qué tasa conducir con alcohol es delito penal?', o:['Más de 0,60 mg/l en aire espirado','Más de 0,30 mg/l en aire espirado','Solo si hay un accidente'], e:'Superar 0,60 mg/l en aire (1,2 g/l en sangre) es delito contra la seguridad vial.'},
+ {c:'alc', q:'Un agente te pide la prueba de alcoholemia y te niegas. ¿Qué ocurre?', o:['Es un delito','Es solo una infracción leve','No pasa nada si no has bebido'], e:'Negarse a las pruebas de alcohol o drogas está tipificado como delito en el Código Penal.'},
+ {c:'alc', q:'Conducir con presencia de drogas en el organismo se sanciona con…', o:['1.000 € y 6 puntos','500 € y 4 puntos','Solo una advertencia'], e:'Basta con la presencia de drogas (no hace falta ir «afectado»): infracción muy grave, 1.000 € y 6 puntos.'},
+ {c:'alc', q:'¿Qué hace bajar el alcohol en sangre?', o:['Solo el paso del tiempo','Un café cargado','Una ducha fría'], e:'El hígado elimina el alcohol lentamente. Café, agua o duchas no reducen la tasa.'},
+ {c:'alc', q:'Algunos medicamentos llevan un pictograma de un coche dentro de un triángulo. ¿Qué significa?', o:['Que pueden afectar a la capacidad de conducir','Que son obligatorios para conducir','Que solo afectan a conductores profesionales'], e:'Ese pictograma avisa de que el medicamento puede causar somnolencia u otros efectos peligrosos al volante.'},
+
+ // ---------- SEGURIDAD Y MÓVIL ----------
+ {c:'seg', q:'Conducir sujetando el móvil con la mano se sanciona con…', o:['200 € y 6 puntos','100 € y 3 puntos','200 € sin pérdida de puntos'], e:'Desde 2022, sujetar el móvil con la mano al conducir cuesta 6 puntos (y 200 €).'},
+ {c:'seg', q:'¿Quién debe llevar puesto el cinturón de seguridad?', o:['Todos los ocupantes, delante y detrás, también en ciudad','Solo el conductor y el copiloto','Solo en carretera, no en ciudad'], e:'El cinturón es obligatorio para todos los ocupantes y en todo tipo de vías.'},
+ {c:'seg', q:'No llevar el cinturón de seguridad se sanciona con…', o:['200 € y 4 puntos','80 € y 1 punto','100 € sin puntos'], e:'No usar el cinturón (o el sistema de retención infantil) son 200 € y 4 puntos.'},
+ {c:'seg', q:'Un niño mide 125 cm. ¿Dónde y cómo debe viajar?', o:['Detrás, en un sistema de retención infantil adecuado a su talla','Delante, con el cinturón normal','Detrás, con el cinturón normal'], e:'Los menores de 135 cm o menos deben ir en un sistema de retención infantil homologado y, por norma general, en los asientos traseros.'},
+ {c:'seg', q:'Si excepcionalmente una silla infantil a contramarcha va en el asiento delantero, debes…', o:['Desactivar el airbag frontal del acompañante','Activar el airbag frontal','Retrasar el asiento al máximo, sin más'], e:'Un airbag frontal activado puede ser mortal para un bebé en silla a contramarcha.'},
+ {c:'seg', q:'¿Puedes conducir con auriculares conectados a un reproductor de música?', o:['No, está prohibido','Sí, si el volumen es bajo','Sí, con un solo auricular'], e:'Está prohibido conducir con cascos o auriculares conectados a aparatos de sonido.'},
+ {c:'seg', q:'¿Cómo debe estar colocado el reposacabezas?', o:['Lo más cerca posible de la cabeza y con su parte superior a la altura de la parte alta de la cabeza','A la altura del cuello','Lo más bajo posible'], e:'Bien colocado protege contra el «latigazo cervical» en un golpe por detrás.'},
+ {c:'seg', q:'¿Dónde debe ir un perro dentro del coche?', o:['Sujeto o separado para que no moleste al conductor','Suelto en el asiento trasero','En el regazo del copiloto'], e:'Los animales deben ir sujetos (arnés, transportín o rejilla) para no distraer y no salir despedidos.'},
+
+ // ---------- SEÑALES Y MARCAS ----------
+ {c:'sen', s:'stop', q:'Ante esta señal, ¿qué debes hacer?', o:['Detenerte siempre en la línea y ceder el paso','Detenerte solo si viene alguien','Reducir la velocidad y pasar'], e:'STOP = detención obligatoria SIEMPRE, aunque no venga nadie, y después ceder el paso.'},
+ {c:'sen', s:'ceda', q:'¿Qué significa esta señal?', o:['Ceder el paso; detenerse solo si es necesario','Detención obligatoria siempre','Tienes prioridad'], e:'Ceda el paso: debes dejar pasar a los demás, pero si no viene nadie no hace falta parar.'},
+ {c:'sen', s:'noest', q:'¿Qué indica esta señal?', o:['Estacionamiento prohibido (sí puedes parar un momento)','Parada y estacionamiento prohibidos','Fin de la zona de estacionamiento'], e:'Una sola franja roja: prohibido estacionar. Parar brevemente (por ejemplo, para dejar a alguien) sí se permite.'},
+ {c:'sen', s:'noparar', q:'¿Qué indica esta señal?', o:['Prohibido parar y estacionar','Solo prohibido estacionar','Cruce peligroso'], e:'Aspa roja (X): no puedes ni parar ni estacionar.'},
+ {c:'sen', s:'entrada', q:'¿Qué significa esta señal?', o:['Entrada prohibida a todos los vehículos','Calle sin salida','Prohibido girar'], e:'Disco rojo con franja blanca: dirección prohibida, no puedes entrar.'},
+ {c:'sen', s:'sentido', q:'¿Qué indica esta señal?', o:['Sentido obligatorio: solo puedes seguir de frente','Recomendado seguir de frente','Calle con prioridad'], e:'Señal azul redonda = obligación. La flecha indica la única dirección permitida.'},
+ {c:'sen', s:'prioridad', q:'¿Qué indica esta señal?', o:['Que circulas por una calzada con prioridad','Que debes ceder el paso','Fin de prioridad'], e:'El rombo amarillo indica que tu vía tiene prioridad en las próximas intersecciones.'},
+ {c:'sen', q:'Un agente da una orden contraria a lo que indica un semáforo. ¿A quién obedeces?', o:['Al agente','Al semáforo','A la señal vertical'], e:'Orden de prioridad: agentes > señales circunstanciales y de balizamiento > semáforos > señales verticales > marcas viales.'},
+ {c:'sen', q:'Un agente levanta el brazo verticalmente. ¿Qué significa?', o:['Que debes detenerte (si puedes hacerlo con seguridad)','Que puedes pasar','Que debes acelerar'], e:'Brazo en alto: atención, alto para todos los que se acercan, salvo que no puedan detenerse con seguridad.'},
+ {c:'sen', q:'¿Puedes cruzar una línea blanca continua en la calzada?', o:['No, ni cruzarla ni circular sobre ella','Sí, para adelantar','Sí, si no viene nadie'], e:'La línea continua prohíbe cruzarla o pisarla. La discontinua sí se puede cruzar.'},
+ {c:'sen', q:'Una línea amarilla continua junto al bordillo significa…', o:['Prohibido parar y estacionar','Prohibido solo estacionar','Zona de carga y descarga'], e:'Amarilla continua en el bordillo: ni parar ni estacionar. Amarilla discontinua: solo prohibido estacionar.'},
+ {c:'sen', q:'Una línea amarilla discontinua junto al bordillo significa…', o:['Prohibido estacionar, pero puedes parar','Prohibido parar y estacionar','Estacionamiento para residentes'], e:'Discontinua = prohibido estacionar; continua = prohibido parar y estacionar.'},
+ {c:'sen', q:'El semáforo se pone en ámbar fijo cuando llegas. ¿Qué haces?', o:['Detenerte, salvo que no puedas hacerlo con seguridad','Acelerar para pasar antes del rojo','Pasar siempre, ámbar es como verde'], e:'Ámbar fijo obliga a detenerse, excepto si ya estás tan cerca que no podrías frenar con seguridad.'},
+ {c:'sen', q:'Un semáforo en ámbar intermitente significa…', o:['Precaución: puedes pasar con prudencia y cediendo el paso','Detención obligatoria','Que el semáforo está a punto de ponerse en verde'], e:'Ámbar intermitente: extrema la precaución y respeta la prioridad de los demás.'},
+ {c:'sen', q:'Unas marcas en zigzag amarillas en el borde de la calzada indican…', o:['Prohibido estacionar en ese tramo','Badén peligroso','Carril bici'], e:'El zigzag amarillo marca un lugar donde está prohibido estacionar (por ejemplo, paradas de bus).'},
+
+ // ---------- PRIORIDAD Y GLORIETAS ----------
+ {c:'pri', q:'En un cruce sin señales ni semáforos, ¿quién tiene prioridad?', o:['El que viene por tu derecha','El que viene por tu izquierda','El que circula más rápido'], e:'Regla general: prioridad a los vehículos que se aproximan por la derecha.'},
+ {c:'pri', q:'En una glorieta, ¿quién tiene prioridad?', o:['Los vehículos que ya circulan dentro de la glorieta','Los que quieren entrar','Los que vienen por la derecha'], e:'Al entrar en una glorieta cedes el paso a los que ya circulan por ella.'},
+ {c:'pri', q:'¿Cómo debes salir de una glorieta de varios carriles?', o:['Desde el carril exterior (derecho), colocándote en él con antelación','Desde cualquier carril','Desde el carril interior, cortando a los demás'], e:'Antes de tu salida debes situarte en el carril derecho e indicar con el intermitente.'},
+ {c:'pri', q:'Un peatón espera para cruzar en un paso de cebra sin semáforo. ¿Qué haces?', o:['Detenerte y dejarle pasar','Pasar tú primero si vas rápido','Tocar el claxon para avisarle'], e:'En los pasos de peatones sin semáforo, el peatón tiene prioridad.'},
+ {c:'pri', q:'Giras a la derecha y hay peatones cruzando la calle a la que entras (sin paso de peatones). ¿Quién pasa?', o:['Los peatones','Tú, porque no hay paso de peatones','El que llegue primero'], e:'Al girar, debes ceder el paso a los peatones que cruzan la calzada en la que vas a entrar.'},
+ {c:'pri', q:'Oyes una ambulancia con sirena y luces detrás de ti. ¿Qué haces?', o:['Facilitarle el paso apartándote con seguridad','Seguir igual, tú tienes tu carril','Frenar en seco donde estés'], e:'Los vehículos de emergencia en servicio tienen prioridad. Apártate (normalmente a la derecha) sin poner en peligro a nadie.'},
+ {c:'pri', q:'Entras en una autovía por el carril de aceleración. ¿Quién tiene prioridad?', o:['Los vehículos que ya circulan por la autovía','Tú, porque estás acelerando','El vehículo más grande'], e:'El carril de aceleración sirve para ajustar la velocidad y cederles el paso a los que ya circulan.'},
+ {c:'pri', q:'En un tramo de mucha pendiente y estrecho, sin señales, ¿quién tiene prioridad?', o:['El que sube, salvo que el que baja tenga un apartadero más cerca','El que baja','El vehículo más pequeño'], e:'En pendientes pronunciadas tiene prioridad el que circula en sentido ascendente.'},
+ {c:'pri', q:'Ves un autobús urbano que señaliza para salir de su parada. ¿Qué debes hacer?', o:['Facilitarle la incorporación si es posible','Acelerar para pasar antes','Tocar el claxon'], e:'En ciudad hay que facilitar la incorporación de los autobuses que salen de una parada señalizada.'},
+
+ // ---------- ADELANTAMIENTOS ----------
+ {c:'ade', q:'Por regla general, ¿por dónde se adelanta?', o:['Por la izquierda','Por la derecha','Por donde haya más espacio'], e:'Normalmente se adelanta por la izquierda.'},
+ {c:'ade', q:'Al adelantar a un ciclista, ¿qué separación lateral mínima debes dejar?', o:['1,5 metros','1 metro','50 centímetros'], e:'Mínimo 1,5 m. En vías con más de un carril por sentido, debes cambiar completamente de carril.'},
+ {c:'ade', q:'¿Cuándo puedes adelantar por la derecha?', o:['Cuando el vehículo de delante indica que va a girar a la izquierda y se ha colocado para ello','Siempre que el carril derecho esté libre','Nunca, en ningún caso'], e:'Es una de las excepciones: si el de delante va a girar a la izquierda, puedes pasar por su derecha.'},
+ {c:'ade', q:'¿Dónde está prohibido adelantar?', o:['En un cambio de rasante sin visibilidad','En una recta con línea discontinua','En una autovía'], e:'No se adelanta en curvas ni cambios de rasante sin visibilidad, ni en pasos de peatones señalizados.'},
+ {c:'ade', q:'Te está adelantando otro coche. ¿Qué debes hacer?', o:['No aumentar la velocidad y ceñirte a la derecha','Acelerar para no dejarle pasar','Frenar bruscamente'], e:'Al ser adelantado no puedes aumentar la velocidad ni hacer maniobras que lo impidan.'},
+ {c:'ade', q:'Antes de adelantar debes comprobar que…', o:['Hay espacio y visibilidad suficientes y nadie te está adelantando a ti','Solo que el coche de delante es lento','Que llevas la radio apagada'], e:'Comprueba espejos, visibilidad, espacio para volver a tu carril y señaliza con el intermitente.'},
+ {c:'ade', q:'En una autovía de dos carriles por sentido, ¿por qué carril debes circular normalmente?', o:['Por el derecho; el izquierdo es para adelantar','Por el izquierdo, que es más rápido','Por cualquiera'], e:'Circula por la derecha y usa el carril izquierdo para adelantar, volviendo después a la derecha.'},
+
+ // ---------- LUCES ----------
+ {c:'luz', q:'Circulas de noche con luz de carretera (largas) y viene un coche de frente. ¿Qué haces?', o:['Cambiar a luz de cruce para no deslumbrarle','Mantener las largas','Apagar todas las luces un momento'], e:'Las largas deslumbran. Cámbialas por las de cruce cuando te cruces con otro vehículo o sigas a uno.'},
+ {c:'luz', q:'¿Cuándo se puede usar la luz antiniebla trasera?', o:['Con niebla espesa, lluvia muy intensa o nevada densa','Siempre de noche','Cuando llueve un poco'], e:'La antiniebla trasera deslumbra mucho al de detrás: solo con condiciones meteorológicas especialmente desfavorables.'},
+ {c:'luz', q:'Entras en un túnel bien iluminado. ¿Qué luces llevas?', o:['La luz de cruce, siempre','Ninguna, porque está iluminado','La de posición solamente'], e:'En túneles es obligatorio llevar como mínimo la luz de cruce encendida.'},
+ {c:'luz', q:'¿Para qué sirven las luces de emergencia (los cuatro intermitentes)?', o:['Para avisar de que tu vehículo está inmovilizado o de un peligro','Para poder aparcar en doble fila','Para ir más rápido'], e:'Se usan para señalizar un vehículo detenido, una avería o un peligro (por ejemplo, un atasco repentino).'},
+ {c:'luz', q:'De día, pasas por una zona con poca visibilidad por lluvia. ¿Qué luces enciendes?', o:['Luz de cruce','Ninguna, es de día','Luz de carretera'], e:'Con poca visibilidad, aunque sea de día, debes llevar como mínimo la luz de cruce.'},
+
+ // ---------- EMERGENCIAS Y AVERÍAS ----------
+ {c:'eme', q:'Desde el 1 de enero de 2026, ¿qué debes llevar para señalizar una avería?', o:['Una baliza V-16 conectada y homologada','Dos triángulos de emergencia','Una linterna normal'], e:'La baliza V-16 conectada a la DGT sustituye a los triángulos. No llevarla: 80 €.'},
+ {c:'eme', q:'¿Dónde se coloca la baliza V-16?', o:['En la parte más alta del vehículo, sin necesidad de salir','A 50 metros detrás del coche','Dentro del maletero'], e:'Se pone en el techo (es magnética) desde la ventanilla. Así evitas el riesgo de atropello.'},
+ {c:'eme', q:'Te paras por avería en una carretera fuera de poblado. Antes de salir del coche debes…', o:['Ponerte el chaleco reflectante','Encender la luz de carretera','Abrir el capó'], e:'En vías interurbanas, quien sale del vehículo inmovilizado en la calzada o el arcén debe llevar el chaleco puesto.'},
+ {c:'eme', q:'Llegas el primero a un accidente. ¿En qué orden actúas?', o:['Proteger, Avisar, Socorrer (P.A.S.)','Socorrer, Avisar, Proteger','Avisar y marcharte'], e:'P.A.S.: primero proteger la zona (para que no haya otro accidente), luego avisar al 112 y después socorrer.'},
+ {c:'eme', q:'¿A qué número llamas para avisar de un accidente?', o:['112','091','010'], e:'El 112 es el número de emergencias en toda España y en la Unión Europea.'},
+ {c:'eme', q:'Un motorista herido lleva el casco puesto. ¿Qué haces?', o:['No quitarle el casco, salvo que sea imprescindible para que respire','Quitárselo enseguida','Moverle al arcén rápidamente'], e:'Quitar el casco puede agravar una lesión de columna. Solo si no respira y sabes cómo hacerlo.'},
+ {c:'eme', q:'Notas que el coche «flota» sobre el agua (aquaplaning). ¿Qué haces?', o:['Sujetar firme el volante y levantar el pie del acelerador, sin frenar bruscamente','Frenar a fondo','Girar el volante con fuerza'], e:'Deja que el coche pierda velocidad poco a poco hasta que los neumáticos vuelvan a agarrar.'},
+ {c:'eme', q:'¿Cuánto tiempo debe estar encendida como mínimo una baliza V-16?', o:['Al menos 30 minutos','5 minutos','2 horas'], e:'La V-16 debe emitir luz intermitente visible en 360° durante al menos 30 minutos.'},
+
+ // ---------- PERMISO Y PUNTOS ----------
+ {c:'per', q:'¿Con cuántos puntos empieza un conductor que acaba de sacar el permiso?', o:['8 puntos','12 puntos','15 puntos'], e:'Los noveles empiezan con 8 puntos. Tras 2 años sin perder puntos pasan a 12.'},
+ {c:'per', q:'¿Cuál es el saldo máximo de puntos que puede tener un conductor?', o:['15 puntos','12 puntos','20 puntos'], e:'Por buen comportamiento se puede llegar a un máximo de 15 puntos.'},
+ {c:'per', q:'¿Qué pasa si pierdes todos los puntos?', o:['Pierdes la vigencia del permiso','Solo pagas una multa','Nada, vuelves a empezar con 8'], e:'Con 0 puntos el permiso pierde su vigencia y hay que hacer un curso y volver a examinarse para recuperarlo.'},
+ {c:'per', q:'¿Durante cuánto tiempo debe llevar el distintivo «L» un conductor novel?', o:['Durante el primer año','Durante los dos primeros años','Durante seis meses'], e:'La «L» blanca sobre fondo verde se lleva en la parte trasera durante el primer año.'},
+ {c:'per', q:'¿Cuál es la edad mínima para obtener el permiso B?', o:['18 años','17 años','16 años'], e:'El permiso B se puede obtener a partir de los 18 años.'},
+ {c:'per', q:'¿Qué seguro es obligatorio para circular con un coche?', o:['El seguro de responsabilidad civil obligatoria','El seguro a todo riesgo','Ninguno si el coche es nuevo'], e:'Todo vehículo a motor debe tener al menos el seguro obligatorio de responsabilidad civil.'},
+ {c:'per', q:'¿Cuántas preguntas tiene el examen teórico del permiso B y cuántos fallos se permiten?', o:['30 preguntas, máximo 3 fallos','40 preguntas, máximo 4 fallos','20 preguntas, máximo 2 fallos'], e:'El examen tiene 30 preguntas tipo test (30 minutos) y puedes fallar como máximo 3.'},
+
+ // ---------- CONDUCCIÓN Y APARCAR ----------
+ {c:'var', q:'¿Qué distancia de seguridad se recomienda con el coche de delante en seco?', o:['Al menos 2 segundos','Medio segundo','Un metro'], e:'La regla de los 2 segundos: cuenta desde que el de delante pasa un punto fijo. Con lluvia, el doble.'},
+ {c:'var', q:'¿Está permitido estacionar en doble fila?', o:['No','Sí, con las luces de emergencia','Sí, menos de 5 minutos'], e:'Estacionar en doble fila está prohibido, aunque pongas los cuatro intermitentes.'},
+ {c:'var', q:'¿Se puede circular marcha atrás en una autopista o autovía?', o:['No, nunca','Sí, por el arcén','Sí, si te has pasado la salida'], e:'Está prohibida la marcha atrás en autopistas y autovías. ¿Te pasaste la salida? Sigue hasta la próxima.'},
+ {c:'var', q:'¿Cuál es la profundidad mínima legal del dibujo de los neumáticos?', o:['1,6 mm','0,5 mm','3 mm'], e:'El mínimo legal es 1,6 mm en las ranuras principales.'},
+ {c:'var', q:'En un viaje largo, ¿cada cuánto se recomienda descansar?', o:['Cada 2 horas o unos 200 km','Cada 5 horas','Solo cuando tengas sueño'], e:'La DGT recomienda parar cada 2 horas o 200 km para evitar la fatiga.'},
+ {c:'var', q:'Antes de abrir la puerta del coche aparcado debes…', o:['Asegurarte de que no viene nadie (coches, bicis, motos)','Abrirla rápido para no molestar','Tocar el claxon'], e:'Abrir la puerta sin mirar es una causa típica de accidentes con ciclistas y motoristas.'},
+ {c:'var', q:'¿Qué es una conducción eficiente?', o:['Circular en marchas largas, con velocidad uniforme y anticipándote','Acelerar fuerte y frenar tarde','Ir siempre en primera en ciudad'], e:'Anticiparse, evitar acelerones y usar marchas largas ahorra combustible y es más seguro.'},
+ {c:'var', q:'¿Qué documento del vehículo acredita que ha pasado la inspección técnica?', o:['La ITV (tarjeta de inspección técnica)','El permiso de conducir','El recibo del impuesto'], e:'La ITV comprueba periódicamente que el coche está en buen estado para circular.'},
+ {c:'var', q:'Llevas el depósito en reserva en la autopista y se acaba la gasolina en el carril. ¿Es una infracción?', o:['Sí, quedarse sin combustible en la vía se puede sancionar','No, es una avería normal','Solo si hay atasco'], e:'Quedarse sin combustible por falta de previsión puede sancionarse, además de ser peligroso.'},
+ {c:'var', q:'Al aparcar en una calle en cuesta hacia abajo, ¿hacia dónde giras las ruedas?', o:['Hacia el bordillo','Hacia el centro de la calle','Rectas'], e:'Ruedas hacia el bordillo y freno de mano: si el coche se mueve, el bordillo lo detiene.'}
+];
+Q.forEach((p,i)=>p.id=i);
+
+/* =========================================================
+   SEÑALES (SVG sencillo)
+   ========================================================= */
+function senal(s){
+  if(!s) return '';
+  const [t,v]=s.split(':');
+  const R='#c8102e',A='#1f5fbf';
+  let g='';
+  if(t==='vel') g=`<circle cx="50" cy="50" r="44" fill="#fff" stroke="${R}" stroke-width="11"/><text x="50" y="63" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="38" fill="#111">${v}</text>`;
+  if(t==='min') g=`<circle cx="50" cy="50" r="48" fill="${A}"/><circle cx="50" cy="50" r="45" fill="none" stroke="#fff" stroke-width="2"/><text x="50" y="63" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="38" fill="#fff">${v}</text>`;
+  if(t==='stop') g=`<polygon points="30,2 70,2 98,30 98,70 70,98 30,98 2,70 2,30" fill="${R}"/><polygon points="32,7 68,7 93,32 93,68 68,93 32,93 7,68 7,32" fill="none" stroke="#fff" stroke-width="3"/><text x="50" y="60" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-weight="700" font-size="27" fill="#fff">STOP</text>`;
+  if(t==='ceda') g=`<polygon points="7,12 93,12 50,90" fill="#fff" stroke="${R}" stroke-width="10" stroke-linejoin="round"/>`;
+  if(t==='noest') g=`<circle cx="50" cy="50" r="43" fill="${A}" stroke="${R}" stroke-width="10"/><line x1="22" y1="22" x2="78" y2="78" stroke="${R}" stroke-width="10"/>`;
+  if(t==='noparar') g=`<circle cx="50" cy="50" r="43" fill="${A}" stroke="${R}" stroke-width="10"/><line x1="22" y1="22" x2="78" y2="78" stroke="${R}" stroke-width="10"/><line x1="78" y1="22" x2="22" y2="78" stroke="${R}" stroke-width="10"/>`;
+  if(t==='entrada') g=`<circle cx="50" cy="50" r="48" fill="${R}"/><rect x="17" y="40" width="66" height="20" fill="#fff"/>`;
+  if(t==='sentido') g=`<circle cx="50" cy="50" r="48" fill="${A}"/><circle cx="50" cy="50" r="45" fill="none" stroke="#fff" stroke-width="2"/><rect x="43" y="42" width="14" height="40" fill="#fff"/><polygon points="50,16 73,46 27,46" fill="#fff"/>`;
+  if(t==='prioridad') g=`<g transform="rotate(45 50 50)"><rect x="18" y="18" width="64" height="64" fill="#fff" stroke="#222" stroke-width="2"/><rect x="30" y="30" width="40" height="40" fill="#ffc629"/></g>`;
+  return `<div class="senal"><svg viewBox="0 0 100 100" role="img" aria-label="Señal de tráfico">${g}</svg></div>`;
+}
+
+/* =========================================================
+   ALMACENAMIENTO (solo en este móvil)
+   ========================================================= */
+const KEY='carneB_tenerife_v1';
+function cargar(){ try{ return JSON.parse(localStorage.getItem(KEY))||{tests:0,aptos:0,fallos:[]}; }catch(e){ return {tests:0,aptos:0,fallos:[]}; } }
+let DATOS=cargar();
+function guardar(){ try{ localStorage.setItem(KEY,JSON.stringify(DATOS)); }catch(e){} }
+function addFallo(id){ if(!DATOS.fallos.includes(id)) DATOS.fallos.push(id); guardar(); }
+function quitarFallo(id){ DATOS.fallos=DATOS.fallos.filter(x=>x!==id); guardar(); }
+
+/* =========================================================
+   NAVEGACIÓN
+   ========================================================= */
+const $=id=>document.getElementById(id);
+function ver(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.toggle('on',s.id===id)); window.scrollTo(0,0); }
+function inicio(){
+  clearInterval(reloj);
+  $('sTests').textContent=DATOS.tests; $('sAptos').textContent=DATOS.aptos; $('sFallos').textContent=DATOS.fallos.length;
+  $('txtFallos').textContent=DATOS.fallos.length?`${DATOS.fallos.length} pregunta${DATOS.fallos.length>1?'s':''} para repasar`:'Aquí aparecerán las preguntas que falles';
+  ver('inicio');
+}
+document.querySelectorAll('[data-home]').forEach(b=>b.addEventListener('click',inicio));
+document.querySelectorAll('[data-go]').forEach(b=>b.addEventListener('click',()=>{
+  const g=b.dataset.go;
+  if(g==='examen') empezar('examen',crearExamen());
+  if(g==='rapido') empezar('practica',mezclar([...Q]).slice(0,10));
+  if(g==='temas') { pintarTemas(); ver('temas'); }
+  if(g==='fallos'){
+    if(!DATOS.fallos.length){ alert('¡Todavía no tienes fallos guardados! Haz un examen o una práctica primero. 💪'); return; }
+    empezar('repaso',mezclar(DATOS.fallos.map(i=>Q[i])));
+  }
+  if(g==='chuleta') ver('chuleta');
+}));
+
+function pintarTemas(){
+  const box=$('listaTemas'); box.innerHTML='';
+  const todo=document.createElement('button'); todo.className='tema todo';
+  todo.innerHTML=`<div class="e">🎯</div><b>Todas las preguntas</b><small>${Q.length} preguntas, en orden aleatorio</small>`;
+  todo.onclick=()=>empezar('practica',mezclar([...Q])); box.appendChild(todo);
+  Object.entries(TEMAS).forEach(([k,t])=>{
+    const n=Q.filter(p=>p.c===k).length;
+    const b=document.createElement('button'); b.className='tema';
+    b.innerHTML=`<div class="e">${t.i}</div><b>${t.n}</b><small>${n} preguntas</small>`;
+    b.onclick=()=>empezar('practica',mezclar(Q.filter(p=>p.c===k)));
+    box.appendChild(b);
+  });
+}
+
+function mezclar(a){ for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; }
+
+// examen: 30 preguntas repartidas entre todos los temas
+function crearExamen(){
+  const porTema={}; Q.forEach(p=>(porTema[p.c]=porTema[p.c]||[]).push(p));
+  Object.values(porTema).forEach(mezclar);
+  const res=[]; const claves=Object.keys(porTema);
+  while(res.length<30){ let algo=false;
+    for(const k of claves){ if(res.length>=30)break; const p=porTema[k].pop(); if(p){res.push(p);algo=true;} }
+    if(!algo)break; }
+  return mezclar(res);
+}
+
+/* =========================================================
+   QUIZ
+   ========================================================= */
+let modo='',lista=[],idx=0,respuestas=[],reloj=null,restante=0,inicioT=0,elegida=null;
+
+function empezar(m,l){
+  modo=m; lista=l.map(p=>({p, ops:mezclar(p.o.map((t,i)=>({t,ok:i===0})))})); idx=0; respuestas=[];
+  clearInterval(reloj);
+  const r=$('reloj');
+  if(modo==='examen'){
+    restante=30*60; inicioT=Date.now(); r.hidden=false; r.classList.remove('poco'); pintarReloj();
+    reloj=setInterval(()=>{ restante--; pintarReloj(); if(restante<=0){ clearInterval(reloj); terminar(true); } },1000);
+  } else r.hidden=true;
+  ver('quiz'); pintar();
+}
+function pintarReloj(){
+  const m=Math.floor(restante/60),s=restante%60;
+  $('reloj').textContent=`${m}:${String(s).padStart(2,'0')}`;
+  $('reloj').classList.toggle('poco',restante<=120);
+}
+
+function pintar(){
+  const it=lista[idx], p=it.p; elegida=null;
+  const etiqueta = modo==='examen'?'Examen':modo==='repaso'?'Repaso de fallos':'Práctica';
+  $('qInfo').textContent=`${etiqueta} · ${idx+1}/${lista.length}`;
+  $('barra').style.width=(idx/lista.length*100)+'%';
+  const t=TEMAS[p.c];
+  const card=$('tarjeta');
+  card.style.animation='none'; card.offsetHeight; card.style.animation='';
+  card.innerHTML=`<span class="chip">${t.i} ${t.n}</span>${senal(p.s)}<h2></h2><div class="respuestas"></div><div id="exp"></div>`;
+  card.querySelector('h2').textContent=p.q;
+  const box=card.querySelector('.respuestas');
+  it.ops.forEach((o,i)=>{
+    const b=document.createElement('button'); b.className='resp';
+    b.innerHTML=`<span class="letra">${'abc'[i]}</span><span></span>`;
+    b.lastChild.textContent=o.t;
+    b.onclick=()=>elegir(i,b);
+    box.appendChild(b);
+  });
+  const sig=$('siguiente'); sig.disabled=true;
+  sig.textContent = idx+1<lista.length ? 'Siguiente →' : (modo==='examen'?'Corregir examen ✔':'Ver resultado ✔');
+}
+
+function elegir(i,btn){
+  const it=lista[idx]; const botones=[...document.querySelectorAll('.resp')];
+  if(modo==='examen'){
+    // como en el examen real: puedes cambiar de idea hasta pulsar «Siguiente»
+    botones.forEach(b=>b.classList.remove('sel')); btn.classList.add('sel'); elegida=i; $('siguiente').disabled=false; return;
+  }
+  if(elegida!==null) return;
+  elegida=i;
+  botones.forEach((b,j)=>{ b.disabled=true; if(it.ops[j].ok) b.classList.add('ok'); });
+  const bien=it.ops[i].ok;
+  if(!bien){ btn.classList.add('mal'); try{navigator.vibrate&&navigator.vibrate(120);}catch(e){} addFallo(it.p.id); }
+  else if(modo==='repaso') quitarFallo(it.p.id);
+  const elogios=['¡Correcto! 🎉','¡Muy bien! 👏','¡Eso es! ✅','¡Perfecto! 🚗💨','¡Genial! ⭐'];
+  const exp=$('exp'); exp.className='explica';
+  exp.innerHTML=`<b></b><span></span>`;
+  exp.firstChild.textContent = bien ? elogios[Math.floor(Math.random()*elogios.length)] : '¡Ups! La correcta está en verde 👆';
+  exp.lastChild.textContent=it.p.e;
+  respuestas[idx]=i;
+  $('siguiente').disabled=false;
+  setTimeout(()=>exp.scrollIntoView({behavior:'smooth',block:'nearest'}),80);
+}
+
+$('siguiente').addEventListener('click',()=>{
+  if(modo==='examen') respuestas[idx]=elegida;
+  idx++;
+  if(idx<lista.length){ pintar(); window.scrollTo({top:0,behavior:'smooth'}); }
+  else terminar(false);
+});
+$('salir').addEventListener('click',()=>{
+  if(modo==='examen' && !confirm('¿Seguro que quieres salir? Se perderá este examen.')) return;
+  inicio();
+});
+
+/* =========================================================
+   RESULTADO
+   ========================================================= */
+function terminar(porTiempo){
+  clearInterval(reloj);
+  $('barra').style.width='100%';
+  const fallos=[]; let aciertos=0;
+  lista.forEach((it,i)=>{
+    const r=respuestas[i];
+    if(r!==undefined && r!==null && it.ops[r].ok) aciertos++;
+    else fallos.push({it, r});
+  });
+  const body=$('resBody'); let html='';
+  if(modo==='examen'){
+    const apto=fallos.length<=3;
+    DATOS.tests++; if(apto) DATOS.aptos++;
+    fallos.forEach(f=>addFallo(f.it.p.id));
+    guardar();
+    const usado=Math.round((Date.now()-inicioT)/1000);
+    html+=`<div class="sello ${apto?'apto':'noapto'}"><div><b>${apto?'APTO':'NO APTO'}</b><small>${apto?'¡Enhorabuena!':'¡A seguir practicando!'}</small></div></div>
+      <p class="resumen"><strong>${fallos.length}</strong> fallo${fallos.length===1?'':'s'} de ${lista.length} preguntas<br>
+      <span style="color:var(--suave)">${porTiempo?'⏰ Se acabó el tiempo':'Tiempo: '+Math.floor(usado/60)+' min '+(usado%60)+' s'} · máximo permitido: 3 fallos</span></p>`;
+    if(apto) setTimeout(()=>confeti(),250);
+  } else {
+    const pct=Math.round(aciertos/lista.length*100);
+    html+=`<div class="sello ${pct>=90?'apto':'noapto'}" style="${pct>=90?'':'color:var(--amarillo)'}"><div><b>${pct}%</b><small>${aciertos} de ${lista.length}</small></div></div>
+      <p class="resumen">${pct===100?'¡Perfecto, ni un fallo! 🏆':pct>=90?'¡Muy bien! Vas preparada. 💪':'Repasa las explicaciones de abajo y vuelve a intentarlo. 📚'}</p>`;
+    if(pct===100) setTimeout(()=>confeti(),250);
+  }
+  if(fallos.length){
+    html+=`<div class="repaso"><h3>Repasa tus fallos</h3>`;
+    fallos.forEach(({it,r})=>{
+      const buena=it.ops.find(o=>o.ok).t;
+      html+=`<div class="fallo"><div class="q">${esc(it.p.q)}</div>
+        <div class="tu">✗ ${r===undefined||r===null?'Sin responder':esc(it.ops[r].t)}</div>
+        <div class="bien">✓ ${esc(buena)}</div><div class="por">${esc(it.p.e)}</div></div>`;
+    });
+    html+=`</div>`;
+  }
+  html+=`<div style="padding:10px 0 30px"><button class="btn" id="otraVez">${modo==='examen'?'📝 Nuevo examen':'🔁 Otra vez'}</button>
+    <button class="btn osc" id="aInicio">🏠 Inicio</button></div>`;
+  body.innerHTML=html;
+  const lastList=lista.map(x=>x.p), lastModo=modo;
+  $('otraVez').onclick=()=>{
+    if(lastModo==='examen') empezar('examen',crearExamen());
+    else if(lastModo==='repaso'){ if(DATOS.fallos.length) empezar('repaso',mezclar(DATOS.fallos.map(i=>Q[i]))); else inicio(); }
+    else empezar('practica',mezclar(lastList));
+  };
+  $('aInicio').onclick=inicio;
+  ver('resultado');
+}
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+/* =========================================================
+   CONFETI
+   ========================================================= */
+const cv=$('confeti'),cx=cv.getContext('2d'); let piezas=[];
+function tam(){cv.width=innerWidth;cv.height=innerHeight} addEventListener('resize',tam); tam();
+function confeti(){
+  const col=['#ffc629','#ff5a5f','#22b867','#1f5fbf','#ffffff'];
+  for(let i=0;i<160;i++) piezas.push({x:innerWidth/2,y:innerHeight*.35,vx:(Math.random()-.5)*14,vy:-Math.random()*14-4,s:5+Math.random()*7,c:col[i%5],r:Math.random()*6,vr:(Math.random()-.5)*.3});
+  (function paso(){
+    cx.clearRect(0,0,cv.width,cv.height);
+    piezas.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=.35;p.vx*=.99;p.r+=p.vr;cx.save();cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*.6);cx.restore();});
+    piezas=piezas.filter(p=>p.y<cv.height+40);
+    if(piezas.length) requestAnimationFrame(paso); else cx.clearRect(0,0,cv.width,cv.height);
+  })();
+}
+
+inicio();
+</script>
+</body>
+</html>
