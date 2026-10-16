@@ -31,8 +31,9 @@ where not exists (select 1 from public.quizzes where title = 'Ruimte Quiz' and s
 --           full_name = 'Juf Mariëlle'
 --     where id = (select id from auth.users where email = 'juf@dekleinewereld.be');
 --
--- 5) Jezelf beheerder maken (ziet en beheert alle scholen):
+-- 5) Jezelf superbeheerder maken (ziet en beheert alle scholen — gebruik 'schooladmin'
+--    in plaats van 'superadmin' voor een beheerder die enkel één school mag beheren):
 --
---    update public.profiles set role = 'admin'
+--    update public.profiles set role = 'superadmin'
 --     where id = (select id from auth.users where email = 'arnold.verhoeven@agv-it.be');
 -- ============================================================

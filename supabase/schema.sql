@@ -19,10 +19,18 @@ create table if not exists public.profiles (
   id          uuid primary key references auth.users(id) on delete cascade,
   full_name   text,
   email       text,                          -- kopie van auth.users.email, zodat het beheerdersscherm het kan tonen
-  role        text not null default 'teacher' check (role in ('teacher','admin')),
+  role        text not null default 'teacher' check (role in ('teacher','schooladmin','superadmin')),
   school_id   uuid references public.schools(id) on delete set null,
   created_at  timestamptz not null default now()
 );
+-- rollen: 'teacher' (leerkracht) · 'schooladmin' (beheert enkel de eigen school: klassen + quizzen)
+-- · 'superadmin' (beheert alle scholen, zoals voorheen 'admin'). Bestaande 'admin'-accounts worden
+-- automatisch 'superadmin' (dat was hun enige mogelijke betekenis tot nu toe).
+-- Belangrijk: eerst de OUDE constraint weghalen, pas dan de update doen — anders wordt de update
+-- zelf nog tegen de oude constraint (die 'superadmin' niet kent) gecontroleerd en faalt hij.
+alter table public.profiles drop constraint if exists profiles_role_check;
+update public.profiles set role='superadmin' where role='admin';
+alter table public.profiles add constraint profiles_role_check check (role in ('teacher','schooladmin','superadmin'));
 
 -- ---------- Klassen ----------
 create table if not exists public.classes (
@@ -59,6 +67,16 @@ create table if not exists public.quizzes (
 alter table public.quizzes add column if not exists kind text not null default 'mc';
 alter table public.quizzes add column if not exists settings jsonb not null default '{}'::jsonb;
 alter table public.quizzes add column if not exists vak text;
+-- seizoensgebonden beschikbaarheid: beide null = het hele jaar zichtbaar.
+-- anders enkel zichtbaar voor leerkrachten tijdens [avail_from_month, avail_to_month] (1=januari .. 12=december).
+-- avail_from_month > avail_to_month betekent een periode die over de jaarwissel loopt (bv. 9 t/m 6 = september t/m juni),
+-- en komt zo elk schooljaar vanzelf terug zonder dat de periode opnieuw ingesteld moet worden.
+alter table public.quizzes add column if not exists avail_from_month int check (avail_from_month between 1 and 12);
+alter table public.quizzes add column if not exists avail_to_month   int check (avail_to_month between 1 and 12);
+do $$ begin
+  alter table public.quizzes add constraint quizzes_avail_both check ((avail_from_month is null) = (avail_to_month is null));
+exception when duplicate_object then null;
+end $$;
 create index if not exists quizzes_school_idx on public.quizzes(school_id);
 create index if not exists quizzes_vak_idx on public.quizzes(vak);
 
@@ -84,9 +102,18 @@ create or replace function public.my_role() returns text
 language sql stable security definer set search_path = public as $$
   select role from public.profiles where id = auth.uid()
 $$;
+create or replace function public.is_superadmin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce((select role = 'superadmin' from public.profiles where id = auth.uid()), false)
+$$;
+create or replace function public.is_schooladmin() returns boolean
+language sql stable security definer set search_path = public as $$
+  select coalesce((select role = 'schooladmin' from public.profiles where id = auth.uid()), false)
+$$;
+-- "is_admin" = mag het beheerscherm (admin.html) openen, ongeacht welk van de twee beheerdersrollen
 create or replace function public.is_admin() returns boolean
 language sql stable security definer set search_path = public as $$
-  select coalesce((select role = 'admin' from public.profiles where id = auth.uid()), false)
+  select coalesce((select role in ('schooladmin','superadmin') from public.profiles where id = auth.uid()), false)
 $$;
 
 -- ---------- Row Level Security ----------
@@ -95,37 +122,47 @@ alter table public.profiles enable row level security;
 alter table public.classes  enable row level security;
 alter table public.quizzes  enable row level security;
 
--- schools: je ziet je eigen school; admin ziet en beheert alles
+-- schools: je ziet je eigen school; superadmin ziet en beheert alle scholen (schooladmin niet: die blijft
+-- beperkt tot de eigen school, ook al mag die het beheerscherm openen)
 drop policy if exists schools_select on public.schools;
 create policy schools_select on public.schools for select to authenticated
-  using (id = public.my_school() or public.is_admin());
+  using (id = public.my_school() or public.is_superadmin());
 drop policy if exists schools_admin on public.schools;
 create policy schools_admin on public.schools for all to authenticated
-  using (public.is_admin()) with check (public.is_admin());
+  using (public.is_superadmin()) with check (public.is_superadmin());
 
--- profiles: eigen profiel lezen/aanpassen (niet je rol of school); admin alles
+-- profiles: eigen profiel lezen/aanpassen (niet je rol of school); schooladmin ziet collega's van de
+-- eigen school (om ze evt. aan een klas te kunnen koppelen); superadmin ziet en beheert alle profielen
 drop policy if exists profiles_self_select on public.profiles;
 create policy profiles_self_select on public.profiles for select to authenticated
-  using (id = auth.uid() or public.is_admin());
+  using (id = auth.uid() or public.is_superadmin() or (public.is_schooladmin() and school_id = public.my_school()));
 drop policy if exists profiles_self_update on public.profiles;
 create policy profiles_self_update on public.profiles for update to authenticated
   using (id = auth.uid())
   with check (id = auth.uid() and role = public.my_role() and school_id is not distinct from public.my_school());
 drop policy if exists profiles_admin on public.profiles;
 create policy profiles_admin on public.profiles for all to authenticated
-  using (public.is_admin()) with check (public.is_admin());
+  using (public.is_superadmin()) with check (public.is_superadmin());
 
--- classes: alles binnen je eigen school; admin overal
+-- classes: alles binnen je eigen school (leerkracht, schooladmin of superadmin van die school);
+-- superadmin overal
 drop policy if exists classes_school on public.classes;
 create policy classes_school on public.classes for all to authenticated
-  using (school_id = public.my_school() or public.is_admin())
-  with check (school_id = public.my_school() or public.is_admin());
+  using (school_id = public.my_school() or public.is_superadmin())
+  with check (school_id = public.my_school() or public.is_superadmin());
 
--- quizzes: algemene quizzen (school_id null) + die van je school lezen; eigen schoolquizzen beheren; admin alles
+-- quizzes: algemene quizzen (school_id null) + gepubliceerde quizzen van je eigen school lezen voor
+-- iedereen; een schooladmin ziet daarnaast ook de eigen (nog niet gepubliceerde) quizzen van de eigen
+-- school; superadmin ziet alles. Bewerken/verwijderen: enkel de eigen school (leerkracht of schooladmin),
+-- of overal voor superadmin.
 drop policy if exists quizzes_select on public.quizzes;
 create policy quizzes_select on public.quizzes for select to authenticated
-  using (published and (school_id is null or school_id = public.my_school()) or public.is_admin());
+  using (
+    (published and (school_id is null or school_id = public.my_school()))
+    or (public.is_schooladmin() and school_id = public.my_school())
+    or public.is_superadmin()
+  );
 drop policy if exists quizzes_school_write on public.quizzes;
 create policy quizzes_school_write on public.quizzes for all to authenticated
-  using (school_id = public.my_school() or public.is_admin())
-  with check (school_id = public.my_school() or public.is_admin());
+  using (school_id = public.my_school() or public.is_superadmin())
+  with check (school_id = public.my_school() or public.is_superadmin());
