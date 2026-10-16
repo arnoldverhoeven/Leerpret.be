@@ -53,6 +53,17 @@
   .qcard .foot{margin-top:auto;display:flex;justify-content:space-between;align-items:center;gap:10px;padding-top:6px}
   .qcard .btn{font-size:1.1rem}
   .badge-new{position:absolute;top:-10px;right:16px;background:var(--pink);color:#fff;font-family:var(--head);font-weight:800;font-size:.85rem;padding:.2em .8em;border-radius:999px;box-shadow:0 3px 0 #b3235f}
+  /* uitgelichte module (bv. nieuw: kloklezen) – bovenaan, boven de vakken */
+  .featured{position:relative;display:flex;align-items:center;gap:22px;flex-wrap:wrap;margin-bottom:22px;padding:22px 26px;border-radius:var(--radius);color:#fff;
+    background:radial-gradient(circle at 85% 20%,rgba(255,210,63,.35),transparent 40%),linear-gradient(120deg,var(--navy) 0%,#2f4bc7 60%,#4cc9f0 130%);box-shadow:0 14px 34px rgba(30,42,120,.28);border:3px solid rgba(255,255,255,.25)}
+  .featured .fico{width:84px;height:84px;border-radius:24px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;font-size:3rem;flex:none;animation:tiktok 2.4s ease-in-out infinite}
+  @keyframes tiktok{0%,100%{transform:rotate(-6deg)}50%{transform:rotate(6deg)}}
+  .featured .ftxt{flex:1;min-width:240px}
+  .featured h2{color:#fff;font-size:1.7rem;margin:0 0 4px}
+  .featured p{margin:0;color:#dfe6ff;font-weight:700}
+  .featured .fbtns{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .featured .btn-ghost{font-size:1rem}
+  .featured .badge-new{top:-14px;left:22px;right:auto;font-size:1rem;padding:.25em 1em}
   .empty{color:var(--muted);padding:40px;text-align:center;border:2px dashed var(--line);border-radius:var(--radius);background:#fff}
   .empty a{font-weight:700}
 </style>
@@ -84,6 +95,7 @@
     <span class="count" id="count"></span>
   </div>
 
+  <div id="featured"></div>
   <div id="quizzes"></div>
 </main>
 
@@ -154,8 +166,22 @@ function cardHtml(q,c,fit,fresh){
   </article>`;
 }
 
+// uitgelichte module(s) bovenaan: de kloklees-module (eigen scherm met uitleg + sleepbare wijzers)
+function renderFeatured(c){
+  const feats=quizzes.filter(q=>q.kind==='klok');
+  $('featured').innerHTML=feats.map(q=>`<section class="featured">
+    <span class="badge-new">🆕 Nieuw</span>
+    <div class="fico">${esc(q.emoji||'🕒')}</div>
+    <div class="ftxt"><h2>${esc(q.title)}</h2><p>Eerst de uitleg van Tiktak over de kleine en de grote wijzer, daarna ${(q.settings||{}).count||10} oefeningen op het digibord: klok aflezen, wijzers zelf zetten, digitale tijd. Leerjaar ${q.grade_min}–${q.grade_max}.</p></div>
+    <div class="fbtns">
+      <a class="btn btn-primary" ${c?`href="/klok.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="/klassen.html" title="Maak eerst een klas aan"'}>🕒 Start${c?' met '+esc(c.name):''}</a>
+      <a class="btn btn-ghost" href="/klok.html?demo=1" target="_blank">Bekijk de demo</a>
+    </div>
+  </section>`).join('');
+}
 function renderQuizzes(){
   const box=$('quizzes'); const c=classes.find(x=>x.id===activeClass);
+  renderFeatured(c);
   $('filters').hidden=!c;
   if(!quizzes.length){box.innerHTML='<div class="empty">Er zijn nog geen quizzen beschikbaar.</div>';return;}
   const fits=q=>c&&c.grade>=q.grade_min&&c.grade<=q.grade_max;

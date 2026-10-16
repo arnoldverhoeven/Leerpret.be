@@ -419,7 +419,27 @@ setInterval(()=>{const d=new Date();live.sec=d.getSeconds();live.set(d.getHours(
 async function loadData(){
   const q=new URLSearchParams(location.search), S=$('startSub'), T=$('startTitle');
   try{
-    if(q.get('demo')){ NAMES=DEMO_NAMES; S.textContent='Demo · Hoe laat is het? Met Tiktak de klok leren lezen 🕒'; }
+    if(q.get('demo')||!q.get('quiz')){
+      // demo, of rechtstreeks via leerpret.be/klok geopend: werkt altijd, ook zonder login.
+      NAMES=DEMO_NAMES; S.textContent='Hoe laat is het? Met Tiktak de klok leren lezen 🕒';
+      // ingelogde leerkracht zonder klas in de link? dan mag ze hier haar klas kiezen
+      try{
+        if(!q.get('demo')&&window.LP&&LP.configured&&await LP.currentUser()){
+          const prof=await LP.myProfile();
+          if(prof&&prof.school_id){
+            const {data:kl}=await LP.sb.from('classes').select('id,name,pupils').eq('school_id',prof.school_id).order('grade').order('name');
+            if(kl&&kl.length){
+              const bar=document.createElement('div'); bar.className='chips'; bar.id='klasChips';
+              bar.innerHTML='<span class="hint" style="align-self:center">Wie speelt mee?</span>'+kl.map(k=>`<button class="chip" data-id="${k.id}">${LP.esc(k.name)} <small>${(k.pupils||[]).length}</small></button>`).join('')+'<button class="chip on" data-id="">Demo-namen</button>';
+              $('startRow').insertAdjacentElement('beforebegin',bar);
+              bar.addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;bar.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));
+                const k=kl.find(x=>x.id===b.dataset.id); NAMES=(k&&k.pupils&&k.pupils.length)?k.pupils.slice():DEMO_NAMES; $('endTitle').textContent=k?'Fantastisch, '+k.name+'!':'Fantastisch!';});
+              S.textContent=(prof.schools&&prof.schools.name?prof.schools.name+' · ':'')+'Kies hieronder je klas, of speel met demo-namen';
+            }
+          }
+        }
+      }catch(e){}
+    }
     else{
       if(!window.LP||!LP.configured) throw new Error('Leerpret is nog niet verbonden met de database (js/config.js).');
       const user=await LP.requireAuth(); if(!user) return;
