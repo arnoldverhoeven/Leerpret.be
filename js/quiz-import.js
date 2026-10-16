@@ -58,13 +58,26 @@
 
   /* ---------------- paragrafen → quiz ---------------- */
   const CORRECT_RE = /(\(\s*(juist|correct|goed)\s*\)|[✓✔]|\*)/gi;
-  const HEADERS = { titel: 'title', title: 'title', thema: 'theme', theme: 'theme', emoji: 'emoji', leerjaar: 'grades', leerjaren: 'grades', grades: 'grades' };
+  const HEADERS = { titel: 'title', title: 'title', thema: 'theme', theme: 'theme', emoji: 'emoji', leerjaar: 'grades', leerjaren: 'grades', grades: 'grades', vak: 'vak' };
+  const MAAND_NAMEN = ['januari', 'februari', 'maart', 'april', 'mei', 'juni', 'juli', 'augustus', 'september', 'oktober', 'november', 'december'];
+  function maandNaarNummer(v) {
+    v = (v || '').trim().toLowerCase();
+    const digit = v.match(/^\d{1,2}$/);
+    if (digit) { const n = +digit[0]; return (n >= 1 && n <= 12) ? n : null; }
+    const i = MAAND_NAMEN.findIndex(m => v.startsWith(m.slice(0, 3)));
+    return i >= 0 ? i + 1 : null;
+  }
 
   function parseParagraphs(paras) {
     const quiz = { title: '', theme: '', emoji: '', grade_min: 1, grade_max: 6, questions: [] };
     let q = null, a = null;
     for (const p of paras) {
       let t = p.text;
+      // "Beschikbaar van:" / "Tot en met:" — optionele seizoensperiode, vóór de eerste vraag
+      const bm = t.match(/^beschikbaar\s+van\s*:\s*(.+)$/i);
+      const tm = t.match(/^tot\s+en\s+met\s*:\s*(.+)$/i);
+      if (bm && !q) { const n = maandNaarNummer(bm[1]); if (n) quiz.avail_from_month = n; continue; }
+      if (tm && !q) { const n = maandNaarNummer(tm[1]); if (n) quiz.avail_to_month = n; continue; }
       // kopregels
       const h = t.match(/^([A-Za-z]+)\s*:\s*(.+)$/);
       if (h && HEADERS[h[1].toLowerCase()] && !q) {
