@@ -117,10 +117,12 @@ async function init(){
   profile=await LP.myProfile();
   $('hello').textContent=`Dag ${(profile&&profile.full_name)||LP.toUsername(user.email)}! 👋`;
   if(profile&&['schooladmin','superadmin'].includes(profile.role)) $('adminLink').hidden=false;
-  if(!profile||!profile.school_id){ $('school').textContent='Je account is nog niet aan een school gekoppeld. Mail naar info@leerpret.be.'; return; }
-  $('school').textContent=profile.schools?profile.schools.name:'';
+  const superNoSchool=profile&&profile.role==='superadmin'&&!profile.school_id; // superbeheerder zonder eigen school: ziet alles, speelt met eender welke klas
+  if(!profile||(!profile.school_id&&!superNoSchool)){ $('school').textContent='Je account is nog niet aan een school gekoppeld. Mail naar info@leerpret.be.'; return; }
+  $('school').textContent=superNoSchool?'Superbeheerder · alle scholen':(profile.schools?profile.schools.name:'');
+  let cq=LP.sb.from('classes').select('id,name,grade,pupils,schools(name)'); if(!superNoSchool) cq=cq.eq('school_id',profile.school_id);
   const [c,q]=await Promise.all([
-    LP.sb.from('classes').select('id,name,grade,pupils').eq('school_id',profile.school_id).order('grade').order('name'),
+    cq.order('grade').order('name'),
     LP.sb.from('quizzes').select('id,title,theme,vak,emoji,grade_min,grade_max,school_id,questions,created_at,kind,settings,avail_from_month,avail_to_month').eq('published',true).order('created_at',{ascending:false})
   ]);
   if(c.error||q.error){note('Laden mislukt: '+esc((c.error||q.error).message),'err');return;}
@@ -137,7 +139,7 @@ async function init(){
 function renderKlassen(){
   const bar=$('klasbar'); bar.hidden=false;
   if(!classes.length){ $('klasbtns').innerHTML='<span class="muted" style="font-weight:700">Nog geen klas – <a href="/klassen.html">maak er eerst één aan</a>.</span>'; return; }
-  $('klasbtns').innerHTML=classes.map(c=>`<button data-id="${c.id}" class="${c.id===activeClass?'active':''}">${esc(c.name)}<small>${(c.pupils||[]).length} 👦👧</small></button>`).join(' ');
+  $('klasbtns').innerHTML=classes.map(c=>`<button data-id="${c.id}" class="${c.id===activeClass?'active':''}" title="${esc(c.schools&&c.schools.name||'')}">${esc(c.name)}${c.schools&&!profile.school_id?' <small>'+esc(c.schools.name)+'</small>':''}<small>${(c.pupils||[]).length} 👦👧</small></button>`).join(' ');
 }
 $('klasbtns').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;activeClass=b.dataset.id;try{localStorage.setItem('lp_class',activeClass)}catch(x){}renderKlassen();renderQuizzes();});
 $('filters').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;filter=b.dataset.f;document.querySelectorAll('#filters button').forEach(x=>x.classList.toggle('active',x===b));renderQuizzes();});
