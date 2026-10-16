@@ -85,10 +85,15 @@
 
   /* -------- leer- & oefenscherm: lay-out -------- */
   .stage{width:100%;max-width:1600px;flex:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:3vw;align-items:center;min-height:0}
-  @media (max-width:900px){.stage{grid-template-columns:1fr;gap:1.5vh;overflow-y:auto;align-items:start}}
+  @media (max-width:900px){
+    .screen{justify-content:flex-start;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:2vh 4vw 14vh} /* 14vh onderaan: knoppen Geluid/Terug staan vast onderaan */
+    .stage{grid-template-columns:1fr;gap:1.5vh;overflow:visible;align-items:start;flex:none}
+    .panel{padding-bottom:2vh}
+    .backlink,.mute{bottom:1vh;font-size:.85rem;padding:.35em .8em}
+  }
   .clockwrap{display:flex;align-items:center;justify-content:center;min-height:0}
   .clockwrap svg{width:min(78vmin,100%);max-height:78vh;height:auto;touch-action:none;filter:drop-shadow(0 18px 30px rgba(30,42,120,.22))}
-  @media (max-width:900px){.clockwrap svg{width:min(70vmin,92vw);max-height:none}}
+  @media (max-width:900px){.clockwrap svg{width:min(58vmin,80vw);max-height:none}}
   .panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;min-height:0;text-align:center}
 
   .topbar{width:100%;max-width:1600px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(1.05rem,2.6vmin,1.9rem);color:var(--navy);font-weight:800;margin-bottom:1vh}
@@ -436,26 +441,10 @@ setInterval(()=>{const d=new Date();live.sec=d.getSeconds();live.set(d.getHours(
 async function loadData(){
   const q=new URLSearchParams(location.search), S=$('startSub'), T=$('startTitle');
   try{
-    if(q.get('demo')||!q.get('quiz')){
-      // demo, of rechtstreeks via leerpret.be/klok geopend: werkt altijd, ook zonder login.
-      NAMES=DEMO_NAMES; S.textContent='Hoe laat is het? Met Tiktak de klok leren lezen 🕒';
-      // ingelogde leerkracht zonder klas in de link? dan mag ze hier haar klas kiezen
-      try{
-        if(!q.get('demo')&&window.LP&&LP.configured&&await LP.currentUser()){
-          const prof=await LP.myProfile();
-          if(prof&&prof.school_id){
-            const {data:kl}=await LP.sb.from('classes').select('id,name,pupils').eq('school_id',prof.school_id).order('grade').order('name');
-            if(kl&&kl.length){
-              const bar=document.createElement('div'); bar.className='chips'; bar.id='klasChips';
-              bar.innerHTML='<span class="hint" style="align-self:center">Wie speelt mee?</span>'+kl.map(k=>`<button class="chip" data-id="${k.id}">${LP.esc(k.name)} <small>${(k.pupils||[]).length}</small></button>`).join('')+'<button class="chip on" data-id="">Demo-namen</button>';
-              $('startRow').insertAdjacentElement('beforebegin',bar);
-              bar.addEventListener('click',e=>{const b=e.target.closest('.chip');if(!b)return;bar.querySelectorAll('.chip').forEach(x=>x.classList.toggle('on',x===b));
-                const k=kl.find(x=>x.id===b.dataset.id); NAMES=(k&&k.pupils&&k.pupils.length)?k.pupils.slice():DEMO_NAMES; $('endTitle').textContent=k?'Fantastisch, '+k.name+'!':'Fantastisch!';});
-              S.textContent=(prof.schools&&prof.schools.name?prof.schools.name+' · ':'')+'Kies hieronder je klas, of speel met demo-namen';
-            }
-          }
-        }
-      }catch(e){}
+    if(q.get('demo')||!q.get('quiz')||!q.get('class')){
+      // open modus: rechtstreeks via leerpret.be/klok (of demo), ook zonder login en op gsm —
+      // dezelfde uitleg en oefeningen, maar zonder klas en zonder namen van kinderen.
+      NAMES=[]; S.textContent='Hoe laat is het? Met Tiktak de klok leren lezen 🕒';
     }
     else{
       if(!window.LP||!LP.configured) throw new Error('Leerpret is nog niet verbonden met de database (js/config.js).');
@@ -610,6 +599,7 @@ function startPlay(){
 function pickName(){if(!namePool.length)namePool=shuffle([...NAMES]);return namePool.pop();}
 function nextTurn(){
   if(qi>=order.length){finish();return;}
+  if(!NAMES.length){currentName='';showExercise();return;} // open modus: geen naamtrekking
   show('pick'); const box=$('namebox'); box.className='namebox spinning'; currentName=pickName();
   let t=0,delay=60;
   (function spin(){box.textContent=NAMES[Math.floor(Math.random()*NAMES.length)];t+=delay;delay*=1.09;
@@ -617,7 +607,7 @@ function nextTurn(){
 }
 function showExercise(){
   cur=order[qi]; cur.done=false; cur.tries=0;
-  show('play'); $('qcount').textContent=qi+1; $('whoName').textContent=currentName; $('progbar').style.width=(qi/order.length*100)+'%';
+  show('play'); $('qcount').textContent=qi+1; $('whoName').textContent=currentName; $('whoName').parentElement.style.visibility=currentName?'':'hidden'; $('progbar').style.width=(qi/order.length*100)+'%';
   pc.eyes(false); pc.focus(null); pc.ring(helpOn); pc.quads(helpOn&&cur.level>=3); pc.locked=false;
   const P=$('playPanel'); P.innerHTML='';
   const help=`<button class="helpbtn ${helpOn?'on':''}" id="helpBtn">💡 Hulp: minutenring</button>`;
@@ -670,7 +660,7 @@ function celebrate(text){
   $('progbar').style.width=((qi+1)/order.length*100)+'%';
   const praise=['Knap gedaan','Super','Fantastisch','Wauw','Geweldig','Topper','Yes'][ri(0,6)];
   const fb=$('fb'); fb.style.display=''; fb.className='bubble ok';
-  fb.innerHTML=`<span class="tt">🕒 Tiktak zegt:</span><span class="big">🎉 ${praise}, ${currentName}!</span>Het is <em>${text}</em>.`;
+  fb.innerHTML=`<span class="tt">🕒 Tiktak zegt:</span><span class="big">🎉 ${praise}${currentName?', '+currentName:''}!</span>Het is <em>${text}</em>.`;
   const row=document.querySelector('#playPanel .row'); row.innerHTML='';
   const next=document.createElement('button'); next.className='bigbtn navy'; next.textContent=(qi+1<order.length)?'Volgende ➡️':'Bekijk het resultaat 🏆';
   next.addEventListener('click',()=>{qi++;nextTurn();}); row.appendChild(next);
