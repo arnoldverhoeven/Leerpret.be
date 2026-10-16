@@ -147,10 +147,10 @@ function cardHtml(q,c,fit,fresh){
   const lj=q.grade_min===q.grade_max?`${ord(q.grade_min)} leerjaar`:`${ord(q.grade_min)} – ${ord(q.grade_max)} leerjaar`;
   return `<article class="qcard ${c&&!fit?'dim':''}">
     ${isNew?'<span class="badge-new">Nieuw!</span>':''}
-    <div class="head"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h3>${esc(q.title)}</h3><div class="m">${esc(q.theme||'')}${q.theme?' · ':''}${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':n+' vragen'}</div></div></div>
+    <div class="head"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h3>${esc(q.title)}</h3><div class="m">${esc(q.theme||'')}${q.theme?' · ':''}${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':q.kind==='klok'?'uitleg + '+((q.settings||{}).count||10)+' oefeningen':n+' vragen'}</div></div></div>
     <div class="tags"><span class="tag">${lj}</span>${q.school_id?'<span class="tag orange">eigen quiz</span>':''}${fit?'<span class="tag green">past bij deze klas</span>':''}</div>
     <div class="foot"><span class="m">${c?'Speelt met klas '+esc(c.name):''}</span>
-      <a class="btn btn-primary" ${c?`href="/quiz.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="/klassen.html" title="Maak eerst een klas aan"'}>▶ Start</a></div>
+      <a class="btn btn-primary" ${c?`href="/${q.kind==='klok'?'klok':'quiz'}.html?quiz=${q.id}&class=${c.id}" target="_blank"`:'href="/klassen.html" title="Maak eerst een klas aan"'}>▶ Start</a></div>
   </article>`;
 }
 

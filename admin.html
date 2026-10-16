@@ -139,7 +139,7 @@
           <div class="field"><label>Van leerjaar</label><select id="f_gmin"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option>6</option></select></div>
           <div class="field"><label>Tot leerjaar</label><select id="f_gmax"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option><option selected>6</option></select></div>
           <div class="field"><label>Zichtbaar voor</label><select id="f_school"><option value="">Alle scholen</option></select></div>
-          <div class="field"><label>Soort</label><select id="f_kind"><option value="mc">Meerkeuzequiz</option><option value="circle">Cirkelrekenen</option></select></div>
+          <div class="field"><label>Soort</label><select id="f_kind"><option value="mc">Meerkeuzequiz</option><option value="circle">Cirkelrekenen</option><option value="klok">Kloklezen (uitleg + oefeningen)</option></select></div>
         </div>
 
         <div class="avail">
@@ -159,6 +159,18 @@
             <div class="field"><label>Soorten</label><select id="c_kinds"><option value="TE+E">Alleen TE ± E (bv. 33 + 5)</option><option value="TE+TE">Alleen TE ± TE (bv. 29 + 35)</option><option value="both" selected>Beide</option></select></div>
             <div class="field"><label>Brug over het tiental</label><select id="c_bridge"><option value="mix" selected>Gemengd</option><option value="no">Zonder brug</option><option value="yes">Alleen met brug</option></select></div>
             <div class="field"><label>Aantal oefeningen</label><input id="c_count" type="number" min="1" max="30" value="10"></div>
+          </div>
+        </div>
+
+        <div class="imp" id="klokSettings" hidden style="border-color:#e0b020;background:#fff8e1">
+          <h3>🕒 Kloklezen – instellingen</h3>
+          <p class="muted" style="margin:0 0 10px">De module begint met de uitleg van Tiktak (kleine en grote wijzer, hele uren, halve uren, kwartieren, minuten) en gaat dan over naar oefeningen: de klok aflezen, de wijzers zelf zetten en digitale tijden herkennen. De oefeningen worden telkens willekeurig gemaakt; de leerkracht kan de niveaus op het startscherm nog aan- of uitzetten.</p>
+          <div class="meta" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+            <div class="field"><label>Niveaus (standaard aan)</label>
+              <div style="display:grid;gap:4px;font-weight:700"><label><input type="checkbox" class="k_level" value="1" checked> Hele uren</label><label><input type="checkbox" class="k_level" value="2" checked> Halve uren</label><label><input type="checkbox" class="k_level" value="3" checked> Kwartieren</label><label><input type="checkbox" class="k_level" value="4" checked> Per 5 minuten</label></div></div>
+            <div class="field"><label>Soorten oefeningen</label>
+              <div style="display:grid;gap:4px;font-weight:700"><label><input type="checkbox" class="k_mode" value="lees" checked> Klok aflezen (keuze)</label><label><input type="checkbox" class="k_mode" value="zet" checked> Wijzers zelf zetten</label><label><input type="checkbox" class="k_mode" value="digitaal" checked> Digitale tijd herkennen</label></div></div>
+            <div class="field"><label>Aantal oefeningen</label><input id="k_count" type="number" min="3" max="30" value="10"></div>
           </div>
         </div>
 
@@ -297,7 +309,7 @@ function rowHtml(q){
   const seasonal=q.avail_from_month&&q.avail_to_month;
   const badge=seasonal?`<span class="tag ${inSeason(q)?'':'orange'}" title="${inSeason(q)?'Nu zichtbaar voor leerkrachten':'Nu niet zichtbaar — komt vanzelf terug in '+MONTHS[q.avail_from_month-1]}">📅 ${MONTHS[q.avail_from_month-1].slice(0,3)}–${MONTHS[q.avail_to_month-1].slice(0,3)}</span>`:'';
   const ro=!canEdit(q);
-  return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${ro?'<span class="tag" title="Algemene bibliotheek — enkel-lezen, kopieer naar je school om aan te passen">🔒 enkel-lezen</span>':''} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
+  return `<div class="row ${cur&&cur.id===q.id?'active':''}" data-id="${q.id}"><div class="ico">${esc(q.emoji||'🎯')}</div><div><h4>${esc(q.title)} ${q.published?'':'<span class="tag orange">verborgen</span>'} ${ro?'<span class="tag" title="Algemene bibliotheek — enkel-lezen, kopieer naar je school om aan te passen">🔒 enkel-lezen</span>':''} ${badge}</h4><div class="m">${q.vak?esc(q.vak)+' · ':''}${esc(q.theme||'')} · ${q.kind==='circle'?((q.settings||{}).count||10)+' oefeningen':q.kind==='klok'?'kloklezen · uitleg + '+((q.settings||{}).count||10)+' oefeningen':(q.questions||[]).length+' vragen'} · lj ${q.grade_min}–${q.grade_max} · ${q.school_id?esc((schools.find(s=>s.id===q.school_id)||{}).name||'school'):'alle scholen'}</div></div></div>`;
 }
 function renderQuizList(){
   if(!quizzes.length){$('quizList').innerHTML='<div class="muted">Nog geen quizzen.</div>';return;}
@@ -330,13 +342,14 @@ function openQuiz(q){
   $('f_gmin').value=cur.grade_min||1;$('f_gmax').value=cur.grade_max||6;$('f_school').value=cur.school_id||'';$('f_pub').checked=cur.published!==false;
   $('f_avail_from').value=cur.avail_from_month||'';$('f_avail_to').value=cur.avail_to_month||'';
   $('f_kind').value=cur.kind||'mc'; const cs=cur.settings||{};
+  $('k_count').value=cs.count||10; document.querySelectorAll('.k_level').forEach(x=>x.checked=!cs.levels||cs.levels.map(String).includes(x.value)); document.querySelectorAll('.k_mode').forEach(x=>x.checked=!cs.modes||cs.modes.includes(x.value));
   $('c_op').value=cs.op||'+'; $('c_kinds').value=(cs.kinds&&cs.kinds.length===1)?cs.kinds[0]:'both'; $('c_bridge').value=cs.bridge||'mix'; $('c_count').value=cs.count||10;
   applyKind();
   // enkel-lezen: dit is een quiz uit de algemene bibliotheek ("alle scholen") en de ingelogde schoolbeheerder
   // mag die niet aanpassen — velden op slot, geen bewaren/verwijderen/importeren, wel een knop om als eigen
   // kopie te starten. De import-doos (niet zinvol als je toch niet mag bewaren) wordt apart verborgen.
   document.querySelectorAll('#editor input, #editor select, #editor textarea').forEach(el=>el.disabled=ro);
-  document.getElementById('drop').closest('.imp').hidden=ro||$('f_kind').value==='circle';
+  document.getElementById('drop').closest('.imp').hidden=ro||$('f_kind').value!=='mc';
   $('save').hidden=ro; $('addQ').disabled=ro; $('checkQ').disabled=ro;
   // de knoppen per vraag (verwijderen/verplaatsen/husselen/antwoord-toggle) zijn geen <input>, dus apart blokkeren
   $('qs').style.pointerEvents=ro?'none':''; $('qs').style.opacity=ro?'.65':'';
@@ -346,10 +359,10 @@ function openQuiz(q){
   renderQuestions(); renderQuizList(); $('editor').scrollIntoView({behavior:'smooth',block:'start'});
 }
 function applyKind(){
-  const circle=$('f_kind').value==='circle';
-  $('circleSettings').hidden=!circle;
-  document.querySelector('#editor .imp:not(#circleSettings)').hidden=circle;
-  $('qs').hidden=circle; $('qs').previousElementSibling.hidden=circle;
+  const kind=$('f_kind').value, circle=kind==='circle', klok=kind==='klok', gen=circle||klok;
+  $('circleSettings').hidden=!circle; $('klokSettings').hidden=!klok;
+  document.querySelector('#editor .imp:not(#circleSettings):not(#klokSettings)').hidden=gen;
+  $('qs').hidden=gen; $('qs').previousElementSibling.hidden=gen;
 }
 $('f_kind').addEventListener('change',applyKind);
 $('f_theme').addEventListener('input',()=>{ if(cur)renderQuestions(); });
@@ -427,14 +440,14 @@ $('parsePaste').addEventListener('click',()=>{const t=$('paste').value.trim();if
 /* ---------- bewaren ---------- */
 $('save').addEventListener('click',async()=>{
   const title=$('f_title').value.trim(); if(!title){note('Geef de quiz een titel.','err');$('f_title').focus();return;}
-  const circle=$('f_kind').value==='circle';
-  const w=circle?[]:QuizImport.validate({questions:cur.questions}); const blocking=w.filter(x=>!/geen uitleg/.test(x));
+  const kind=$('f_kind').value, circle=kind==='circle', klok=kind==='klok';
+  const w=(circle||klok)?[]:QuizImport.validate({questions:cur.questions}); const blocking=w.filter(x=>!/geen uitleg/.test(x));
   if(blocking.length){showWarnings(w);if(!confirm('Er zijn nog problemen met de vragen (zie geel kader). Toch bewaren?'))return;}
   const availFrom=$('f_avail_from').value?+$('f_avail_from').value:null, availTo=$('f_avail_to').value?+$('f_avail_to').value:null;
   if((availFrom&&!availTo)||(!availFrom&&availTo)){note('Kies zowel een start- als een eindmaand voor de beschikbaarheid (of laat beide leeg).','err');return;}
   const rec={title,theme:$('f_theme').value.trim()||null,vak:$('f_vak').value||null,emoji:$('f_emoji').value.trim()||'🎯',grade_min:+$('f_gmin').value,grade_max:+$('f_gmax').value,school_id:$('f_school').value||null,published:$('f_pub').checked,
     avail_from_month:availFrom,avail_to_month:availTo,
-    kind:circle?'circle':'mc',settings:circle?{op:$('c_op').value,kinds:$('c_kinds').value==='both'?['TE+E','TE+TE']:[$('c_kinds').value],bridge:$('c_bridge').value,count:+$('c_count').value||10}:{},
+    kind:kind,settings:circle?{op:$('c_op').value,kinds:$('c_kinds').value==='both'?['TE+E','TE+TE']:[$('c_kinds').value],bridge:$('c_bridge').value,count:+$('c_count').value||10}:klok?{levels:[...document.querySelectorAll('.k_level:checked')].map(x=>+x.value),modes:[...document.querySelectorAll('.k_mode:checked')].map(x=>x.value),count:+$('k_count').value||10}:{},
     questions:cur.questions.map(q=>{const o={q:q.q.trim(),a:q.a.map(a=>{const x={t:a.t.trim(),ok:!!a.ok,e:(a.e||'').trim()};if(a.planet)x.planet=a.planet;return x;})};if(q.multi)o.multi=q.multi;return o;})};
   if(rec.grade_min>rec.grade_max)[rec.grade_min,rec.grade_max]=[rec.grade_max,rec.grade_min];
   $('save').disabled=true;
@@ -449,7 +462,7 @@ $('preview').addEventListener('click',async e=>{
   // eerste klas van de eerste school als proefklas
   const {data}=await LP.sb.from('classes').select('id').limit(1);
   if(!data||!data.length){note('Maak eerst een klas aan (dashboard) om uit te proberen.','err');return;}
-  window.open(`/quiz.html?quiz=${cur.id}&class=${data[0].id}`,'_blank');
+  window.open(`/${$('f_kind').value==='klok'?'klok':'quiz'}.html?quiz=${cur.id}&class=${data[0].id}`,'_blank');
 });
 $('copyToSchool').addEventListener('click',()=>{
   const copy=JSON.parse(JSON.stringify(cur));

@@ -16,13 +16,16 @@ Alles in deze map is een statische website (geen build-stap). De database en de 
    update auth.users set encrypted_password = crypt('NieuwWachtwoord123', gen_salt('bf'))
     where email = 'marielle.peeters@login.leerpret.be';
    ```
-5. Maak jezelf beheerder (één keer, SQL Editor):
+5. Maak jezelf **superbeheerder** (één keer, SQL Editor) — dat is de rol die alle scholen ziet en beheert:
    ```sql
-   update public.profiles set role = 'admin',
+   update public.profiles set role = 'superadmin',
           school_id = (select id from public.schools where slug = 'de-kleine-wereld')
     where id = (select id from auth.users where email = 'arnold.verhoeven@agv-it.be');
    ```
-   Alle andere accounts koppel je daarna gewoon in het beheerdersscherm (`leerpret.be/admin` → tab *Scholen & leerkrachten*).
+   Alle andere accounts koppel je daarna gewoon in het beheerdersscherm (`leerpret.be/admin` → tab *Scholen & leerkrachten*). Er zijn drie rollen:
+   - **Leerkracht** (`teacher`) — enkel de eigen klassen en het spelen van quizzen.
+   - **Schoolbeheerder** (`schooladmin`) — mag `/admin` openen, maar ziet en beheert enkel de klassen en quizzen van de eigen school (geen andere scholen, geen algemene Leerpret-quizzen, geen scholenlijst).
+   - **Superbeheerder** (`superadmin`) — ziet en beheert alles: alle scholen, alle quizzen (ook de algemene), en het aanmaken van scholen/koppelen van accounts.
 6. **Authentication → Providers → Email**: zet *Confirm email* uit (je maakt accounts zelf aan, niemand registreert zich zelf). Laat *Enable sign ups* het liefst ook **uit**, zodat enkel jij accounts kan maken.
 7. **Project Settings → API**: kopieer de **Project URL** en de **anon public** key naar `js/config.js`.
 

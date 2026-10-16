@@ -361,6 +361,8 @@ async function loadData(){
         LP.sb.from('quizzes').select('title,theme,emoji,questions,kind,settings').eq('id',q.get('quiz')).single(),
         LP.sb.from('classes').select('name,pupils,schools(name)').eq('id',q.get('class')).single()]);
       if(e1||!quiz) throw new Error('Quiz niet gevonden.'); if(e2||!klas) throw new Error('Klas niet gevonden.');
+      // de kloklees-module heeft een eigen scherm (uitleg + sleepbare wijzers)
+      if(quiz.kind==='klok'){ location.replace('/klok.html'+location.search); return; }
       QUESTIONS=quiz.kind==='circle'?genCircle(quiz.settings||{}):(quiz.questions||[]); NAMES=(klas.pupils||[]).slice();
       T.textContent=quiz.title; E.textContent=quiz.emoji||'🚀';
       QUIZ_THEME=quiz.theme||''; QUIZ_TITLE=quiz.title||'';

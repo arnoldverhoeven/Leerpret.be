@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kloklezen – Leerpret</title>
+<meta name="robots" content="noindex">
+<link rel="icon" href="/favicon.ico" sizes="32x32">
+<link rel="icon" href="/assets/icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#8fd3ff">
+<style>
+@font-face{font-family:'Baloo 2';font-weight:700;font-display:swap;src:url('/assets/fonts/baloo2-700.woff') format('woff')}
+@font-face{font-family:'Baloo 2';font-weight:800;font-display:swap;src:url('/assets/fonts/baloo2-800.woff') format('woff')}
+@font-face{font-family:'Nunito';font-weight:700;font-display:swap;src:url('/assets/fonts/nunito-700.woff') format('woff')}
+</style>
+<style>
+  :root{
+    --navy:#1e2a78; --navy2:#2a3a9e; --orange:#ff6b35; --orange2:#ff8c42; --yellow:#ffd23f; --sky:#4cc9f0; --green:#2fc46f; --pink:#ff5fa2; --purple:#9b6dff;
+    --ink:#1b2140; --muted:#4d5790; --card:#fff;
+    --over:#2fc46f; --voorhalf:#4cc9f0; --overhalf:#9b6dff; --voor:#ff5fa2;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:'Baloo 2','Nunito','Trebuchet MS',sans-serif;color:var(--ink);overflow:hidden;
+    background:linear-gradient(180deg,#8fd3ff 0%,#c8ecff 45%,#fff6dc 100%);
+    user-select:none;-webkit-user-select:none;
+  }
+  /* -------- lucht: zon + wolken -------- */
+  .sun{position:fixed;right:-3vmin;top:-3vmin;width:18vmin;height:18vmin;border-radius:50%;background:radial-gradient(circle at 40% 40%,#fff6b0,#ffd23f 60%,#ffb300);box-shadow:0 0 60px 20px rgba(255,210,63,.45);z-index:0;animation:sunspin 40s linear infinite}
+  @keyframes sunspin{to{transform:rotate(360deg)}}
+  .sun::before{content:"";position:absolute;inset:-28%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,220,100,.35) 0 10deg,transparent 10deg 30deg)}
+  .cloud{position:fixed;z-index:0;opacity:.95;filter:drop-shadow(0 8px 14px rgba(30,42,120,.08));animation:drift linear infinite}
+  .cloud i{position:absolute;background:#fff;border-radius:50%}
+  @keyframes drift{from{transform:translateX(-30vw)}to{transform:translateX(130vw)}}
+  .hills{position:fixed;left:0;right:0;bottom:0;height:22vh;z-index:0;pointer-events:none}
+
+  /* -------- schermen -------- */
+  .screen{position:fixed;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:3vh 4vw;z-index:2;text-align:center}
+  .screen.active{display:flex;animation:fadeIn .45s ease}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+  .backlink{position:fixed;bottom:1.5vh;right:1.5vw;z-index:100;color:var(--navy);text-decoration:none;font-weight:800;font-size:clamp(.9rem,2vmin,1.3rem);background:rgba(255,255,255,.7);padding:.4em 1em;border-radius:99px}
+  .mute{position:fixed;bottom:1.5vh;left:1.5vw;z-index:100;background:rgba(255,255,255,.75);border:2px solid rgba(30,42,120,.15);color:var(--navy);border-radius:99px;padding:.5vh 1.2vw;font-family:inherit;font-weight:800;cursor:pointer;font-size:clamp(.9rem,2vmin,1.3rem)}
+
+  h1.title{font-size:clamp(2.6rem,8vmin,7rem);font-weight:800;line-height:1.05;color:var(--navy);text-shadow:0 5px 0 rgba(255,255,255,.8),0 10px 24px rgba(30,42,120,.18)}
+  h1.title b{color:var(--orange)}
+  .subtitle{font-size:clamp(1.2rem,3.2vmin,2.4rem);margin-top:1.2vh;color:var(--muted);font-weight:800}
+
+  .bigbtn{border:none;cursor:pointer;color:#fff;font-family:inherit;font-weight:800;font-size:clamp(1.4rem,4vmin,3rem);padding:1.8vh 5vw;border-radius:999px;
+    background:linear-gradient(180deg,#ffa163,#ff7a1f);box-shadow:0 9px 0 #c95d10,0 18px 36px rgba(255,122,31,.35);transition:transform .1s,box-shadow .1s}
+  .bigbtn:hover{transform:translateY(-3px) scale(1.02)}
+  .bigbtn:active{transform:translateY(5px);box-shadow:0 3px 0 #c95d10}
+  .bigbtn.navy{background:linear-gradient(180deg,#3346b8,var(--navy));box-shadow:0 9px 0 #0f1745,0 18px 36px rgba(30,42,120,.3)}
+  .bigbtn.navy:active{box-shadow:0 3px 0 #0f1745}
+  .bigbtn.green{background:linear-gradient(180deg,#5fe39a,var(--green));box-shadow:0 9px 0 #1c8a4a,0 18px 36px rgba(47,196,111,.35)}
+  .bigbtn.green:active{box-shadow:0 3px 0 #1c8a4a}
+  .bigbtn.sm{font-size:clamp(1.1rem,2.8vmin,2rem);padding:1.3vh 3.5vw}
+  .bigbtn.light{background:#fff;color:var(--navy);box-shadow:0 7px 0 #cfd6f5,0 14px 30px rgba(30,42,120,.15)}
+  .bigbtn.light:active{box-shadow:0 2px 0 #cfd6f5}
+  .bigbtn[disabled]{opacity:.5;cursor:default;transform:none!important}
+
+  /* -------- startscherm: niveaus -------- */
+  .chips{display:flex;flex-wrap:wrap;gap:1.2vmin;justify-content:center;margin-top:2.5vh}
+  .chip{font-family:inherit;font-weight:800;font-size:clamp(1rem,2.6vmin,1.8rem);padding:.5em 1.1em;border-radius:99px;border:3px solid rgba(30,42,120,.2);background:rgba(255,255,255,.75);color:var(--muted);cursor:pointer;transition:all .15s}
+  .chip.on{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 5px 0 #0f1745}
+  .startrow{display:flex;gap:2vw;flex-wrap:wrap;justify-content:center;margin-top:4vh;align-items:center}
+  .liveclock{width:min(46vmin,420px);filter:drop-shadow(0 18px 30px rgba(30,42,120,.22))}
+
+  /* -------- leer- & oefenscherm: lay-out -------- */
+  .stage{width:100%;max-width:1600px;flex:1;display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:3vw;align-items:center;min-height:0}
+  @media (max-width:900px){.stage{grid-template-columns:1fr;gap:1.5vh;overflow-y:auto;align-items:start}}
+  .clockwrap{display:flex;align-items:center;justify-content:center;min-height:0}
+  .clockwrap svg{width:min(78vmin,100%);max-height:78vh;height:auto;touch-action:none;filter:drop-shadow(0 18px 30px rgba(30,42,120,.22))}
+  @media (max-width:900px){.clockwrap svg{width:min(70vmin,92vw);max-height:none}}
+  .panel{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2vh;min-height:0;text-align:center}
+
+  .topbar{width:100%;max-width:1600px;display:flex;justify-content:space-between;align-items:center;font-size:clamp(1.05rem,2.6vmin,1.9rem);color:var(--navy);font-weight:800;margin-bottom:1vh}
+  .topbar .who{color:var(--orange)}
+  .progress{height:1.2vh;width:100%;max-width:1600px;background:rgba(30,42,120,.12);border-radius:99px;overflow:hidden;margin-bottom:1.5vh}
+  .progress>div{height:100%;width:0;background:linear-gradient(90deg,var(--sky),var(--green));border-radius:99px;transition:width .6s ease}
+  .steps{display:flex;gap:.8vmin;justify-content:center;margin-bottom:1vh}
+  .steps i{width:2.2vmin;height:2.2vmin;border-radius:50%;background:rgba(30,42,120,.18)}
+  .steps i.on{background:var(--orange);transform:scale(1.25)}
+  .steps i.done{background:var(--navy)}
+
+  /* tekstballon van Tiktak */
+  .bubble{position:relative;background:#fff;border-radius:3vmin;padding:2.2vh 2.4vw;font-size:clamp(1.25rem,3.4vmin,2.6rem);font-weight:800;line-height:1.3;color:var(--ink);box-shadow:0 14px 30px rgba(30,42,120,.14);max-width:min(100%,900px);text-align:left;animation:pop .4s cubic-bezier(.2,1.4,.4,1) both}
+  .bubble::before{content:"";position:absolute;left:-2.4vmin;top:50%;border:1.4vmin solid transparent;border-right-color:#fff;transform:translateY(-50%)}
+  @media (max-width:900px){.bubble::before{left:50%;top:-2.6vmin;border-right-color:transparent;border-bottom-color:#fff;transform:translateX(-50%)}}
+  .bubble .tt{display:block;font-size:.6em;color:var(--muted);margin-bottom:.3em}
+  .bubble em{font-style:normal;color:var(--orange)}
+  .bubble u{text-decoration:none;color:var(--navy2);border-bottom:.15em solid var(--sky)}
+  .bubble .big{display:block;font-size:1.45em;color:var(--navy);margin-top:.25em;line-height:1.1}
+  @keyframes pop{from{opacity:0;transform:scale(.85)}to{opacity:1;transform:none}}
+  .bubble.ok{background:#eafff2;border:3px solid var(--green)}
+  .bubble.nope{background:#fff0f6;border:3px solid var(--pink);animation:shake .5s both}
+  @keyframes shake{10%,90%{transform:translateX(-2px)}20%,80%{transform:translateX(4px)}30%,50%,70%{transform:translateX(-8px)}40%,60%{transform:translateX(8px)}}
+
+  .tiktak{font-size:clamp(2.6rem,7vmin,5.5rem);line-height:1;animation:bob 2.4s ease-in-out infinite;display:inline-block}
+  @keyframes bob{0%,100%{transform:rotate(-6deg) translateY(0)}50%{transform:rotate(6deg) translateY(-6px)}}
+
+  .task{font-size:clamp(1.3rem,3.4vmin,2.6rem);font-weight:800;color:var(--muted)}
+  .target{font-size:clamp(2.2rem,7vmin,5.6rem);font-weight:800;color:var(--navy);line-height:1.1;background:#fff;padding:.25em .7em;border-radius:2.5vmin;box-shadow:0 12px 26px rgba(30,42,120,.14);border:.4vmin solid var(--yellow)}
+  .target small{display:block;font-size:.42em;color:var(--muted);font-weight:800}
+
+  .options{display:grid;grid-template-columns:1fr 1fr;gap:1.6vmin;width:100%}
+  .opt{font-family:inherit;font-weight:800;font-size:clamp(1.4rem,4vmin,3.2rem);padding:1.8vh 1vw;border-radius:2.4vmin;border:.4vmin solid rgba(30,42,120,.15);background:#fff;color:var(--navy);cursor:pointer;box-shadow:0 8px 0 #dfe4fb;transition:transform .12s,box-shadow .12s;animation:pop .4s cubic-bezier(.2,1.4,.4,1) both;animation-delay:var(--d,0s);line-height:1.1}
+  .opt:hover:not(.locked){transform:translateY(-3px);border-color:var(--sky)}
+  .opt:active:not(.locked){transform:translateY(4px);box-shadow:0 2px 0 #dfe4fb}
+  .opt.good{background:#eafff2;border-color:var(--green);color:#146b3a;box-shadow:0 8px 0 #9fe8bd;animation:bounce .7s both}
+  .opt.bad{background:#fff0f6;border-color:var(--pink);color:#8a1f4b;opacity:.75;animation:shake .5s both}
+  .opt.locked{cursor:default}
+  @keyframes bounce{0%{transform:scale(1)}40%{transform:scale(1.08) rotate(-1.5deg)}70%{transform:scale(.98) rotate(1deg)}100%{transform:scale(1)}}
+  .digital{font-family:'Nunito','Baloo 2',monospace;letter-spacing:.06em}
+
+  .row{display:flex;gap:1.5vw;flex-wrap:wrap;justify-content:center;align-items:center}
+  .hint{font-size:clamp(1rem,2.4vmin,1.6rem);color:var(--muted);font-weight:800}
+  .helpbtn{font-family:inherit;font-weight:800;font-size:clamp(.95rem,2.3vmin,1.5rem);padding:.45em 1em;border-radius:99px;border:3px solid rgba(30,42,120,.2);background:rgba(255,255,255,.8);color:var(--navy);cursor:pointer}
+  .helpbtn.on{background:var(--yellow);border-color:#e0b020}
+
+  /* naamscherm */
+  .label{font-size:clamp(1.3rem,3.6vmin,2.8rem);color:var(--navy);font-weight:800}
+  .namebox{margin-top:2vh;min-width:55vw;padding:3vh 4vw;border-radius:3vmin;background:#fff;border:.5vmin solid rgba(30,42,120,.12);font-size:clamp(2.6rem,10vmin,9rem);font-weight:800;line-height:1.1;color:var(--navy);box-shadow:0 18px 40px rgba(30,42,120,.18)}
+  .namebox.spinning{color:#9aa3cf}
+  .namebox.chosen{color:var(--orange);border-color:var(--orange);animation:popName .6s cubic-bezier(.2,1.6,.4,1) both;box-shadow:0 0 60px rgba(255,107,53,.35)}
+  @keyframes popName{0%{transform:scale(.6)}100%{transform:scale(1)}}
+
+  /* einde */
+  .trophy{font-size:clamp(5rem,16vmin,14rem);animation:bob 2s ease-in-out infinite}
+  #confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
+  .burst{position:fixed;font-size:clamp(2rem,6vmin,5rem);z-index:60;pointer-events:none;animation:burst 1.2s ease-out forwards}
+  @keyframes burst{0%{opacity:1;transform:translate(0,0) scale(.5)}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.4) rotate(360deg)}}
+
+  /* -------- SVG-klok -------- */
+  .face{fill:#fff}
+  .rim{fill:url(#rimgrad)}
+  .num{font-family:'Baloo 2','Nunito',sans-serif;font-weight:800;font-size:34px;fill:var(--navy);text-anchor:middle;dominant-baseline:central}
+  .tick{stroke:#2a3a9e;stroke-linecap:round}
+  .tick.min{stroke:#9aa3cf;stroke-width:3}
+  .tick.hr{stroke-width:6}
+  .ring{font-family:'Nunito','Baloo 2',sans-serif;font-weight:800;font-size:14px;fill:#fff;text-anchor:middle;dominant-baseline:central;opacity:0;transition:opacity .4s}
+  .ringbg{fill:var(--navy);opacity:0;transition:opacity .4s}
+  .ringon .ring,.ringon .ringbg{opacity:1}
+  .hand{transition:opacity .3s,filter .3s}
+  .hand.h path{fill:var(--orange)}
+  .hand.m path{fill:var(--navy)}
+  .hand.s line{stroke:#e63946;stroke-width:3;stroke-linecap:round}
+  .hand.dim{opacity:.22}
+  .hand.glow{filter:drop-shadow(0 0 10px rgba(255,210,63,.95)) drop-shadow(0 0 22px rgba(255,210,63,.7))}
+  .hand.grab{cursor:grab}
+  .hand.grab:active{cursor:grabbing}
+  .cap{fill:var(--navy)} .cap2{fill:#fff}
+  .quad{opacity:0;transition:opacity .4s}
+  .quadon .quad{opacity:1}
+  .quad text{font-family:'Baloo 2',sans-serif;font-weight:800;font-size:20px;text-anchor:middle;dominant-baseline:central;fill:#fff}
+  .eyes{opacity:0;transition:opacity .3s}
+  .eyeson .eyes{opacity:1}
+  .wiggle{animation:wig .6s ease-in-out 3}
+  @keyframes wig{0%,100%{transform:rotate(0)}25%{transform:rotate(-6deg)}75%{transform:rotate(6deg)}}
+</style>
+</head>
+<body>
+<div class="sun"></div>
+<div class="cloud" style="top:8vh;width:22vmin;height:9vmin;animation-duration:95s"><i style="left:0;bottom:0;width:45%;height:60%"></i><i style="left:25%;bottom:0;width:50%;height:100%"></i><i style="right:0;bottom:0;width:40%;height:65%"></i></div>
+<div class="cloud" style="top:26vh;width:16vmin;height:7vmin;animation-duration:140s;animation-delay:-60s"><i style="left:0;bottom:0;width:45%;height:60%"></i><i style="left:25%;bottom:0;width:50%;height:100%"></i><i style="right:0;bottom:0;width:40%;height:65%"></i></div>
+<div class="cloud" style="top:16vh;width:12vmin;height:5vmin;animation-duration:120s;animation-delay:-100s"><i style="left:0;bottom:0;width:45%;height:60%"></i><i style="left:25%;bottom:0;width:50%;height:100%"></i><i style="right:0;bottom:0;width:40%;height:65%"></i></div>
+<svg class="hills" viewBox="0 0 1600 220" preserveAspectRatio="none"><path d="M0 160 Q200 60 420 150 T820 140 T1220 150 T1600 120 V220 H0Z" fill="#9be0a5"/><path d="M0 200 Q300 120 600 190 T1200 180 T1600 170 V220 H0Z" fill="#6fcf85"/></svg>
+<canvas id="confetti"></canvas>
+<button class="mute" id="muteBtn" title="Geluid aan/uit">🔊 Geluid</button>
+<a href="/dashboard.html" class="backlink">← Terug naar Leerpret</a>
+
+<!-- START -->
+<section class="screen active" id="start">
+  <h1 class="title" id="startTitle">Leren <b>kloklezen</b></h1>
+  <div class="subtitle" id="startSub">Even laden…</div>
+  <div id="startErr" class="subtitle" style="display:none;color:#c2185b"></div>
+  <div class="startrow" id="startRow" style="display:none">
+    <svg class="liveclock" id="liveClock"></svg>
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2vh">
+      <div class="hint">Wat oefenen we?</div>
+      <div class="chips" id="levelChips" style="margin-top:0">
+        <button class="chip" data-l="1">🕒 Hele uren</button>
+        <button class="chip" data-l="2">🕞 Halve uren</button>
+        <button class="chip" data-l="3">🕘 Kwartieren</button>
+        <button class="chip" data-l="4">🕙 Per 5 minuten</button>
+      </div>
+      <div class="row" style="margin-top:2vh">
+        <button class="bigbtn" id="learnBtn">📖 Eerst leren</button>
+        <button class="bigbtn navy" id="playBtn">🎮 Meteen oefenen</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- LEREN -->
+<section class="screen" id="learn">
+  <div class="topbar"><div>📖 Leren kloklezen</div><div class="who" id="learnStep"></div></div>
+  <div class="steps" id="stepDots"></div>
+  <div class="stage">
+    <div class="clockwrap"><svg id="learnClock"></svg></div>
+    <div class="panel">
+      <div class="bubble" id="learnBubble"></div>
+      <div class="row" id="learnCtl"></div>
+      <div class="row">
+        <button class="bigbtn light sm" id="prevBtn">← Vorige</button>
+        <button class="bigbtn sm" id="nextBtn">Volgende →</button>
+        <button class="bigbtn navy sm" id="skipLearn">Naar de oefeningen 🎮</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NAAM -->
+<section class="screen" id="pick">
+  <div class="label">Wie mag deze klok lezen?</div>
+  <div class="namebox spinning" id="namebox">…</div>
+</section>
+
+<!-- OEFENEN -->
+<section class="screen" id="play">
+  <div class="topbar"><div>Oefening <span id="qcount"></span> van <span id="qtotal"></span></div><div class="who">Aan de beurt: <b id="whoName"></b></div></div>
+  <div class="progress"><div id="progbar"></div></div>
+  <div class="stage">
+    <div class="clockwrap"><svg id="playClock"></svg></div>
+    <div class="panel" id="playPanel"></div>
+  </div>
+</section>
+
+<!-- EINDE -->
+<section class="screen" id="end">
+  <div class="trophy">🏆</div>
+  <h1 class="title" id="endTitle">Fantastisch!</h1>
+  <div class="subtitle" id="endSub">Jullie kunnen de klok lezen! ⏰🌟</div>
+  <div class="row" style="margin-top:4vh">
+    <button class="bigbtn" id="againBtn">🔁 Nog een keer</button>
+    <button class="bigbtn light" id="homeBtn">🏠 Startscherm</button>
+  </div>
+</section>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+<script src="/js/config.js"></script>
+<script src="/js/app.js"></script>
+<script>
+/* =========================================================
+   KLOK – SVG-component met sleepbare wijzers
+   ========================================================= */
+const NS='http://www.w3.org/2000/svg';
+function el(tag,attrs,parent){const e=document.createElementNS(NS,tag);for(const k in attrs)e.setAttribute(k,attrs[k]);if(parent)parent.appendChild(e);return e;}
+const C=200,R=160;
+function polar(r,deg){const a=(deg-90)*Math.PI/180;return [C+r*Math.cos(a),C+r*Math.sin(a)];}
+function arcPath(r1,r2,a0,a1){const [x0,y0]=polar(r2,a0),[x1,y1]=polar(r2,a1),[x2,y2]=polar(r1,a1),[x3,y3]=polar(r1,a0);return `M${x0} ${y0}A${r2} ${r2} 0 0 1 ${x1} ${y1}L${x2} ${y2}A${r1} ${r1} 0 0 0 ${x3} ${y3}Z`;}
+
+class Clock{
+  constructor(svg,opts={}){
+    this.svg=svg; this.h=3; this.m=0; this.sec=null; this.onChange=opts.onChange||null;
+    this.drag={hour:false,minute:false}; this.snap=5; this.anim=null; this.locked=false;
+    svg.setAttribute('viewBox','0 0 400 400');
+    const defs=el('defs',{},svg);
+    const g=el('linearGradient',{id:'rimgrad',x1:'0',y1:'0',x2:'0',y2:'1'},defs);
+    el('stop',{offset:'0',"stop-color":'#ffe066'},g); el('stop',{offset:'1',"stop-color":'#ff9f1c'},g);
+    // kwart-bogen (over / voor half / over half / voor) – buiten de rand
+    const quads=el('g',{class:'quad'},svg);
+    [['over','var(--over)',0,90],['voor half','var(--voorhalf)',90,180],['over half','var(--overhalf)',180,270],['voor','var(--voor)',270,360]].forEach(([t,col,a0,a1])=>{
+      el('path',{d:arcPath(179,199,a0+1.5,a1-1.5),fill:col},quads);
+      const mid=(a0+a1)/2,[x,y]=polar(189,mid); const tx=el('text',{x,y,transform:`rotate(${mid<=90||mid>=270?mid:mid-180} ${x} ${y})`},quads); tx.textContent=t;
+    });
+    el('circle',{cx:C,cy:C,r:R+14,class:'rim'},svg);
+    el('circle',{cx:C,cy:C,r:R,class:'face'},svg);
+    // minutenring (5,10,…,60) net binnen de rand
+    this.ringG=el('g',{},svg);
+    for(let i=1;i<=12;i++){const [x,y]=polar(R+7,i*30);el('circle',{cx:x,cy:y,r:11.5,class:'ringbg'},this.ringG);const t=el('text',{x,y,class:'ring'},this.ringG);t.textContent=i*5;}
+    // streepjes
+    for(let i=0;i<60;i++){const hr=i%5===0;const [x0,y0]=polar(hr?R-28:R-24,i*6),[x1,y1]=polar(R-18,i*6);el('line',{x1:x0,y1:y0,x2:x1,y2:y1,class:'tick '+(hr?'hr':'min')},svg);}
+    // cijfers
+    for(let i=1;i<=12;i++){const [x,y]=polar(R-54,i*30);const t=el('text',{x,y,class:'num'},svg);t.textContent=i;}
+    // oogjes (Tiktak)
+    const eyes=el('g',{class:'eyes'},svg);
+    [[-26,-58],[26,-58]].forEach(([dx,dy])=>{el('circle',{cx:C+dx,cy:C+dy,r:11,fill:'#fff',stroke:'#1e2a78','stroke-width':3},eyes);el('circle',{cx:C+dx+2,cy:C+dy+2,r:5,fill:'#1e2a78'},eyes);});
+    el('path',{d:`M${C-18} ${C-32} Q${C} ${C-18} ${C+18} ${C-32}`,stroke:'#1e2a78','stroke-width':4,fill:'none','stroke-linecap':'round'},eyes);
+    // wijzers
+    this.gh=el('g',{class:'hand h grab'},svg); el('path',{d:`M${C-9} ${C+22} L${C-9} ${C-70} Q${C} ${C-96} ${C+9} ${C-70} L${C+9} ${C+22} Q${C} ${C+30} ${C-9} ${C+22}Z`},this.gh);
+    this.gm=el('g',{class:'hand m grab'},svg); el('path',{d:`M${C-6} ${C+26} L${C-6} ${C-118} Q${C} ${C-140} ${C+6} ${C-118} L${C+6} ${C+26} Q${C} ${C+34} ${C-6} ${C+26}Z`},this.gm);
+    this.gs=el('g',{class:'hand s'},svg); el('line',{x1:C,y1:C+34,x2:C,y2:C-128},this.gs); this.gs.style.display='none';
+    el('circle',{cx:C,cy:C,r:12,class:'cap'},svg); el('circle',{cx:C,cy:C,r:5,class:'cap2'},svg);
+    this.render();
+    // slepen
+    svg.addEventListener('pointerdown',e=>this.down(e));
+    svg.addEventListener('pointermove',e=>this.move(e));
+    svg.addEventListener('pointerup',e=>this.up(e)); svg.addEventListener('pointercancel',e=>this.up(e));
+  }
+  angles(){return {h:(this.h%12)*30+this.m*0.5, m:this.m*6};}
+  render(){
+    const a=this.angles();
+    this.gh.setAttribute('transform',`rotate(${a.h} ${C} ${C})`);
+    this.gm.setAttribute('transform',`rotate(${a.m} ${C} ${C})`);
+    if(this.sec!==null){this.gs.style.display='';this.gs.setAttribute('transform',`rotate(${this.sec*6} ${C} ${C})`);}
+  }
+  set(h,m){this.h=((h-1)%12+12)%12+1;this.m=((m%60)+60)%60;this.render();}
+  // vloeiend naar een tijd draaien (altijd vooruit, zoals een echte klok)
+  animateTo(h,m,dur=900){
+    return new Promise(res=>{
+      if(this.anim)cancelAnimationFrame(this.anim);
+      const from=this.angles(); const toH=((h-1)%12+12)%12+1, toM=((m%60)+60)%60;
+      const target={h:(toH%12)*30+toM*0.5,m:toM*6};
+      let dM=(target.m-from.m+360)%360, dH=(target.h-from.h+360)%360;
+      if(dM<1&&dH>=1)dM=360; if(dM===0&&dH===0){this.set(toH,toM);return res();}
+      const t0=performance.now();
+      const step=now=>{
+        let p=Math.min(1,(now-t0)/dur); const e=1-Math.pow(1-p,3);
+        this.gm.setAttribute('transform',`rotate(${from.m+dM*e} ${C} ${C})`);
+        this.gh.setAttribute('transform',`rotate(${from.h+dH*e} ${C} ${C})`);
+        if(p<1)this.anim=requestAnimationFrame(step); else {this.anim=null;this.set(toH,toM);res();}
+      };
+      this.anim=requestAnimationFrame(step);
+    });
+  }
+  // visuele hulpjes
+  ring(on){this.svg.classList.toggle('ringon',on);}
+  quads(on){this.svg.classList.toggle('quadon',on);}
+  eyes(on){this.svg.classList.toggle('eyeson',on);}
+  focus(which){ // 'h' | 'm' | null
+    this.gh.classList.toggle('dim',which==='m'); this.gm.classList.toggle('dim',which==='h');
+    this.gh.classList.toggle('glow',which==='h'); this.gm.classList.toggle('glow',which==='m');
+  }
+  wiggle(){this.svg.classList.remove('wiggle');void this.svg.offsetWidth;this.svg.classList.add('wiggle');}
+  draggable(hour,minute){this.drag={hour,minute};this.gh.classList.toggle('grab',hour);this.gm.classList.toggle('grab',minute);}
+  // --- pointer ---
+  pt(e){const r=this.svg.getBoundingClientRect();const x=(e.clientX-r.left)/r.width*400,y=(e.clientY-r.top)/r.height*400;const dx=x-C,dy=y-C;return {ang:(Math.atan2(dy,dx)*180/Math.PI+90+360)%360,dist:Math.hypot(dx,dy)};}
+  down(e){
+    if(this.locked||(!this.drag.hour&&!this.drag.minute))return;
+    const p=this.pt(e); if(p.dist>R+20||p.dist<8)return;
+    const a=this.angles(); const da=x=>Math.min(Math.abs(p.ang-x),360-Math.abs(p.ang-x));
+    let pick=null;
+    if(this.drag.hour&&this.drag.minute){ pick=da(a.m)<=da(a.h)?'m':'h'; if(da(a.m)>30&&da(a.h)>30)pick=p.dist>95?'m':'h'; }
+    else pick=this.drag.hour?'h':'m';
+    this.active=pick; this.svg.setPointerCapture(e.pointerId); this.lastAng=p.ang; this.move(e);
+  }
+  move(e){
+    if(!this.active)return; const p=this.pt(e);
+    if(this.active==='m'){
+      const snap=this.snap, newM=Math.round(p.ang/6/snap)*snap%60;
+      if(newM!==this.m){
+        // over 12 heen? dan het uur mee laten springen (zoals een echte klok)
+        if(this.m>=45&&newM<=15)this.h=this.h%12+1; else if(this.m<=15&&newM>=45)this.h=(this.h+10)%12+1;
+        this.m=newM; this.render(); tick(); if(this.onChange)this.onChange(this);
+      }
+    }else{
+      const newH=Math.floor((((p.ang-this.m*0.5)+360)%360+15)/30)%12||12;
+      if(newH!==this.h){this.h=newH;this.render();tick();if(this.onChange)this.onChange(this);}
+    }
+  }
+  up(e){if(this.active){this.active=null;try{this.svg.releasePointerCapture(e.pointerId)}catch(x){}}}
+}
+
+/* =========================================================
+   TIJD IN WOORDEN (zoals in de Vlaamse klas)
+   ========================================================= */
+function volgend(h){return h%12+1;}
+function woorden(h,m){
+  if(m===0)return `${h} uur`;
+  if(m===15)return `kwart over ${h}`;
+  if(m===30)return `half ${volgend(h)}`;
+  if(m===45)return `kwart voor ${volgend(h)}`;
+  if(m<15)return `${m} over ${h}`;
+  if(m<30)return `${30-m} voor half ${volgend(h)}`;
+  if(m<45)return `${m-30} over half ${volgend(h)}`;
+  return `${60-m} voor ${volgend(h)}`;
+}
+function digitaal(h,m){return `${h}:${String(m).padStart(2,'0')}`;}
+function uitleg(h,m){ // korte denkhulp bij een tijd
+  if(m===0)return `De grote wijzer staat op 12, dus het is precies <em>${h} uur</em>. De kleine wijzer wijst naar de ${h}.`;
+  if(m===30)return `De grote wijzer staat op 6: <em>half</em>. De kleine wijzer staat tussen ${h} en ${volgend(h)} — op weg naar ${volgend(h)}. Dus: <em>half ${volgend(h)}</em>.`;
+  if(m===15)return `De grote wijzer staat op 3: <em>kwart over</em>. De kleine wijzer is net voorbij ${h}. Dus: <em>kwart over ${h}</em>.`;
+  if(m===45)return `De grote wijzer staat op 9: <em>kwart voor</em>. De kleine wijzer is bijna bij ${volgend(h)}. Dus: <em>kwart voor ${volgend(h)}</em>.`;
+  if(m<15)return `De grote wijzer staat ${m} minuten voorbij 12: <em>${m} over</em>. De kleine wijzer is net voorbij ${h}. Dus: <em>${m} over ${h}</em>.`;
+  if(m<30)return `Nog ${30-m} minuten tot de 6: <em>${30-m} voor half</em>. De kleine wijzer gaat naar ${volgend(h)}. Dus: <em>${30-m} voor half ${volgend(h)}</em>.`;
+  if(m<45)return `De grote wijzer is ${m-30} minuten voorbij de 6: <em>${m-30} over half</em>. Dus: <em>${m-30} over half ${volgend(h)}</em>.`;
+  return `Nog ${60-m} minuten tot de 12: <em>${60-m} voor</em>. De kleine wijzer is bijna bij ${volgend(h)}. Dus: <em>${60-m} voor ${volgend(h)}</em>.`;
+}
+
+/* =========================================================
+   GELUID (Web Audio)
+   ========================================================= */
+let audioCtx=null, muted=false;
+function ctx(){if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();if(audioCtx.state==='suspended')audioCtx.resume();return audioCtx;}
+function tone(freq,start,dur,type='sine',vol=0.22){
+  if(muted)return; try{const ac=ctx(),o=ac.createOscillator(),g=ac.createGain();o.type=type;o.frequency.setValueAtTime(freq,ac.currentTime+start);
+  g.gain.setValueAtTime(0.0001,ac.currentTime+start);g.gain.exponentialRampToValueAtTime(vol,ac.currentTime+start+0.02);g.gain.exponentialRampToValueAtTime(0.0001,ac.currentTime+start+dur);
+  o.connect(g);g.connect(ac.destination);o.start(ac.currentTime+start);o.stop(ac.currentTime+start+dur+0.05);}catch(e){}
+}
+let lastTick=0;
+function tick(){const now=performance.now();if(now-lastTick<40)return;lastTick=now;tone(1200,0,0.03,'square',0.05);}
+function soundCorrect(){[523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*0.09,0.35,'triangle',0.25));tone(1318.5,0.4,0.5,'sine',0.16);}
+function soundWrong(){tone(220,0,0.25,'sawtooth',0.08);tone(180,0.18,0.3,'sawtooth',0.08);}
+function soundFanfare(){[523.25,523.25,523.25,659.25,783.99,1046.5].forEach((f,i)=>tone(f,i*0.15,0.3,'square',0.1));[659.25,783.99,1046.5,1318.5].forEach((f,i)=>tone(f,1.0+i*0.12,0.6,'triangle',0.2));}
+document.getElementById('muteBtn').addEventListener('click',e=>{muted=!muted;e.target.textContent=muted?'🔇 Stil':'🔊 Geluid';});
+
+/* =========================================================
+   CONFETTI
+   ========================================================= */
+const canvas=document.getElementById('confetti'),cx=canvas.getContext('2d');let pieces=[],running=false;
+function resize(){canvas.width=innerWidth;canvas.height=innerHeight}addEventListener('resize',resize);resize();
+const COLORS=['#ffd23f','#ff8c42','#ff5fa2','#2fc46f','#4cc9f0','#9b6dff','#1e2a78'];
+function confetti(n=220){for(let i=0;i<n;i++){pieces.push({x:canvas.width/2+(Math.random()-0.5)*canvas.width*0.5,y:canvas.height*0.55,vx:(Math.random()-0.5)*18,vy:-Math.random()*18-6,g:0.35+Math.random()*0.2,s:6+Math.random()*10,c:COLORS[i%COLORS.length],r:Math.random()*Math.PI,vr:(Math.random()-0.5)*0.3,life:1});}if(!running){running=true;requestAnimationFrame(tickC);}}
+function tickC(){cx.clearRect(0,0,canvas.width,canvas.height);pieces.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=p.g;p.vx*=0.99;p.r+=p.vr;if(p.y>canvas.height*0.85)p.life-=0.04;cx.save();cx.globalAlpha=Math.max(p.life,0);cx.translate(p.x,p.y);cx.rotate(p.r);cx.fillStyle=p.c;cx.fillRect(-p.s/2,-p.s/2,p.s,p.s*0.6);cx.restore();});pieces=pieces.filter(p=>p.life>0&&p.y<canvas.height+50);if(pieces.length)requestAnimationFrame(tickC);else{running=false;cx.clearRect(0,0,canvas.width,canvas.height);}}
+function starBurst(x,y){const em=['⭐','🌟','✨','⏰','🕒'];for(let i=0;i<10;i++){const b=document.createElement('div');b.className='burst';b.textContent=em[i%em.length];const ang=(i/10)*Math.PI*2,d=120+Math.random()*160;b.style.cssText=`left:${x}px;top:${y}px;--dx:${Math.cos(ang)*d}px;--dy:${Math.sin(ang)*d}px`;document.body.appendChild(b);setTimeout(()=>b.remove(),1300);}}
+
+/* =========================================================
+   DATA & START
+   ========================================================= */
+const $=id=>document.getElementById(id);
+const screens=['start','learn','pick','play','end'];
+function show(id){screens.forEach(s=>$(s).classList.toggle('active',s===id));}
+const DEMO_NAMES=["Noor","Liam","Emma","Adam","Lina","Milan","Sara","Finn","Yara","Louis","Nour","Jules","Amira","Arthur","Mila","Ayoub"];
+let NAMES=[], SETTINGS={levels:[1,2,3,4],count:10,modes:['lees','zet','digitaal']}, LEVELS=new Set();
+const live=new Clock($('liveClock')); live.eyes(true);
+setInterval(()=>{const d=new Date();live.sec=d.getSeconds();live.set(d.getHours()%12||12,d.getMinutes());},1000);
+
+async function loadData(){
+  const q=new URLSearchParams(location.search), S=$('startSub'), T=$('startTitle');
+  try{
+    if(q.get('demo')){ NAMES=DEMO_NAMES; S.textContent='Demo · Hoe laat is het? Met Tiktak de klok leren lezen 🕒'; }
+    else{
+      if(!window.LP||!LP.configured) throw new Error('Leerpret is nog niet verbonden met de database (js/config.js).');
+      const user=await LP.requireAuth(); if(!user) return;
+      const [{data:quiz,error:e1},{data:klas,error:e2}]=await Promise.all([
+        LP.sb.from('quizzes').select('title,theme,emoji,kind,settings').eq('id',q.get('quiz')).single(),
+        LP.sb.from('classes').select('name,pupils,schools(name)').eq('id',q.get('class')).single()]);
+      if(e1||!quiz) throw new Error('Module niet gevonden.'); if(e2||!klas) throw new Error('Klas niet gevonden.');
+      NAMES=(klas.pupils||[]).slice(); SETTINGS=Object.assign(SETTINGS,quiz.settings||{});
+      if(quiz.title){T.innerHTML=LP.esc(quiz.title).replace(/(klok\w*)/i,'<b>$1</b>');}
+      S.textContent=[klas.schools&&klas.schools.name,'Klas '+klas.name].filter(Boolean).join(' · ');
+      $('endTitle').textContent='Fantastisch, '+klas.name+'!';
+      if(!NAMES.length) throw new Error('Deze klas heeft nog geen namenlijst. Vul ze in op het dashboard.');
+    }
+    LEVELS=new Set((SETTINGS.levels&&SETTINGS.levels.length?SETTINGS.levels:[1,2,3,4]).map(Number));
+    document.querySelectorAll('#levelChips .chip').forEach(c=>c.classList.toggle('on',LEVELS.has(+c.dataset.l)));
+    $('startRow').style.display='';
+  }catch(err){S.textContent='Oeps…';const x=$('startErr');x.style.display='';x.textContent=err.message;}
+}
+loadData();
+$('levelChips').addEventListener('click',e=>{const c=e.target.closest('.chip');if(!c)return;const l=+c.dataset.l;if(LEVELS.has(l)){if(LEVELS.size===1)return;LEVELS.delete(l);}else LEVELS.add(l);c.classList.toggle('on',LEVELS.has(l));});
+
+/* =========================================================
+   LEREN – de uitleg van Tiktak, stap voor stap
+   ========================================================= */
+const lc=new Clock($('learnClock'),{onChange:c=>{if(STEPS[si].onChange)STEPS[si].onChange(c);}});
+let si=0, stepDone=false;
+const bub=(html,cls='')=>{const b=$('learnBubble');b.className='bubble '+cls;b.innerHTML=`<span class="tt"><span class="tiktak">🕒</span> Tiktak zegt:</span>${html}`;};
+const ctl=html=>{$('learnCtl').innerHTML=html||'';};
+function need(ok){stepDone=ok;$('nextBtn').disabled=!ok;}
+
+const STEPS=[
+  { // 0 – kennismaking
+    enter(){lc.set(3,0);lc.eyes(true);lc.focus(null);lc.ring(false);lc.quads(false);lc.draggable(false,false);lc.wiggle();
+      bub(`Hallo! Ik ben <em>Tiktak</em> de klok. 👋<br>Ik heb <u>twee wijzers</u>: een <em>kleine</em> en een <em>grote</em>. Samen vertellen ze hoe laat het is!`); ctl(''); need(true);}
+  },
+  { // 1 – kleine wijzer
+    enter(){lc.set(3,0);lc.focus('h');lc.draggable(true,false);
+      bub(`Dit is de <em>kleine wijzer</em>. Hij is kort en dik.<br>Hij vertelt welk <u>uur</u> het is.<span class="big">Sleep hem maar eens rond! 👉</span>`);
+      ctl('<span class="hint">Pak de oranje wijzer vast en draai hem naar een ander cijfer.</span>'); need(false); this.moved=0;},
+    onChange(c){this.moved++; bub(`De kleine wijzer wijst naar de <em>${c.h}</em>.<span class="big">Dus het is ${c.h} uur!</span>`,'ok'); if(this.moved>=2)need(true);}
+  },
+  { // 2 – grote wijzer
+    enter(){lc.set(3,0);lc.focus('m');lc.draggable(false,true);lc.snap=5;lc.ring(true);
+      bub(`Dit is de <em>grote wijzer</em>. Hij is lang.<br>Hij vertelt hoeveel <u>minuten</u> er al voorbij zijn.<span class="big">Draai hem eens helemaal rond! 🔄</span>`);
+      ctl('<span class="hint">Kijk goed: als de grote wijzer één rondje draait, schuift de kleine wijzer één cijfer op.</span>'); need(false); this.start=3; this.turned=false;},
+    onChange(c){ if(c.h!==this.start)this.turned=true;
+      bub(`De grote wijzer staat op <em>${c.m} minuten</em>.${c.m===0?' Precies op de 12 — dan is het een heel uur!':''}${this.turned?`<span class="big">Zie je? De kleine wijzer is opgeschoven naar ${c.h}! 🎉</span>`:''}`,'ok');
+      if(this.turned||c.m>=30)need(true);}
+  },
+  { // 3 – hele uren
+    async enter(my){lc.focus(null);lc.ring(false);lc.draggable(false,false);
+      bub(`<u>Hele uren</u>: de grote wijzer staat op <em>12</em>.<br>Kijk dan naar de kleine wijzer: die zegt het uur.`); ctl(''); need(false);
+      for(const h of [1,2,3]){await A(my,lc.animateTo(h,0,700));bub(`Grote wijzer op 12, kleine wijzer op <em>${h}</em>…<span class="big">Het is ${h} uur!</span>`);await A(my,wait(1300));}
+      this.doel=7; lc.draggable(true,false);
+      bub(`Nu jij! <span class="big">Zet de klok op ${this.doel} uur. 🕖</span>`); ctl('<span class="hint">Sleep de kleine (oranje) wijzer. De grote wijzer blijft op 12.</span>');},
+    onChange(c){ if(c.h===this.doel&&c.m===0){bub(`<span class="big">Juist! Het is ${this.doel} uur! 🎉</span>`,'ok');cheer();need(true);} else bub(`Hmm, nu is het ${woorden(c.h,c.m)}. Zet de klok op <em>${this.doel} uur</em>.`);}
+  },
+  { // 4 – halve uren
+    async enter(my){lc.set(3,0);lc.focus(null);lc.draggable(false,false);
+      bub(`<u>Halve uren</u>: de grote wijzer staat op <em>6</em>.<br>Dan zeggen we <em>half</em> … en dan het uur dat <u>nog moet komen</u>!`); ctl(''); need(false);
+      await A(my,wait(1500)); await A(my,lc.animateTo(3,30,1200));
+      bub(`Kijk: de kleine wijzer staat <em>tussen 3 en 4</em>. Hij is op weg naar de 4.<span class="big">Dus: half 4!</span><span class="tt">(en dus niét half 3 — dat is de valkuil 😉)</span>`);
+      await A(my,wait(3500)); await A(my,lc.animateTo(8,30,1200));
+      bub(`Tussen 8 en 9, grote wijzer op 6…<span class="big">Half 9!</span>`); await A(my,wait(2200));
+      this.doel=11; lc.draggable(true,true); lc.snap=30;
+      bub(`Nu jij! <span class="big">Zet de klok op half ${this.doel}. 🕥</span>`); ctl('<span class="hint">Grote wijzer op 6, kleine wijzer tussen 10 en 11.</span>');},
+    onChange(c){ if(c.m===30&&volgend(c.h)===this.doel){bub(`<span class="big">Super! Dat is half ${this.doel}! 🎉</span>`,'ok');cheer();need(true);} else bub(`Nu staat hij op ${woorden(c.h,c.m)}. We willen <em>half ${this.doel}</em>.`);}
+  },
+  { // 5 – kwartieren
+    async enter(my){lc.set(3,0);lc.focus(null);lc.draggable(false,false);
+      bub(`<u>Kwartieren</u>: een uur heeft 4 kwartjes van 15 minuten.`); ctl(''); need(false);
+      await A(my,wait(1200)); await A(my,lc.animateTo(3,15,900));
+      bub(`Grote wijzer op <em>3</em> = <em>kwart over</em>. Kwart over … welk uur? Het uur dat <u>net voorbij</u> is.<span class="big">Kwart over 3!</span>`);
+      await A(my,wait(3200)); await A(my,lc.animateTo(3,45,1200));
+      bub(`Grote wijzer op <em>9</em> = <em>kwart voor</em>. Kwart voor … het uur dat <u>nog komt</u>.<span class="big">Kwart voor 4!</span>`);
+      await A(my,wait(3200)); this.doelH=5;this.doelM=45; lc.draggable(true,true); lc.snap=15;
+      bub(`Nu jij! <span class="big">Zet de klok op kwart voor 6. 🕧</span>`); ctl('<span class="hint">Grote wijzer op 9, kleine wijzer bijna bij de 6.</span>');},
+    onChange(c){ if(c.m===45&&c.h===this.doelH){bub(`<span class="big">Knap! Kwart voor 6! 🎉</span>`,'ok');cheer();need(true);} else bub(`Nu is het ${woorden(c.h,c.m)}. We willen <em>kwart voor 6</em>.`);}
+  },
+  { // 6 – minuten tellen
+    async enter(my){lc.set(3,0);lc.focus('m');lc.draggable(false,false);lc.ring(true);
+      bub(`<u>Minuten</u>: elk <em>streepje</em> is 1 minuut. Elk <em>cijfer</em> is 5 minuten verder.<br>Tel maar mee met sprongen van 5!`); ctl(''); need(false);
+      await A(my,wait(1500));
+      for(let m=5;m<=60;m+=5){await A(my,lc.animateTo(3+(m===60?1:0),m%60,320));bub(`<span class="big">${m===60?'60 — een heel uur rond! 🔄':m}</span>`);await A(my,wait(260));}
+      await A(my,wait(600)); lc.set(3,0); lc.quads(true);
+      bub(`Zo lezen we minuten:<br>🟢 tot de 6: <em>… over</em> 3<br>🔵 vlak voor de 6: <em>… voor half</em> 4<br>🟣 net na de 6: <em>… over half</em> 4<br>🩷 bijna rond: <em>… voor</em> 4`);
+      await A(my,wait(1200)); lc.draggable(false,true); lc.snap=5; this.seen=new Set();
+      ctl('<span class="hint">Sleep de grote wijzer en lees mee. Kom je in alle vier de kleuren?</span>');},
+    onChange(c){ const z=c.m===0?null:c.m<15?'over':c.m<30?'voor half':c.m===30?'half':c.m<45?'over half':'voor'; if(z)this.seen.add(z);
+      bub(`<span class="big">${woorden(c.h,c.m)}</span>${uitleg(c.h,c.m)}`,'ok'); if(this.seen.size>=4)need(true);}
+  },
+  { // 7 – klaar
+    enter(){lc.set(3,0);lc.focus(null);lc.ring(false);lc.quads(false);lc.draggable(false,false);lc.wiggle();
+      bub(`Je weet nu alles over de <em>kleine</em> en de <em>grote</em> wijzer. 🌟<span class="big">Klaar om te oefenen? Druk op de groene knop!</span>`);
+      ctl(''); need(true); $('nextBtn').textContent='Oefenen! 🎮'; $('nextBtn').classList.add('green');}
+  }
+];
+function wait(ms){return new Promise(r=>setTimeout(r,ms));}
+// een stap kan een reeks animaties afspelen; klikt de leerkracht intussen op Vorige/Volgende, dan stopt de oude reeks
+let runId=0; const A=(my,p)=>Promise.resolve(p).then(v=>{if(my!==runId)throw new Error('stale');return v;});
+function cheer(){soundCorrect();confetti(120);const r=$('learnClock').getBoundingClientRect();starBurst(r.left+r.width/2,r.top+r.height/2);}
+function gotoStep(i){
+  si=Math.max(0,Math.min(STEPS.length-1,i)); const s=STEPS[si];
+  $('learnStep').textContent=`Stap ${si+1} van ${STEPS.length}`;
+  $('stepDots').innerHTML=STEPS.map((_,k)=>`<i class="${k===si?'on':k<si?'done':''}"></i>`).join('');
+  $('prevBtn').style.visibility=si===0?'hidden':''; $('nextBtn').textContent='Volgende →'; $('nextBtn').classList.remove('green');
+  const my=++runId; lc.ring(false); lc.quads(false); lc.focus(null); lc.eyes(true); lc.draggable(false,false); lc.snap=5; ctl('');
+  Promise.resolve(s.enter(my)).catch(()=>{});
+}
+$('prevBtn').addEventListener('click',()=>gotoStep(si-1));
+$('nextBtn').addEventListener('click',()=>{if(!stepDone)return; if(si===STEPS.length-1)startPlay(); else gotoStep(si+1);});
+$('skipLearn').addEventListener('click',startPlay);
+$('learnBtn').addEventListener('click',()=>{ctx();show('learn');gotoStep(0);});
+
+/* =========================================================
+   OEFENEN
+   ========================================================= */
+const pc=new Clock($('playClock'),{onChange:c=>{if(cur&&cur.type==='zet'&&!cur.done){$('zetNu').innerHTML=`Nu staat de klok op: <em>${woorden(c.h,c.m)}</em>`;}}});
+let order=[],qi=0,namePool=[],currentName='',cur=null,helpOn=false,total=10;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+const ri=(a,b)=>a+Math.floor(Math.random()*(b-a+1));
+function randTime(level){const h=ri(1,12);let m=0;if(level===2)m=Math.random()<0.5?0:30;if(level===3)m=[0,15,30,45][ri(0,3)];if(level===4)m=ri(0,11)*5;return {h,m};}
+function makeExercises(){
+  const lv=[...LEVELS], modes=(SETTINGS.modes&&SETTINGS.modes.length?SETTINGS.modes:['lees','zet','digitaal']), out=[], seen=new Set();
+  let guard=0;
+  while(out.length<total&&guard++<500){
+    const level=lv[ri(0,lv.length-1)], t=randTime(level); const key=t.h+':'+t.m; if(seen.has(key)&&guard<300)continue; seen.add(key);
+    let type=modes[out.length%modes.length];
+    if(type==='digitaal'&&level===1&&Math.random()<0.5)type='lees';
+    out.push({type,level,h:t.h,m:t.m});
+  }
+  return out;
+}
+// foute antwoorden die lijken op het juiste (de klassieke valkuilen)
+function distractors(ex,fmt){
+  const c=[]; const push=(h,m)=>{h=((h-1)%12+12)%12+1;m=((m%60)+60)%60;const s=fmt(h,m);if(s!==fmt(ex.h,ex.m)&&!c.includes(s))c.push(s);};
+  push(ex.h+1,ex.m); push(ex.h-1,ex.m);
+  if(ex.m!==0&&ex.m!==30)push(ex.h,60-ex.m);                 // over ↔ voor verwisseld
+  if(ex.m===30){push(ex.h-1,30);push(ex.h+1,30);}           // half 3 i.p.v. half 4
+  if(ex.m===0){push(ex.h,30);push(ex.h,15);}
+  if(ex.m===15||ex.m===45){push(ex.h,60-ex.m);push(ex.h,30);}
+  if(ex.m%5===0&&ex.m!==0){push(ex.h,ex.m+5);push(ex.h,ex.m-5);push(ex.h,ex.m+30);}
+  // wijzers verwisseld (kinderen lezen soms de grote wijzer als uur)
+  if(ex.m%5===0&&ex.m!==0)push(ex.m/5||12,(ex.h%12)*5);
+  return shuffle(c).slice(0,3);
+}
+function startPlay(){
+  ctx(); total=Math.min(30,Math.max(3,+SETTINGS.count||10));
+  order=makeExercises(); qi=0; namePool=shuffle([...NAMES]); $('qtotal').textContent=order.length; nextTurn();
+}
+function pickName(){if(!namePool.length)namePool=shuffle([...NAMES]);return namePool.pop();}
+function nextTurn(){
+  if(qi>=order.length){finish();return;}
+  show('pick'); const box=$('namebox'); box.className='namebox spinning'; currentName=pickName();
+  let t=0,delay=60;
+  (function spin(){box.textContent=NAMES[Math.floor(Math.random()*NAMES.length)];t+=delay;delay*=1.09;
+    if(t<1600)setTimeout(spin,delay); else{box.textContent=currentName;box.className='namebox chosen';tone(880,0,0.2,'triangle',0.2);setTimeout(showExercise,1800);}})();
+}
+function showExercise(){
+  cur=order[qi]; cur.done=false; cur.tries=0;
+  show('play'); $('qcount').textContent=qi+1; $('whoName').textContent=currentName; $('progbar').style.width=(qi/order.length*100)+'%';
+  pc.eyes(false); pc.focus(null); pc.ring(helpOn); pc.quads(helpOn&&cur.level>=3); pc.locked=false;
+  const P=$('playPanel'); P.innerHTML='';
+  const help=`<button class="helpbtn ${helpOn?'on':''}" id="helpBtn">💡 Hulp: minutenring</button>`;
+  if(cur.type==='lees'||cur.type==='digitaal'){
+    pc.draggable(false,false); pc.set(cur.h,cur.m);
+    const fmt=cur.type==='lees'?woorden:digitaal;
+    const opts=shuffle([fmt(cur.h,cur.m),...distractors(cur,fmt)]);
+    P.innerHTML=`<div class="task">${cur.type==='lees'?'Hoe laat is het? 🕒':'Welke digitale tijd hoort bij de klok? 📱'}</div>
+      <div class="options" id="opts">${opts.map((o,i)=>`<button class="opt ${cur.type==='digitaal'?'digital':''}" data-v="${o}" style="--d:${i*0.08}s">${o}</button>`).join('')}</div>
+      <div class="bubble" id="fb" style="display:none"></div><div class="row">${help}</div>`;
+    $('opts').addEventListener('click',e=>{const b=e.target.closest('.opt');if(!b||b.classList.contains('locked')||cur.done)return;
+      cur.tries++;
+      if(b.dataset.v===fmt(cur.h,cur.m)){b.classList.add('good');document.querySelectorAll('.opt').forEach(x=>x.classList.add('locked'));celebrate(`${woorden(cur.h,cur.m)}${cur.type==='digitaal'?' = '+digitaal(cur.h,cur.m):''}`);}
+      else{b.classList.add('bad','locked');soundWrong();const fb=$('fb');fb.style.display='';fb.className='bubble nope';fb.innerHTML=`<span class="tt">🕒 Tiktak helpt:</span>${hintFor(cur,cur.tries)}`;pc.focus(cur.m===0?'h':(cur.tries%2?'m':'h'));}
+    });
+  }else{ // zet de klok
+    pc.draggable(true,true); pc.snap=cur.level===1?60:cur.level===2?30:cur.level===3?15:5;
+    pc.set(cur.h===12?6:12,0); // start op een neutrale stand
+    P.innerHTML=`<div class="task">Zet de klok op… 🕰️</div>
+      <div class="target">${woorden(cur.h,cur.m)}${cur.level>=3?`<small class="digital">${digitaal(cur.h,cur.m)}</small>`:''}</div>
+      <div class="hint" id="zetNu">Sleep de wijzers!</div>
+      <div class="bubble" id="fb" style="display:none"></div>
+      <div class="row"><button class="bigbtn green" id="checkBtn">✅ Controleer</button>${help}</div>`;
+    $('checkBtn').addEventListener('click',()=>{ if(cur.done)return; cur.tries++;
+      const okM=pc.m===cur.m, okH=pc.h===cur.h;
+      if(okM&&okH){celebrate(woorden(cur.h,cur.m));return;}
+      soundWrong(); const fb=$('fb'); fb.style.display=''; fb.className='bubble nope';
+      let msg;
+      if(!okM&&!okH)msg=`Nog niet… Kijk eerst naar de <em>grote wijzer</em>: ${cur.m===0?'die moet op de 12.':cur.m===30?'die moet op de 6 (half).':cur.m===15?'die moet op de 3 (kwart over).':cur.m===45?'die moet op de 9 (kwart voor).':`die moet op ${cur.m} minuten.`}`;
+      else if(!okM)msg=`De kleine wijzer staat al goed! 👍 Nu de <em>grote wijzer</em>: ${cur.m===0?'op de 12.':cur.m===30?'op de 6.':cur.m===15?'op de 3.':cur.m===45?'op de 9.':`op ${cur.m} minuten.`}`;
+      else msg=`De grote wijzer staat juist! 👍 Nu de <em>kleine wijzer</em>: ${cur.m===0?`precies op de ${cur.h}.`:cur.m<30?`net voorbij de ${cur.h}.`:cur.m===30?`tussen ${cur.h} en ${volgend(cur.h)}.`:`bijna bij de ${volgend(cur.h)}.`}`;
+      if(cur.tries>=3)msg+=`<span class="big">Tip: ${uitleg(cur.h,cur.m)}</span>`;
+      fb.innerHTML=`<span class="tt">🕒 Tiktak helpt:</span>${msg}`; pc.focus(!okM?'m':'h'); pc.wiggle();
+    });
+  }
+  $('helpBtn').addEventListener('click',()=>{helpOn=!helpOn;$('helpBtn').classList.toggle('on',helpOn);pc.ring(helpOn);pc.quads(helpOn&&cur.level>=3);});
+}
+function hintFor(ex,tries){
+  if(tries>=3)return `${uitleg(ex.h,ex.m)}<span class="big">Probeer nog eens!</span>`;
+  if(ex.m===0)return `Kijk naar de <em>kleine wijzer</em>: naar welk cijfer wijst hij? De grote staat op 12, dus het is een heel uur.`;
+  if(ex.m===30)return `De grote wijzer staat op 6, dus het is <em>half</em>… Maar half wát? Kijk tussen welke twee cijfers de kleine wijzer staat — het is het <u>grootste</u> van de twee!`;
+  if(ex.m===15)return `De grote wijzer op 3 = <em>kwart over</em>. Over welk uur? Het uur dat de kleine wijzer <u>net voorbij</u> is.`;
+  if(ex.m===45)return `De grote wijzer op 9 = <em>kwart voor</em>. Voor welk uur? Het uur waar de kleine wijzer <u>bijna</u> bij is.`;
+  if(ex.m<30)return `Tel de minuten vanaf de 12 met sprongen van 5. Zit de grote wijzer vóór de 6? Dan is het <em>over</em> of <em>voor half</em>.`;
+  return `De grote wijzer is al voorbij de 6: dan is het <em>over half</em> of <em>voor</em>. Het uur is dan het uur dat <u>nog komt</u>.`;
+}
+function celebrate(text){
+  cur.done=true; pc.locked=true; pc.draggable(false,false); pc.set(cur.h,cur.m); pc.focus(null); pc.eyes(true);
+  soundCorrect(); confetti(); const r=$('playClock').getBoundingClientRect(); starBurst(r.left+r.width/2,r.top+r.height/2);
+  $('progbar').style.width=((qi+1)/order.length*100)+'%';
+  const praise=['Knap gedaan','Super','Fantastisch','Wauw','Geweldig','Topper','Yes'][ri(0,6)];
+  const fb=$('fb'); fb.style.display=''; fb.className='bubble ok';
+  fb.innerHTML=`<span class="tt">🕒 Tiktak zegt:</span><span class="big">🎉 ${praise}, ${currentName}!</span>Het is <em>${text}</em>.`;
+  const row=document.querySelector('#playPanel .row'); row.innerHTML='';
+  const next=document.createElement('button'); next.className='bigbtn navy'; next.textContent=(qi+1<order.length)?'Volgende ➡️':'Bekijk het resultaat 🏆';
+  next.addEventListener('click',()=>{qi++;nextTurn();}); row.appendChild(next);
+}
+function finish(){show('end');soundFanfare();confetti(400);let n=0;const iv=setInterval(()=>{confetti(120);starBurst(Math.random()*innerWidth,Math.random()*innerHeight*0.6);if(++n>5)clearInterval(iv);},700);}
+$('playBtn').addEventListener('click',startPlay);
+$('againBtn').addEventListener('click',startPlay);
+$('homeBtn').addEventListener('click',()=>show('start'));
+</script>
+</body>
+</html>
